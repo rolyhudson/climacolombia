@@ -1,16 +1,21 @@
 package org.rolson.emr;
 
 import javax.swing.JFrame;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 
 public class main {
 
 	public static void main(String[] args) {
-		GUI gui = new GUI();
-		
-		gui.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		gui.setTitle("climaProto1");
-		gui.setSize(600,500);
-		gui.setVisible(true);
+
+		//Schedule a job for the event dispatch thread:
+        //creating and showing this application's GUI.
+        SwingUtilities.invokeLater(new Runnable() {
+            public void run() {
+
+        GUI gui = new GUI();
+            }
+        });
 
 	}
 
