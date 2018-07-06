@@ -1,4 +1,4 @@
-package org.rolson.emr;
+package org.rolson.emr.emrcycle1;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;

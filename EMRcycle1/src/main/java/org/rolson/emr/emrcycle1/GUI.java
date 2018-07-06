@@ -1,21 +1,28 @@
-package org.rolson.emr;
+package org.rolson.emr.emrcycle1;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.GridLayout;
+import java.awt.Insets;
 import java.util.List;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
+import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Enumeration;
+import java.util.HashMap;
 
+import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JComponent;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -23,14 +30,18 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTable;
+import javax.swing.JTextField;
 import javax.swing.UIDefaults;
 import javax.swing.UIManager;
 import javax.swing.plaf.FontUIResource;
+
 
 public class GUI extends JFrame {
 	JFrame guiFrame;
 	ClimaBucket s3b = new ClimaBucket();
 	Cluster clus = new Cluster();
+	private DataManager datamanager = new DataManager();
+	private HashMap<String,JComponent> buttonLabelMap = new HashMap<String,JComponent>();
 	int width = 1000;
 	int height =700;
 	public GUI()
@@ -59,10 +70,20 @@ public class GUI extends JFrame {
 		ButtonHandler handler = new ButtonHandler();
 		but.addActionListener(handler);
 	}
-	
+	private void addALabel(JPanel p,String btntext,int bw, int bh)
+	{
+		JLabel l = new JLabel("Result:");
+		l.setFont(new Font(l.getFont().getName(), Font.PLAIN, 12));
+		l.setPreferredSize(new Dimension(bw, bh));
+		p.add(l);
+		buttonLabelMap.put(btntext, l);
+	}
+	public void addToMap(String s, JComponent c)
+	{
+		buttonLabelMap.put(s, c);
+	}
 	private void addButtonsFixedGrid(JPanel panel,List<String> buttonCmds,int cols,int rows)
 	{
-	
 		JPanel[][] panelHolder = new JPanel[rows][cols];  
 		int pw = (int)(width*0.95/cols);
 		int ph = (int)(height*0.95/rows);
@@ -81,15 +102,27 @@ public class GUI extends JFrame {
 		    	  addAButton(panelHolder[m][n],buttonCmds.get(m),bw,bh);
 		    	  }
 		      }
+		      if(n==1)
+		      {
+		    	  if(m<buttonCmds.size())
+		    	  {
+		    	  addALabel(panelHolder[m][n],buttonCmds.get(m),bw,bh);
+		    	  }
+		      }
 		   }
 		}
+	}
+	private List<String> setDataManagerButtons()
+	{
+		List<String> buttonCmds = new ArrayList<String>();
+		buttonCmds.add("Upload dataset");
+		buttonCmds.add("Upload JAR file");
+		
+		return buttonCmds;
 	}
 	private List<String> setWorkflowButtons()
 	{
 		List<String> buttonCmds = new ArrayList<String>();
-		buttonCmds.add("Hadoop Map Reduce");
-		buttonCmds.add("K-means clustering");
-		buttonCmds.add("Linear Regression");
 		buttonCmds.add("Hadoop Map Reduce");
 		buttonCmds.add("K-means clustering");
 		buttonCmds.add("Linear Regression");
@@ -130,6 +163,7 @@ public class GUI extends JFrame {
 		tabbedPane.setMnemonicAt(2, KeyEvent.VK_V);
 
 		JPanel datapanel = new JPanel();
+		addButtonsFixedGrid(datapanel,setDataManagerButtons(),3,12);
 		datapanel.setPreferredSize(new Dimension(width, height));
 		tabbedPane.addTab("Data Manager",  datapanel);
 		tabbedPane.setMnemonicAt(3, KeyEvent.VK_D);
@@ -139,10 +173,57 @@ public class GUI extends JFrame {
 		tabbedPane.addTab("AWSTests", buttonHolder);
 		tabbedPane.setMnemonicAt(4, KeyEvent.VK_T);
 		
+		JPanel gridbagButtons = new JPanel();
+		gridbagButtons.setLayout(new GridBagLayout());
+		addButtonsGridBag(gridbagButtons,setDataManagerButtons());
+		tabbedPane.addTab("Layout test", gridbagButtons);
+		tabbedPane.setMnemonicAt(5, KeyEvent.VK_L);
+		
 		guiFrame.getContentPane().add(tabbedPane);
 
 	}
-
+	private void addButtonsGridBag(JPanel pane,List<String> btnNames)
+	{
+		GridBagConstraints c = new GridBagConstraints();
+		//c.anchor = GridBagConstraints.FIRST_LINE_START;
+	    for(int i=0;i<btnNames.size();i++)
+	    {
+	    	JButton button = new JButton(btnNames.get(i));
+	    	c.fill = GridBagConstraints.HORIZONTAL;
+	    	
+	    	c.weightx =0.0;
+	    	c.weighty =0.1;
+	    	//c.gridwidth =1;
+	    	c.gridheight=1;
+		    c.gridx = 0;
+		    c.gridy = i;
+		    pane.add(button, c);
+		    
+		    JLabel l = new JLabel("Info:");
+		    l.setBorder(BorderFactory.createLineBorder(Color.black));
+		    c.fill = GridBagConstraints.HORIZONTAL;
+		    c.weightx =1;
+		    c.weighty =0.0;
+		    //c.gridwidth =2;
+		    c.gridx = 1;
+		    c.gridy = i;
+		    pane.add(l, c);
+//		    JTextField textB = new JTextField ("Button 3");
+//		    c.fill = GridBagConstraints.HORIZONTAL;
+//		    c.weightx =0.2;
+//		    //c.gridwidth =2;
+//		    c.gridx = 2;
+//		    c.gridy = i;
+//		    pane.add(textB, c);
+//		    textB = new JTextField ("Button 3");
+//		    c.fill = GridBagConstraints.HORIZONTAL;
+//		    c.weightx =0.2;
+//		    //c.gridwidth =2;
+//		    c.gridx = 3;
+//		    c.gridy = i;
+//		    pane.add(textB, c);
+	    }  
+	}
 	private class ButtonHandler implements ActionListener
 	{
 		// handle button event
@@ -197,11 +278,58 @@ public class GUI extends JFrame {
 			break;
 		case "Linear Regression": actionMessage("Linear regression");
 			break;
+		case "Upload dataset":
+			List<String> dataexts = Arrays.asList("csv", "txt");
+			getFileForUpload(dataexts, cmd);
+		break;
+		case "Upload JAR file": 
+			List<String> processexts = Arrays.asList("jar");
+			getFileForUpload(processexts, cmd);
+		break;
 		}
 		}
 	}
+	public void getFileForUpload(List<String> extensions, String cmd)
+	{
+		JFileChooser jfc = new JFileChooser();
+		int returnVal = jfc.showOpenDialog(GUI.this);
+
+        if (returnVal == JFileChooser.APPROVE_OPTION) {
+            File file = jfc.getSelectedFile();
+            boolean required =false;
+            String foundext = Utils.getFileExtension(file);
+            for(String ext:extensions){
+            	if(ext.equals(foundext))required=true;
+            }
+            if(required) {
+            	JLabel l = (JLabel)getComponentByName(cmd);
+            	if(datamanager.upload(file))
+            	{
+            		//write result message
+            		
+            		l.setText("Result: "+file.getName()+ " uploaded");
+            	}
+            	else{
+                	//
+            		l.setText("Result: "+file.getName()+ " upload failed");
+                }
+            }
+            else{
+            	JOptionPane.showMessageDialog(null, "file extension not accepted");
+            }
+            
+        } 
+        //Open command cancelled by user
+	}
+	public JComponent getComponentByName(String name) {
+        if (buttonLabelMap.containsKey(name)) {
+                return (JComponent) buttonLabelMap.get(name);
+        }
+        else return null;
+}
 	private void actionMessage(String message) {
 		JOptionPane.showMessageDialog(null, message);
+		
 	}
 	private void createWorkflowTable(JPanel p)
 	{
