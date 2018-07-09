@@ -12,8 +12,8 @@ public class main {
         //creating and showing this application's GUI.
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-
-        GUI gui = new GUI();
+        WorkflowCoordinator coordinator = new WorkflowCoordinator();
+        GUI gui = new GUI(coordinator); 
             }
         });
 

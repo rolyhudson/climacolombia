@@ -1,0 +1,24 @@
+package org.rolson.emr.emrcycle1;
+
+import static org.junit.Assert.*;
+
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+
+import org.junit.Test;
+
+public class WorkflowTest {
+
+	@Test
+	public void testDateTimeFolder() {
+		
+		String now = "2016-11-09 10:30:30";
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+
+        LocalDateTime formatDateTime = LocalDateTime.parse(now, formatter);
+        String folder = Workflow.generateUniqueOutputName("folder_",formatDateTime);
+        assertEquals(folder,"folder_2016_11_09_10_30_30");
+	}
+
+}

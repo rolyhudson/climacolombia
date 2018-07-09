@@ -10,7 +10,7 @@ import javax.swing.JLabel;
 import org.junit.Test;
 
 public class GUITest {
-GUI gui = new GUI();
+GUI gui = new GUI(new WorkflowCoordinator());
 	@Test
 	public void testGUI() {
 		//fail("Not yet implemented");

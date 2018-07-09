@@ -44,10 +44,12 @@ public class GUI extends JFrame {
 	private HashMap<String,JComponent> buttonLabelMap = new HashMap<String,JComponent>();
 	int width = 1000;
 	int height =700;
-	public GUI()
+	private WorkflowCoordinator coordinator;
+	public GUI(WorkflowCoordinator wfc)
 	{
 		
 		super("Testing Buttons");
+		coordinator = wfc;
 		//Create and set up the window.
 		modifyFontSizes();
 		guiFrame = new JFrame("TabbedPaneDemo");
@@ -272,11 +274,13 @@ public class GUI extends JFrame {
 		
 		s3b.uploadMultiPart();
 		break;
-		case "Hadoop Map Reduce": actionMessage("Hadoop");
+		case "Hadoop Map Reduce": actionMessage(cmd);
+		coordinator.addPredfined(cmd);
+		coordinator.runWorkflow(cmd);
 			break;
-		case "K-means clustering": actionMessage("K-means");
+		case "K-means clustering": actionMessage(cmd);
 			break;
-		case "Linear Regression": actionMessage("Linear regression");
+		case "Linear Regression": actionMessage(cmd);
 			break;
 		case "Upload dataset":
 			List<String> dataexts = Arrays.asList("csv", "txt");
