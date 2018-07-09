@@ -2,10 +2,9 @@ package org.rolson.emr.emrcycle1;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClient;
 import com.amazonaws.services.elasticmapreduce.model.*;
 
 public class Workflow {
@@ -29,13 +28,14 @@ public class Workflow {
 	public String status; 
 	public String releaseLabel;
 	
+	
 	public RunJobFlowResult result;
 	public RunJobFlowRequest request;
 	private ActionOnFailure actionOnFailure;
 	
 	private StepConfig stepConfig;
-	private  List<String> commandArgs;
-	
+	private List<String> commandArgs;
+	private Collection<Application> applications;
 	public Workflow(String workflowname)
 	{
 	defaultVariables();
@@ -53,7 +53,7 @@ public class Workflow {
 	{
 		//setup for basic MapReduce job
 		this.name = "MapReduce Station Counter";
-		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV.txt";
+		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV50.txt";
 		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
 		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/stationAnalysis.jar";
 		this.debugName = "Hadoop MR NOAA Counting"; 
@@ -73,13 +73,32 @@ public class Workflow {
 		this.status = "NEW"; 
 		this.releaseLabel = "emr-5.14.0";
 	}
+	public void messageLogAgregator()
+	{
+		this.name = "Message log agregator";
+		this.debugName = "Agregator debug"; 
+		this.dataSource = "s3//rolyhudsontestbucket1/cookbookexamples/access_log_Jul95.txt";
+		this.outputFolder = "s3//rolyhudsontestbucket1/cookbookexamples/"+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
+		this.analysisJAR = "s3//rolyhudsontestbucket1/cookbookexamples/messageSize.jar";
+		this.mainClassInJAR = "org.rolson.emr.messageSize.App";
+		commandArgs = Arrays.asList(dataSource,outputFolder);
+	}
+	public void sparkTestVariables()
+	{
+		Application app = new Application().withName("Spark");
+		this.applications.add(app);
+		this.name = "Spark test";
+		this.debugName = "Spark test debug"; 
+		this.dataSource = "";
+		this.outputFolder = ""+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
+		this.analysisJAR = "";
+		this.mainClassInJAR = "";
+		commandArgs = Arrays.asList(dataSource,outputFolder);
+	}
 	public static String generateUniqueOutputName(String prefix,LocalDateTime timePoint)
 	{
-		
 		DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy_MM_dd_HH_mm_ss");
-
 		String s = prefix+timePoint.format(formatter);
-		
 		return s;
 	}
 	private void setStepConfig()
@@ -110,8 +129,5 @@ public class Workflow {
 		           .withMasterInstanceType(this.masterInstance)
 		           .withSlaveInstanceType(this.slaveInstance)
 		           .withEc2SubnetId(this.subnetID));
-
-		   //this.result = emr.runJobFlow(request);
-		   //result.getJobFlowId();
 	}
 }

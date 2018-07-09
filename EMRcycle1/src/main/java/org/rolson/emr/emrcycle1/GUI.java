@@ -128,6 +128,7 @@ public class GUI extends JFrame {
 		buttonCmds.add("Hadoop Map Reduce");
 		buttonCmds.add("K-means clustering");
 		buttonCmds.add("Linear Regression");
+		buttonCmds.add("Message log agregator");
 		return buttonCmds;
 	}
 	private List<String> setAWSTestButtons()
@@ -210,20 +211,7 @@ public class GUI extends JFrame {
 		    c.gridx = 1;
 		    c.gridy = i;
 		    pane.add(l, c);
-//		    JTextField textB = new JTextField ("Button 3");
-//		    c.fill = GridBagConstraints.HORIZONTAL;
-//		    c.weightx =0.2;
-//		    //c.gridwidth =2;
-//		    c.gridx = 2;
-//		    c.gridy = i;
-//		    pane.add(textB, c);
-//		    textB = new JTextField ("Button 3");
-//		    c.fill = GridBagConstraints.HORIZONTAL;
-//		    c.weightx =0.2;
-//		    //c.gridwidth =2;
-//		    c.gridx = 3;
-//		    c.gridy = i;
-//		    pane.add(textB, c);
+
 	    }  
 	}
 	private class ButtonHandler implements ActionListener
@@ -238,45 +226,49 @@ public class GUI extends JFrame {
 		switch(cmd) {
 		case "Create Bucket": actionMessage("Creating Bucket");
 		
-		s3b.createBucket("climacolombiabucket");
-		break;
+			s3b.createBucket("climacolombiabucket");
+			break;
 		case "Delete Bucket": actionMessage("Deleting Bucket");
 		
-		s3b.deleteBucket("climacolombiabucket");
-		break;
+			s3b.deleteBucket("climacolombiabucket");
+			break;
 		case "Start Cluster": actionMessage("Starting Cluster");
 		
-		clus.launch();
-		break;
+			clus.launch();
+			break;
 		case "Stop Cluster": actionMessage("Stopping Cluster");
-		break;
+			break;
 		case "List all Buckets": actionMessage("Listing buckets");
 		
-		s3b.listBuckets();
-		break;
-			case "Cluster Status": actionMessage("Status of clusters");
+			s3b.listBuckets();
+			break;
+		case "Cluster Status": actionMessage("Status of clusters");
 		
-		clus.clusterStatusReport();
-		break;
+			clus.clusterStatusReport();
+			break;
 		case "Terminate all clusters": actionMessage("Status of clusters");
 		
-		clus.terminateAllClusters();
-		break;
+			clus.terminateAllClusters();
+			break;
 		case "Start Spark Cluster": actionMessage("Starting a spark cluster");
 		
-		clus.launchSparkCluster();
-		break;
+			clus.launchSparkCluster();
+			break;
 		case "Count NOAA Stations": actionMessage("Starting a spark cluster");
 		
-		clus.launchNOAACounter();
-		break;
+			clus.launchNOAACounter();
+			break;
 		case "Put a file in bucket": actionMessage("Adding file to bucket");
 		
-		s3b.uploadMultiPart();
-		break;
+			s3b.uploadMultiPart();
+			break;
 		case "Hadoop Map Reduce": actionMessage(cmd);
-		coordinator.addPredfined(cmd);
-		coordinator.runWorkflow(cmd);
+			coordinator.addPredfined(cmd);
+			coordinator.runWorkflow(cmd);
+			break;
+		case "Message log agregator": actionMessage(cmd);
+			coordinator.addPredfined(cmd);
+			coordinator.runWorkflow(cmd);
 			break;
 		case "K-means clustering": actionMessage(cmd);
 			break;
@@ -290,8 +282,17 @@ public class GUI extends JFrame {
 			List<String> processexts = Arrays.asList("jar");
 			getFileForUpload(processexts, cmd);
 		break;
+		
 		}
 		}
+	}
+	private String getStringInput(String message)
+	{
+		JFrame frame = new JFrame("InputDialog Example #1");
+		// prompt the user to enter 
+	    String input = JOptionPane.showInputDialog(frame, message);
+
+	    return input;
 	}
 	public void getFileForUpload(List<String> extensions, String cmd)
 	{
@@ -306,8 +307,10 @@ public class GUI extends JFrame {
             	if(ext.equals(foundext))required=true;
             }
             if(required) {
+            	//String bucket = getStringInput("enter bucket name");
+            	String subfolderpath = getStringInput("enter folderpath");
             	JLabel l = (JLabel)getComponentByName(cmd);
-            	if(datamanager.upload(file))
+            	if(datamanager.upload(file,subfolderpath))
             	{
             		//write result message
             		

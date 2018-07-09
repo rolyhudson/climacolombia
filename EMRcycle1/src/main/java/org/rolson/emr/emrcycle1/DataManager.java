@@ -13,8 +13,8 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 public class DataManager {
 	private AmazonS3 s3client;
 	private TransferManager xfm;
-	private String bucketName;
-	private String keyName;
+	private String bucketName = "rolyhudsontestbucket1";
+	private String keyName = "climateData";
 	private void setupClient(){
 		s3client = AmazonS3ClientBuilder.standard()
                 .withRegion("us-east-1")
@@ -24,8 +24,9 @@ public class DataManager {
 		DefaultAWSCredentialsProviderChain credentialProviderChain = new DefaultAWSCredentialsProviderChain();
 		xfm =  new TransferManager(credentialProviderChain.getCredentials());
 	}
-	public boolean upload(File f)
+	public boolean upload(File f,String keypath)
 	{
+		this.keyName=keypath;
 		setupClient();
 		setupXFManger();
 		//see https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3-transfermanager.html
@@ -33,7 +34,7 @@ public class DataManager {
 		try{
 		 // TransferManager processes all transfers asynchronously,
         // so this call returns immediately.
-        com.amazonaws.services.s3.transfer.Upload upload = xfm.upload(bucketName, keyName, f);
+        com.amazonaws.services.s3.transfer.Upload upload = xfm.upload(bucketName, keyName+"/"+f.getName(), f);
         System.out.println("Object upload started");
 
         // Optionally, wait for the upload to finish before continuing.

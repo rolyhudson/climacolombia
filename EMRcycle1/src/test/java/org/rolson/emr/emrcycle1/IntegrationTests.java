@@ -4,7 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Ignore;
 import org.junit.Test;
-//@Ignore
+@Ignore
 public class IntegrationTests {
 	WorkflowCoordinator coord = new WorkflowCoordinator();
 	
@@ -14,7 +14,7 @@ public class IntegrationTests {
 		assertNotNull(coord.getClient());
 	}
 	@Test
-	public void testEMRRun() {
+	public void testEMRRunHadoopMR() {
 		coord.setEMRClient();
 		//add a workfow
 		coord.addPredfined("Hadoop Map Reduce");

@@ -11,8 +11,8 @@ public class DataManagerTest {
 	DataManager dm = mock(DataManager.class);
 	@Test
 	public void testIncorrectFileType() {
-		when(dm.upload(new File("src\test\resources\testfiles\testfile.txt"))).thenReturn(true);
-		assertTrue(dm.upload(new File("src\test\resources\testfiles\testfile.txt")));
+		when(dm.upload(new File("src\test\resources\testfiles\testfile.txt"),"testuploads")).thenReturn(true);
+		assertTrue(dm.upload(new File("src\test\resources\testfiles\testfile.txt"),"testuploads"));
 	}
 
 }

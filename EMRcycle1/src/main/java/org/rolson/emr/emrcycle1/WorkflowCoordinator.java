@@ -82,10 +82,17 @@ public class WorkflowCoordinator {
 			break;
 		case "K-means clustering":
 			wf = new Workflow(testtype);
+			//wf.sparkTestVariables();
 			//configure for kmeans
 			break;
 		case "Linear Regression":
 			wf = new Workflow(testtype);
+			//configure for linear classification
+			break;
+		case "Message log processing":
+			wf = new Workflow(testtype);
+			//configure for ...
+			wf.messageLogAgregator();
 			//configure for linear classification
 			break;
 			default:
