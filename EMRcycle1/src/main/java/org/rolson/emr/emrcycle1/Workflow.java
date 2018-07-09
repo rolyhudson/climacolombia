@@ -73,15 +73,25 @@ public class Workflow {
 		this.status = "NEW"; 
 		this.releaseLabel = "emr-5.14.0";
 	}
+	public void monthlyResultsConfig()
+	{
+		this.name = "Monthly records totals";
+		this.debugName = "Monthly records totals debug"; 
+		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV50.txt";
+		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
+		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/monthlyrecords.jar";
+		this.mainClassInJAR = "org.rolson.emr.groupStationByMonthYear.App";
+		this.commandArgs = Arrays.asList(dataSource,outputFolder);
+	}
 	public void messageLogAgregator()
 	{
 		this.name = "Message log agregator";
 		this.debugName = "Agregator debug"; 
-		this.dataSource = "s3//rolyhudsontestbucket1/cookbookexamples/access_log_Jul95.txt";
-		this.outputFolder = "s3//rolyhudsontestbucket1/cookbookexamples/"+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
-		this.analysisJAR = "s3//rolyhudsontestbucket1/cookbookexamples/messageSize.jar";
+		this.dataSource = "s3://rolyhudsontestbucket1/cookbookexamples/access_log_Jul95.txt";
+		this.outputFolder = "s3://rolyhudsontestbucket1/cookbookexamples/"+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
+		this.analysisJAR = "s3://rolyhudsontestbucket1/cookbookexamples/messageSize.jar";
 		this.mainClassInJAR = "org.rolson.emr.messageSize.App";
-		commandArgs = Arrays.asList(dataSource,outputFolder);
+		this.commandArgs = Arrays.asList(dataSource,outputFolder);
 	}
 	public void sparkTestVariables()
 	{
@@ -93,7 +103,7 @@ public class Workflow {
 		this.outputFolder = ""+generateUniqueOutputName(this.name+"_output_", LocalDateTime.now());
 		this.analysisJAR = "";
 		this.mainClassInJAR = "";
-		commandArgs = Arrays.asList(dataSource,outputFolder);
+		this.commandArgs = Arrays.asList(dataSource,outputFolder);
 	}
 	public static String generateUniqueOutputName(String prefix,LocalDateTime timePoint)
 	{

@@ -89,10 +89,16 @@ public class WorkflowCoordinator {
 			wf = new Workflow(testtype);
 			//configure for linear classification
 			break;
-		case "Message log processing":
+		case "Message log agregator":
 			wf = new Workflow(testtype);
 			//configure for ...
 			wf.messageLogAgregator();
+			//configure for linear classification
+			break;
+		case "Monthly records totals":
+			wf = new Workflow(testtype);
+			//configure for ...
+			wf.monthlyResultsConfig();
 			//configure for linear classification
 			break;
 			default:
@@ -101,23 +107,7 @@ public class WorkflowCoordinator {
 		}
 		this.workflows.add(wf);
 	}
-	private void getAllWorkflows()
-	{
-		
-		ListClustersResult clusters = emr.listClusters();
-		List<ClusterSummary> clusterlist = clusters.getClusters();
-		 
-		for(ClusterSummary cs: clusterlist)
-		{
-			Workflow wf = new Workflow(cs.getName());
-			wf.status = cs.getStatus().getState();
-			workflows.add(wf);
-			
-			//STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
-			//System.out.println("ID: "+cs.getId()+", name: "+cs.getName()+" status: "+cs.getStatus().getState());
-			
-		}
-	}
+	
 	public List<Workflow> getWorkflows()
 	{
 		return workflows;

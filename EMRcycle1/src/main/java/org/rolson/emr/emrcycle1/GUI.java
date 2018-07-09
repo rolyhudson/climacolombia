@@ -129,6 +129,7 @@ public class GUI extends JFrame {
 		buttonCmds.add("K-means clustering");
 		buttonCmds.add("Linear Regression");
 		buttonCmds.add("Message log agregator");
+		buttonCmds.add("Monthly records totals");
 		return buttonCmds;
 	}
 	private List<String> setAWSTestButtons()
@@ -270,6 +271,10 @@ public class GUI extends JFrame {
 			coordinator.addPredfined(cmd);
 			coordinator.runWorkflow(cmd);
 			break;
+		case "Monthly records totals": actionMessage(cmd);
+			coordinator.addPredfined(cmd);
+			coordinator.runWorkflow(cmd);
+		break;
 		case "K-means clustering": actionMessage(cmd);
 			break;
 		case "Linear Regression": actionMessage(cmd);

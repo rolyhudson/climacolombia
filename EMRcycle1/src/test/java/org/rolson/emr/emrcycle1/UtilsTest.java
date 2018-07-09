@@ -2,12 +2,12 @@ package org.rolson.emr.emrcycle1;
 
 import static org.junit.Assert.*;
 
+
 import java.io.File;
 
 import org.junit.Test;
 
 public class UtilsTest {
-
 
 	@Test
 	public void testGetExtension() {
