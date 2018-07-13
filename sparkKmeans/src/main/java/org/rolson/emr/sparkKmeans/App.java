@@ -2,6 +2,7 @@ package org.rolson.emr.sparkKmeans;
 
 import org.apache.spark.SparkConf;
 
+
 import org.apache.spark.api.java.JavaSparkContext;
 
 // $example on$
@@ -21,7 +22,7 @@ public class App
 
 	    // $example on$
 	    // Load and parse data
-	    String path = "C:\\Users\\r.hudson\\Documents\\WORK\\softEng\\Diss\\Design\\cycle1\\sparkKmeans\\kmeanstest.txt";
+	    String path = args[0];
 	    JavaRDD<String> data = jsc.textFile(path);
 	    JavaRDD<Vector> parsedData = data.map(s -> {
 	      String[] sarray = s.split(" ");
@@ -50,9 +51,9 @@ public class App
 	    System.out.println("Within Set Sum of Squared Errors = " + WSSSE);
 
 	    // Save and load model
-//	    clusters.save(jsc.sc(), "target/org/apache/spark/JavaKMeansExample/KMeansModel");
-//	    KMeansModel sameModel = KMeansModel.load(jsc.sc(),
-//	      "target/org/apache/spark/JavaKMeansExample/KMeansModel");
+	    clusters.save(jsc.sc(), "target/org/apache/spark/JavaKMeansExample/KMeansModel");
+	    KMeansModel sameModel = KMeansModel.load(jsc.sc(),
+	      "target/org/apache/spark/JavaKMeansExample/KMeansModel");
 	    // $example off$
 
 	    jsc.stop();
