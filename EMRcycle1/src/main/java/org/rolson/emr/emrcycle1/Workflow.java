@@ -46,6 +46,14 @@ public class Workflow {
 	{
 		return name;
 	}
+	public String getStatus()
+	{
+		return status;
+	}
+	public String getAppType()
+	{
+		return appType;
+	}
 	public List<String> getCommandArgs(){
 		return commandArgs;
 	}

@@ -1,5 +1,7 @@
 package org.rolson.emr.sparkKmeans;
 
+import java.util.List;
+
 import org.apache.spark.SparkConf;
 
 
@@ -24,6 +26,8 @@ public class App
 	    // Load and parse data
 	    String path = args[0];
 	    JavaRDD<String> data = jsc.textFile(path);
+	    List<String> head = data.take(10);
+	    head.forEach(item->System.out.println(item));
 	    JavaRDD<Vector> parsedData = data.map(s -> {
 	      String[] sarray = s.split(" ");
 	      double[] values = new double[sarray.length];

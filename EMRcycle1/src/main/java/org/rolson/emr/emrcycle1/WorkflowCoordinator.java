@@ -13,13 +13,19 @@ import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
 import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
+
 public class WorkflowCoordinator {
 	private List<Workflow> workflows;
+	public ObservableList<Workflow> data = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
 	public WorkflowCoordinator()
 	{
 		//getWorkflowsFromAWS();
 		this.workflows = new ArrayList<Workflow>();
+		//dummyWorkflows();
+		
 	}
 	public void setEMRClient()
 	{
@@ -32,6 +38,36 @@ public class WorkflowCoordinator {
 		}
 		 
 	}
+//	public void removeWorkflow()
+//	{
+//		data.remove(0);
+//	}
+//	public void addWorkflow()
+//	{
+//		Workflow wf = new Workflow("workflow new");
+//		data.add(wf );
+//	}
+//	public void updateWorkflow()
+//	{
+//		for(Workflow wf: workflows)
+//		{
+//			wf.status = "running";
+//		}
+//		//update cheat
+//		
+//		data.setAll(workflows);
+//	}
+//	private void dummyWorkflows()
+//	{
+//		for(int i=0;i<6;i++)
+//		{
+//			Workflow wf = new Workflow("workflow"+i);
+//			wf.status = "starting";
+//			wf.appType = "Spark";
+//			workflows.add(wf );
+//		}
+//		data.setAll(workflows);
+//	}
 	public AmazonElasticMapReduce getClient()
 	{
 		return emr;

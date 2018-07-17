@@ -10,6 +10,9 @@ import java.util.Optional;
 
 import javax.swing.JComponent;
 
+import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.geometry.Insets;
@@ -20,14 +23,20 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
 import javafx.scene.control.Dialog;
+import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TableColumn;
+import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.InputEvent;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
@@ -41,6 +50,8 @@ public class GUILayout {
 	int width = 1000;
 	int height =700;
 	private WorkflowCoordinator coordinator;
+	private TableView<Workflow> table = new TableView<Workflow>();
+	ObservableList<Workflow> data = FXCollections.observableArrayList();
 	Stage stage;
 	
 	public GUILayout(WorkflowCoordinator wfc,Stage stg)
@@ -57,7 +68,7 @@ public class GUILayout {
         stage.setScene(scene);
         stage.show();
 	}
-	private void addTab(int index, String name, TabPane pane)
+	private void addTabWithButtons(int index, String name, TabPane pane)
 	{
 		Tab tab1 = new Tab();
 		addButtonLabel(tab1,btnNames(name));
@@ -113,7 +124,11 @@ public class GUILayout {
 		List<String> tabnames = tabSet();
 		for(int i=0; i<tabnames.size();i++)
 		{
-			addTab(i, tabnames.get(i), tabPane);
+			if(tabnames.get(i).equals("Monitor"))
+			{
+				addTabWithTableView(i,tabnames.get(i),tabPane);
+			}
+			else addTabWithButtons(i, tabnames.get(i), tabPane);
 		}
 
         tabPane.getSelectionModel().select(0);
@@ -121,6 +136,54 @@ public class GUILayout {
         
         return tabPane;
 	}
+	private void addTabWithTableView(int index,String name,TabPane tabpane)
+	{
+		final Label label = new Label("Workflow monitor");
+        label.setFont(new Font("Arial", 20));
+ 
+        table.setEditable(true);
+ 
+        TableColumn nameCol = new TableColumn("name");
+        nameCol.setMinWidth(200);
+        nameCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("name"));
+ 
+        TableColumn appCol = new TableColumn("application type");
+        appCol.setMinWidth(200);
+        appCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("appType"));
+ 
+        TableColumn statusCol = new TableColumn("status");
+       statusCol.setMinWidth(200);
+       statusCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("status"));
+ 
+       data = FXCollections.observableArrayList(coordinator.data);
+        table.setItems(coordinator.data);
+        table.getColumns().addAll(nameCol, appCol, statusCol);
+ 
+        final VBox vbox = new VBox();
+        vbox.setSpacing(5);
+        vbox.setPadding(new Insets(10, 0, 0, 10));
+//        Button add = new Button("Add");
+//        add.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e) {
+//                coordinator.addWorkflow();
+//            }
+//        });
+//        Button remove = new Button("Update");
+//        remove.setOnAction(new EventHandler<ActionEvent>() {
+//            @Override public void handle(ActionEvent e) {
+//                coordinator.updateWorkflow();
+//                
+//                
+//            }
+//        });
+        vbox.getChildren().addAll(label, table);
+        Tab tab = new Tab();
+        tab.setText(name);
+        tab.setContent(vbox);
+        tabpane.getTabs().add(index, tab);
+        //((Group) scene.getRoot()).getChildren().addAll(vbox);
+	}
+	
 	private void addButtonLabel(Tab tab,List<String> buttons)
 	{
 		//Creating a Grid Pane 
@@ -157,7 +220,7 @@ public class GUILayout {
                 return buttonLabelMap.get(name);
         }
         else return null;
-}
+	}
 	private boolean alertMessage(String text)
 	{
 		Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -285,7 +348,7 @@ public class GUILayout {
 		TextInputDialog dialog = new TextInputDialog();
 		dialog.setTitle("Set path in S3");
 		dialog.setHeaderText("Set path in S3");
-		dialog.setContentText("Please enter path in the format \"test//data//folder\":");
+		dialog.setContentText("Please enter path in the format \"test/data/folder\":");
 
 		// Traditional way to get the response value.
 		Optional<String> result = dialog.showAndWait();
