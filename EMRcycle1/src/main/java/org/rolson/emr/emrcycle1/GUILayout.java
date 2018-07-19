@@ -44,20 +44,21 @@ import javafx.stage.Stage;
 public class GUILayout {
 	
 	ClimaBucket s3b = new ClimaBucket();
-	Cluster clus = new Cluster();
+	ClusterTests clustest = new ClusterTests();
 	private DataManager datamanager = new DataManager();
 	private HashMap<String,Text> buttonLabelMap = new HashMap<String,Text>();
 	int width = 1000;
 	int height =700;
-	private WorkflowCoordinator coordinator;
+	private ClusterCoordinator coordinator;
 	private TableView<Workflow> table = new TableView<Workflow>();
 	ObservableList<Workflow> data = FXCollections.observableArrayList();
 	Stage stage;
 	
-	public GUILayout(WorkflowCoordinator wfc,Stage stg)
+	public GUILayout(ClusterCoordinator wfc,Stage stg)
 	{
 		coordinator = wfc;
 		stage = stg;
+		stage.setOnHiding( event -> {System.out.println("Closing Stage");coordinator.endTimer();} );
 		StackPane root = new StackPane();
 
         root.getChildren().add(addTabs());
@@ -102,6 +103,7 @@ public class GUILayout {
 			buttonCmds.add("Linear Regression");
 			buttonCmds.add("Message log agregator");
 			buttonCmds.add("Monthly records totals");
+			buttonCmds.add("Spark word count");
 			break;
 		case "AWS tests":
 			buttonCmds.add("Start Cluster");
@@ -155,8 +157,8 @@ public class GUILayout {
        statusCol.setMinWidth(200);
        statusCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("status"));
  
-       data = FXCollections.observableArrayList(coordinator.data);
-        table.setItems(coordinator.data);
+       
+        table.setItems(coordinator.monitorData);
         table.getColumns().addAll(nameCol, appCol, statusCol);
  
         final VBox vbox = new VBox();
@@ -242,48 +244,62 @@ public class GUILayout {
 			break;
 		case "Delete Bucket":if(alertMessage("Deleting Bucket")) s3b.deleteBucket("climacolombiabucket");
 			break;
-		case "Start Cluster": if(alertMessage("Starting Cluster")) clus.launch();
+		case "Start Cluster": if(alertMessage("Starting Cluster")) clustest.launch();
 			break;
 		case "Stop Cluster": if (alertMessage("Stopping Cluster"))
 			break;
 		case "List all Buckets": if(alertMessage("Listing buckets"))s3b.listBuckets();
 			break;
-		case "Cluster Status": if(alertMessage("Status of clusters"))clus.clusterStatusReport();
+		case "Cluster Status": if(alertMessage("Status of clusters"))clustest.clusterStatusReport();
 			break;
-		case "Terminate all clusters": if(alertMessage("Status of clusters"))clus.terminateAllClusters();
+		case "Terminate all clusters": if(alertMessage("Status of clusters"))clustest.terminateAllClusters();
 			break;
-		case "Start Spark Cluster": if(alertMessage("Starting a spark cluster"))clus.launchSparkCluster();
+		case "Start Spark Cluster": if(alertMessage("Starting a spark cluster"))clustest.launchSparkCluster();
 			break;
-		case "Count NOAA Stations": if(alertMessage("Starting a spark cluster"))clus.launchNOAACounter();
+		case "Count NOAA Stations": if(alertMessage("Starting a spark cluster"))clustest.launchNOAACounter();
 			break;
 		case "Put a file in bucket": if(alertMessage("Adding file to bucket"))s3b.uploadMultiPart();
 			break;
 		case "Hadoop Map Reduce": if(alertMessage(cmd))
 			{
-				coordinator.addPredfined(cmd);
-				coordinator.runWorkflow(cmd);
+				Cluster clus = new Cluster();
+				clus.setName("Map Reduce Cluster");
+				clus.addPredfined(cmd);
+				coordinator.addCluster(clus);
+				coordinator.runCluster("Map Reduce Cluster");
 			}
 			break;
 		case "Message log agregator": if(alertMessage(cmd))
 			{
-				coordinator.addPredfined(cmd);
-				coordinator.runWorkflow(cmd);
+				Cluster clus = new Cluster();
+				clus.setName("Message log");
+				clus.addPredfined(cmd);
+				coordinator.addCluster(clus);
+				coordinator.runCluster("Message log");
 			}
 			break;
 		case "Monthly records totals": if(alertMessage(cmd))
 			{
-				coordinator.addPredfined(cmd);
-				coordinator.runWorkflow(cmd);
+				Cluster clus = new Cluster();
+				clus.setName("Monthly records");
+				clus.addPredfined(cmd);
+				coordinator.addCluster(clus);
+				coordinator.runCluster("Monthly records");
 			}
 		break;
+		
 		case "K-means clustering": if(alertMessage(cmd))
 			{
 				
 			}
 			break;
-		case "Linear Regression": if(alertMessage(cmd))
+		case "Spark word count": if(alertMessage(cmd))
 			{
-				
+			Cluster clus = new Cluster();
+			clus.setName("Spark word count");
+			clus.addPredfined(cmd);
+			coordinator.addCluster(clus);
+			coordinator.runCluster("Spark word count");
 			}
 			break;
 		case "Upload dataset":if(alertMessage(cmd))

@@ -1,170 +1,164 @@
 package org.rolson.emr.emrcycle1;
 
-import java.io.IOException;
-
-
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
-import com.amazonaws.auth.AWSCredentials;
-import com.amazonaws.auth.PropertiesCredentials;
-import com.amazonaws.auth.AWSCredentials.*;
-import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
-import com.amazonaws.services.elasticmapreduce.*;
 import com.amazonaws.services.elasticmapreduce.model.*;
-import com.amazonaws.services.elasticmapreduce.util.*;
-import javax.json.Json;
-import javax.json.stream.JsonParser;
-import javax.json.stream.JsonParser.Event;
-import javax.json.JsonObject;
+
 
 public class Cluster {
-	
+	private String name;
+	private String masterInstance;
+	private String slaveInstance;
+	private String logUri;
+	private String ec2KeyName;
+	private String serviceRole;
+	private String jobFlowRole;
+	private String subnetID;
+	private String status; 
+	private String releaseLabel;
+	private RunJobFlowResult result;
+	private RunJobFlowRequest request;
+	private StepConfig stepConfig;
+	private List<StepConfig> allSteps;
+	private Collection<Application> applications;
+	private List<Workflow> workflows;
 	public Cluster() {
-		//setCredentials();
+		workflows = new ArrayList<Workflow>();
+		applications = new ArrayList<Application>();
+		defaultVariables();
+		stepConfig=new StepConfig();
 	}
-	public void launchNOAACounter() {
-		//get the client
-		   AmazonElasticMapReduceClient emr = new AmazonElasticMapReduceClient(new DefaultAWSCredentialsProviderChain());
-		   //ListClustersResult clusters = emr.listClusters();
-		   
-		//set up step data   
-		   String COMMAND_RUNNER = "s3://rolyhudsontestbucket1/climateData/stationAnalysis.jar";
-		   
-		   String DEBUGGING_NAME = "Hadoop MR NOAA Counting"; 
-		   String INPUTFILE = "s3://rolyhudsontestbucket1/climateData/VV.txt";
-		   String OUTPUTFOLDER = "s3://rolyhudsontestbucket1/climateData/runfromJAVA";
-		   List<String> commandArgs = Arrays.asList(INPUTFILE, OUTPUTFOLDER);
-		   String MAINCLASS = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
-		   
-
-		   StepConfig enabledebugging = new StepConfig()
-		       .withName(DEBUGGING_NAME)
-		       .withActionOnFailure(ActionOnFailure.TERMINATE_CLUSTER)
-		       .withHadoopJarStep(new HadoopJarStepConfig()
-		           .withJar(COMMAND_RUNNER)
-		           .withArgs(commandArgs)
-		           .withMainClass(MAINCLASS));
-		   //request new cluster
-		   RunJobFlowRequest request = new RunJobFlowRequest()
-		       .withName("NOAACounter")
-		       .withReleaseLabel("emr-5.14.0")
-		       .withSteps(enabledebugging)
-		       .withLogUri("s3://rolyhudsontestbucket1/climateData")
-		       .withServiceRole("EMR_DefaultRole")
-		       .withJobFlowRole("EMR_EC2_DefaultRole")
-		       .withInstances(new JobFlowInstancesConfig()
-		           .withEc2KeyName("monday")
-		           .withInstanceCount(5)
-		           .withKeepJobFlowAliveWhenNoSteps(true)
-		           .withMasterInstanceType("m3.xlarge")
-		           .withSlaveInstanceType("m3.xlarge")
-		           .withEc2SubnetId("subnet-da059bd5"));
-
-		   RunJobFlowResult result = emr.runJobFlow(request);
-		   result.getJobFlowId();
-		   
-		   //emr.terminateJobFlows();
-	}
-	public void launch() {
-		//get the client
-		   AmazonElasticMapReduceClient emr = new AmazonElasticMapReduceClient(new DefaultAWSCredentialsProviderChain());
-		   //ListClustersResult clusters = emr.listClusters();
-		   
-		//set up step data   
-		   String COMMAND_RUNNER = "command-runner.jar";
-		   String DEBUGGING_COMMAND = "state-pusher-script";
-		   String DEBUGGING_NAME = "Setup Hadoop Debugging";   
-
-		   StepFactory stepFactory = new StepFactory();
-
-		   StepConfig enabledebugging = new StepConfig()
-		       .withName(DEBUGGING_NAME)
-		       .withActionOnFailure(ActionOnFailure.TERMINATE_CLUSTER)
-		       .withHadoopJarStep(new HadoopJarStepConfig()
-		           .withJar(COMMAND_RUNNER)
-		           .withArgs(DEBUGGING_COMMAND));
-		   //request new cluster
-		   RunJobFlowRequest request = new RunJobFlowRequest()
-		       .withName("Hive Interactive")
-		       .withReleaseLabel("emr-5.14.0")
-		       .withSteps(enabledebugging)
-		       .withLogUri("s3://rolyhudsontestbucket1/")
-		       .withServiceRole("EMR_DefaultRole")
-		       .withJobFlowRole("EMR_EC2_DefaultRole")
-		       .withInstances(new JobFlowInstancesConfig()
-		           .withEc2KeyName("monday")
-		           .withInstanceCount(5)
-		           .withKeepJobFlowAliveWhenNoSteps(true)
-		           .withMasterInstanceType("m4.large")
-		           .withSlaveInstanceType("m4.large")
-		           .withEc2SubnetId("subnet-da059bd5"));
-
-		   RunJobFlowResult result = emr.runJobFlow(request);
-		   result.getJobFlowId();
-		   
-		   //emr.terminateJobFlows();
-	}
-	public void launchSparkCluster()
+	public RunJobFlowResult getResult()
 	{
-		AmazonElasticMapReduceClient emr = new AmazonElasticMapReduceClient(new DefaultAWSCredentialsProviderChain());
-
-		Application sparkApp = new Application()
-		    .withName("Spark");
-//		Applications myApps = new Applications();
-//		myApps.add(sparkApp);
-
-		RunJobFlowRequest request = new RunJobFlowRequest()
-		    .withName("Spark Cluster")
-		    .withApplications(sparkApp)
-		    .withReleaseLabel("emr-5.15.0")
-		    .withLogUri("s3://rolyhudsontestbucket1/")
-	        .withServiceRole("EMR_DefaultRole")
-		     .withJobFlowRole("EMR_EC2_DefaultRole")
+		return result;
+	}
+	public void setResult(RunJobFlowResult rjfResult)
+	{
+		result = rjfResult;
+	}
+	public RunJobFlowRequest getRequest()
+	{
+		return request;
+	}
+	public void setRequest()
+	{
+		//set request for new cluster
+		//note with steps can be a list of steps
+		this.request = new RunJobFlowRequest()
+		       .withName(this.name)
+		       .withReleaseLabel(this.releaseLabel)
+		       .withApplications(this.applications)
+		       .withSteps(this.stepConfig)
+		       .withLogUri(this.logUri)
+		       .withServiceRole(this.serviceRole)
+		       .withJobFlowRole(this.jobFlowRole)
 		       .withInstances(new JobFlowInstancesConfig()
-		           .withEc2KeyName("monday")
+		           .withEc2KeyName(this.ec2KeyName)
 		           .withInstanceCount(5)
 		           .withKeepJobFlowAliveWhenNoSteps(true)
-		           .withMasterInstanceType("m4.large")
-		           .withSlaveInstanceType("m4.large")
-		           .withEc2SubnetId("subnet-da059bd5"));
-		RunJobFlowResult result = emr.runJobFlow(request);
+		           .withMasterInstanceType(this.masterInstance)
+		           .withSlaveInstanceType(this.slaveInstance)
+		           .withEc2SubnetId(this.subnetID));
 	}
-	public void terminateAllClusters()
+	public List<Workflow> getWorkflows()
 	{
-		AmazonElasticMapReduceClient emr = new AmazonElasticMapReduceClient(new DefaultAWSCredentialsProviderChain());
-		ListClustersResult clusters = emr.listClusters();
-		List<ClusterSummary> clusterlist = clusters.getClusters();
+		return workflows;
+	}
+	public String getName()
+	{
+		return name;
+	}
+	public void setName(String newname)
+	{
+		name = newname;
+	}
+	public String getStatus()
+	{
+		return status;
+	}
+	public void setStatus(String newstatus)
+	{
+		status = newstatus;
+	}
+	private void defaultVariables()
+	{
+		this.masterInstance = "m4.large";
+		this.slaveInstance = "m4.large";
+		this.logUri = "s3://rolyhudsontestbucket1/climateData";
+		this.ec2KeyName = "monday";
+		this.serviceRole = "EMR_DefaultRole";
+		this.jobFlowRole = "EMR_EC2_DefaultRole";
+		this.subnetID = "subnet-da059bd5";
+		this.status = "NEW"; 
+		this.releaseLabel = "emr-5.14.0";
 		
-		List<String> nonTerminatedClusters = new ArrayList<String>();
-		for(ClusterSummary cs: clusterlist)
-		{
-			//STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
-			String status = cs.getStatus().getState();
-			if(status.equals("STARTING")||
-					status.equals("RUNNING")||
-							status.equals("WAITING") ){
-				nonTerminatedClusters.add(cs.getId());
-			}
-			
-		}
-		TerminateJobFlowsRequest request =new TerminateJobFlowsRequest()
-				.withJobFlowIds(nonTerminatedClusters);
-		emr.terminateJobFlows(request);
 	}
-	
-	public void clusterStatusReport()
+	public void addPredfined(String testtype)
 	{
-		AmazonElasticMapReduceClient emr = new AmazonElasticMapReduceClient(new DefaultAWSCredentialsProviderChain());
-		ListClustersResult clusters = emr.listClusters();
-		List<ClusterSummary> clusterlist = clusters.getClusters();
-		for(ClusterSummary cs: clusterlist)
+		Workflow wf;
+		switch(testtype)
 		{
-			//STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
-			System.out.println("ID: "+cs.getId()+", name: "+cs.getName()+" status: "+cs.getStatus().getState());
-			
+		case "Hadoop Map Reduce":
+			wf = new Workflow(testtype);
+			//use the default wf settings
+			break;
+		case "K-means clustering":
+			wf = new Workflow(testtype);
+			//wf.sparkTestVariables();
+			//configure for kmeans
+			break;
+		case "Linear Regression":
+			wf = new Workflow(testtype);
+			//configure for linear classification
+			break;
+		case "Message log agregator":
+			wf = new Workflow(testtype);
+			//configure for ...
+			wf.messageLogAgregator();
+			//configure for linear classification
+			break;
+		case "Monthly records totals":
+			wf = new Workflow(testtype);
+			//configure for ...
+			wf.monthlyResultsConfig();
+			//configure for linear classification
+			break;
+		case "Spark word count":
+			wf = new Workflow(testtype);
+			wf.sparkWordCount();
+			break;
+			default:
+				wf = new Workflow(testtype);
+				break;
+		}
+		addWorkflow(wf);
+		
+	}
+	public void addWorkflow(Workflow wf)
+	{
+		this.stepConfig = wf.getStepConfig();
+		this.applications.add(wf.getApplication());
+		this.workflows.add(wf);
+		setRequest();
+		//workflowUpdate();
+	}
+	public Workflow getWorkflow(String name)
+	{
+		Optional<Workflow> matches = workflows.stream()
+				.filter(t -> t.getName() ==name)
+				.findAny(); 
+		if(matches.isPresent())
+		{
+			Workflow clus = matches.get();
+			return clus;
+		}
+		else
+		{
+			return null;
 		}
 	}
 }

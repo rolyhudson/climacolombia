@@ -1,8 +1,7 @@
 package climaCluster;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
+import java.time.*;
 import java.util.stream.Collectors;
 
 import org.apache.spark.SparkConf;
@@ -13,6 +12,7 @@ import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.joda.time.DateTime;
 public class KMeansClimate {
 	
 	public static void main(String[] args) {
@@ -22,8 +22,8 @@ public class KMeansClimate {
 	    //val conf = new SparkConf().setMaster("local").setAppName("myApp")
 	    JavaSparkContext jsc = new JavaSparkContext(conf);
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
-		Date startdate = getDate(2005, 1, 1, 1);
-		Date enddate = getDate(2008, 1, 1, 1);
+	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
+		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
 		int startSeason =0;
 		int endSeason=11;
 	    String path = args[0];
@@ -71,13 +71,13 @@ public class KMeansClimate {
 		if(currentMonth>=startmonth&&currentMonth<=endmonth)return true;
 		else return false;
 	}
-	private static boolean inDateRange(String line,Date startdate,Date enddate)
+	private static boolean inDateRange(String line,DateTime startdate,DateTime enddate)
 	{
 		String[] sarray = line.split(",");
 		int currentYr = Integer.parseInt(sarray[2]);
 		int currentMonth = Integer.parseInt(sarray[3]);
-		Date currentDate = getDate(currentYr, currentMonth, 1, 1);
-		if(currentDate.after(startdate)&&currentDate.before(enddate))
+		DateTime currentDate =new DateTime(currentYr, currentMonth, 1, 1,0,0);
+		if(currentDate.isAfter(startdate)&&currentDate.isBefore(enddate))
 		{
 			return true;
 		}
@@ -87,17 +87,7 @@ public class KMeansClimate {
 	{
 		return line.contains("latitude");
 	}
-	public static Date getDate(int year, int month, int day, int hour) {
-        Calendar cal = Calendar.getInstance();
-        cal.set(Calendar.YEAR, year);
-        cal.set(Calendar.MONTH, month);
-        cal.set(Calendar.DAY_OF_MONTH, day);
-        cal.set(Calendar.HOUR_OF_DAY, hour);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        return cal.getTime();
-    }
+	
 	private static Vector getValues(String line,List<String> reqVariables)
 	{
 	      String[] sarray = line.split(",");

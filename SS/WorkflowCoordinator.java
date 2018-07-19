@@ -17,15 +17,16 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 
 public class WorkflowCoordinator {
-	private List<Workflow> workflows;
-	public ObservableList<Workflow> data = FXCollections.observableArrayList();
+	
+	private List<Cluster> clusters;
+	public ObservableList<Cluster> data = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
 	public WorkflowCoordinator()
 	{
+		//
+		this.clusters = new ArrayList<Cluster>();
 		//getWorkflowsFromAWS();
-		this.workflows = new ArrayList<Workflow>();
 		//dummyWorkflows();
-		
 	}
 	public void setEMRClient()
 	{
@@ -74,78 +75,43 @@ public class WorkflowCoordinator {
 	}
 	public void getWorkflowFromAWS(String clusterID)
 	{
-		DescribeClusterResult clusterinfo = emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterID));
-		Workflow wf = new Workflow(clusterinfo.getCluster().getName());
-		workflows.add(wf);
+//		DescribeClusterResult clusterinfo = emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterID));
+//		Workflow wf = new Workflow(clusterinfo.getCluster().getName());
+//		addWorkflow(wf);
 	}
 	public void runWorkflow(String name)
 	{
 		setEMRClient();
 		//get the workflow by name
-		Workflow wf = getWorkflow(name);
-		if(wf!=null)
+		Cluster clus = getCluster(name);
+		if(clus!=null)
 		{
 			System.out.println("Starting workflow "+name);
-			wf.setUpRequest();
-		wf.result = emr.runJobFlow(wf.request);
-		wf.status = "starting";
+			clus.setRequest();
+			clus.setResult(emr.runJobFlow(clus.getRequest()));
+			clus.setStatus("starting");
 		}
 		
 	}
-	public Workflow getWorkflow(String name)
+	public Cluster getCluster(String name)
 	{
-		Optional<Workflow> matches = workflows.stream()
-				.filter(t -> t.name ==name)
+		Optional<Cluster> matches = clusters.stream()
+				.filter(t -> t.getName() ==name)
 				.findAny(); 
 		if(matches.isPresent())
 		{
-			Workflow wf = matches.get();
-			return wf;
+			Cluster clus = matches.get();
+			return clus;
 		}
 		else
 		{
 			return null;
 		}
 	}
-	public void addPredfined(String testtype)
-	{
-		Workflow wf;
-		switch(testtype)
-		{
-		case "Hadoop Map Reduce":
-			wf = new Workflow(testtype);
-			//use the default wf settings
-			break;
-		case "K-means clustering":
-			wf = new Workflow(testtype);
-			//wf.sparkTestVariables();
-			//configure for kmeans
-			break;
-		case "Linear Regression":
-			wf = new Workflow(testtype);
-			//configure for linear classification
-			break;
-		case "Message log agregator":
-			wf = new Workflow(testtype);
-			//configure for ...
-			wf.messageLogAgregator();
-			//configure for linear classification
-			break;
-		case "Monthly records totals":
-			wf = new Workflow(testtype);
-			//configure for ...
-			wf.monthlyResultsConfig();
-			//configure for linear classification
-			break;
-			default:
-				wf = new Workflow(testtype);
-				break;
-		}
-		this.workflows.add(wf);
-	}
 	
-	public List<Workflow> getWorkflows()
+	private void workflowUpdate()
 	{
-		return workflows;
+		//called to trigger update on monitor
+		data.setAll(clusters);
 	}
 }

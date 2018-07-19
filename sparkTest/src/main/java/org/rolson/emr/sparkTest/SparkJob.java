@@ -1,6 +1,7 @@
 package org.rolson.emr.sparkTest;
 
 import org.apache.spark.api.java.JavaPairRDD;
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.sql.SparkSession;
 import scala.Tuple2;

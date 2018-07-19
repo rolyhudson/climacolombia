@@ -6,7 +6,7 @@ import org.junit.Ignore;
 import org.junit.Test;
 @Ignore
 public class IntegrationTests {
-	WorkflowCoordinator coord = new WorkflowCoordinator();
+	ClusterCoordinator coord = new ClusterCoordinator();
 	
 	@Test
 	public void testEMRClient() {
@@ -16,11 +16,13 @@ public class IntegrationTests {
 	@Test
 	public void testEMRRunHadoopMR() {
 		coord.setEMRClient();
+		//define cluster
+		Cluster cluster = new Cluster();
+		cluster.setName("Hadoop Map Reduce");
 		//add a workfow
-		coord.addPredfined("Hadoop Map Reduce");
-		coord.runWorkflow("Hadoop Map Reduce");
-		Workflow wf = coord.getWorkflow("Hadoop Map Reduce");
-		assertNotNull(wf.result);
+		cluster.addPredfined("Hadoop Map Reduce");
+		coord.runCluster("Hadoop Map Reduce");
+		
 		
 	}
 }
