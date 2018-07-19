@@ -11,14 +11,15 @@ import org.joda.time.format.DateTimeFormatter;
 import com.amazonaws.services.elasticmapreduce.model.*;
 
 public class Workflow {
-	public String name;
-	public Application appType;
-	public String debugName; 
-	public String dataSource;
-	public String outputFolder;
-	public String analysisJAR;
-	public String mainClassInJAR;
-	public String status;
+	private String name;
+	private Application appType;
+	private String debugName; 
+	private String dataSource;
+	private String outputFolder;
+	private String analysisJAR;
+	private String mainClassInJAR;
+	private String status;
+	private String awsID;
 	private StepConfig stepConfig;
 	private ActionOnFailure actionOnFailure;
 	
@@ -30,16 +31,31 @@ public class Workflow {
 		appType = new Application();
 		defaultVariables();
 		this.name = workflowname;
-		
 	}
 	
 	public StepConfig getStepConfig()
 	{
 		return stepConfig;
 	}
+	public String getAwsID()
+	{
+		return awsID;
+	}
+	public void setAwsID(String id)
+	{
+		awsID =id;
+	}
 	public String getName()
 	{
 		return name;
+	}
+	public void setName(String n)
+	{
+		name =n;
+	}
+	public void setStatus(String s)
+	{
+		status = s;
 	}
 	public String getStatus()
 	{

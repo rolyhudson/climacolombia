@@ -20,6 +20,7 @@ public class Cluster {
 	private String subnetID;
 	private String status; 
 	private String releaseLabel;
+	private String awsID;
 	private RunJobFlowResult result;
 	private RunJobFlowRequest request;
 	private StepConfig stepConfig;
@@ -75,6 +76,14 @@ public class Cluster {
 	public void setName(String newname)
 	{
 		name = newname;
+	}
+	public String getAwsID()
+	{
+		return awsID;
+	}
+	public void setAwsID(String id)
+	{
+		awsID = id;
 	}
 	public String getStatus()
 	{

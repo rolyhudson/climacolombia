@@ -7,9 +7,17 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.swing.JComponent;
 
+import org.joda.time.DateTime;
+
+import javafx.animation.Timeline;
+import javafx.beans.binding.Bindings;
+import javafx.beans.property.SimpleStringProperty;
+import javafx.beans.property.StringProperty;
 import javafx.collections.FXCollections;
 import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
@@ -50,15 +58,17 @@ public class GUILayout {
 	int width = 1000;
 	int height =700;
 	private ClusterCoordinator coordinator;
-	private TableView<Workflow> table = new TableView<Workflow>();
-	ObservableList<Workflow> data = FXCollections.observableArrayList();
-	Stage stage;
+	private TableView<Cluster> resourcetable = new TableView<Cluster>();
+	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	
+	private List<Label> statuslabels = new ArrayList();
+	
+	Stage stage;
 	public GUILayout(ClusterCoordinator wfc,Stage stg)
 	{
 		coordinator = wfc;
 		stage = stg;
-		stage.setOnHiding( event -> {System.out.println("Closing Stage");coordinator.endTimer();} );
+		
 		StackPane root = new StackPane();
 
         root.getChildren().add(addTabs());
@@ -67,8 +77,10 @@ public class GUILayout {
 
         stage.setTitle("Clima Colombia");
         stage.setScene(scene);
+        
         stage.show();
 	}
+	
 	private void addTabWithButtons(int index, String name, TabPane pane)
 	{
 		Tab tab1 = new Tab();
@@ -80,9 +92,10 @@ public class GUILayout {
 	{
 		List<String> buttonCmds = new ArrayList<String>();
 		buttonCmds.add("Workflows");
-		buttonCmds.add("Monitor");
+		buttonCmds.add("Resource monitor");
+		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
-		buttonCmds.add("Data Manager");
+		buttonCmds.add("Data manager");
 		buttonCmds.add("AWS tests");
 		
 		return buttonCmds;
@@ -124,11 +137,23 @@ public class GUILayout {
 	{
 		TabPane tabPane = new TabPane();
 		List<String> tabnames = tabSet();
+		List<String> cols;
 		for(int i=0; i<tabnames.size();i++)
 		{
-			if(tabnames.get(i).equals("Monitor"))
+			if(tabnames.get(i).contains("monitor"))
 			{
-				addTabWithTableView(i,tabnames.get(i),tabPane);
+				
+				if(tabnames.get(i).contains("Resource")) {
+					cols = Arrays.asList("name", "status" , "awsID");
+					addTabWithTableView(i,tabnames.get(i),tabPane, this.resourcetable,cols);
+					
+				}
+				else {
+					cols = Arrays.asList("name", "status" , "awsID","appType");
+					addTabWithTableView(i,tabnames.get(i),tabPane, this.workflowtable,cols);
+					
+				}
+				
 			}
 			else addTabWithButtons(i, tabnames.get(i), tabPane);
 		}
@@ -138,47 +163,45 @@ public class GUILayout {
         
         return tabPane;
 	}
-	private void addTabWithTableView(int index,String name,TabPane tabpane)
+	
+	private TableColumn addColumn(String name,int width,String property)
 	{
-		final Label label = new Label("Workflow monitor");
+		 TableColumn col = new TableColumn(name);
+		 col.setMinWidth(width);
+	     col.setCellValueFactory(new PropertyValueFactory<Workflow, String>(property));
+	     return col;
+	}
+	public void updateStatusLabel()
+	{
+		for(Label l:statuslabels) {
+		l.setText(coordinator.EMRStatus());
+		}
+	}
+	private void addTabWithTableView(int index,String name,TabPane tabpane,TableView table,List<String> columns)
+	{
+		if(name.contains("Resource"))table.setPlaceholder(new Label(name + " could not find any active clusters"));
+		else table.setPlaceholder(new Label(name + " could not find any active workflows"));
+		final Label label = new Label(name);
         label.setFont(new Font("Arial", 20));
- 
+        Label statuslabel = new Label("Connecting...");
+        statuslabels.add(statuslabel);
+        statuslabel.setFont(new Font("Arial", 15));
         table.setEditable(true);
  
-        TableColumn nameCol = new TableColumn("name");
-        nameCol.setMinWidth(200);
-        nameCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("name"));
- 
-        TableColumn appCol = new TableColumn("application type");
-        appCol.setMinWidth(200);
-        appCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("appType"));
- 
-        TableColumn statusCol = new TableColumn("status");
-       statusCol.setMinWidth(200);
-       statusCol.setCellValueFactory(new PropertyValueFactory<Workflow, String>("status"));
- 
-       
-        table.setItems(coordinator.monitorData);
-        table.getColumns().addAll(nameCol, appCol, statusCol);
+        List<TableColumn> tabColumns = new ArrayList<TableColumn>();
+        for(String col : columns)
+        {
+        	tabColumns.add(addColumn(col,200,col));
+        }
+        if(name.contains("Resource")) table.setItems(coordinator.monitorResourceData);
+        else table.setItems(coordinator.monitorWorkflowData);
+        table.getColumns().addAll(tabColumns);
  
         final VBox vbox = new VBox();
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 10));
-//        Button add = new Button("Add");
-//        add.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override public void handle(ActionEvent e) {
-//                coordinator.addWorkflow();
-//            }
-//        });
-//        Button remove = new Button("Update");
-//        remove.setOnAction(new EventHandler<ActionEvent>() {
-//            @Override public void handle(ActionEvent e) {
-//                coordinator.updateWorkflow();
-//                
-//                
-//            }
-//        });
-        vbox.getChildren().addAll(label, table);
+
+        vbox.getChildren().addAll(label,statuslabel, table);
         Tab tab = new Tab();
         tab.setText(name);
         tab.setContent(vbox);
