@@ -96,7 +96,7 @@ public class GUILayout {
 		List<String> buttonCmds = new ArrayList<String>();
 		switch(tabname)
 		{
-		case "Data Manager":
+		case "Data manager":
 			buttonCmds.add("Upload dataset");
 			buttonCmds.add("Upload JAR file");
 			break;
@@ -346,7 +346,11 @@ public class GUILayout {
 		
 		case "K-means clustering": if(alertMessage(cmd))
 			{
-				
+			Cluster clus = new Cluster();
+			clus.setName("K-means clustering");
+			clus.addPredfined(cmd);
+			coordinator.addCluster(clus);
+			coordinator.runCluster("K-means clustering");
 			}
 			break;
 		case "Spark word count": if(alertMessage(cmd))

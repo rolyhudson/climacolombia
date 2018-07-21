@@ -1,41 +1,44 @@
 package climateClusters;
 
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 import java.util.Arrays;
+
 import java.util.List;
 import java.util.Map;
 
-import org.apache.spark.SparkConf;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.JavaSparkContext;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
+import org.apache.spark.sql.SparkSession;
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
 
 import scala.Tuple2;
 
 public class Clustering {
 
 	public static void main(String[] args) {
-		SparkConf conf = new SparkConf().setMaster("local").setAppName("App");
-		JavaSparkContext jsc = new JavaSparkContext(conf);
+	
+		SparkSession spark = SparkSession
+                .builder()
+                .appName("SparkJob")
+                .getOrCreate();
+		
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
 		int startSeason =1;
 		int endSeason=12;
-	    String path = args[0];
-	    JavaRDD<String> data = jsc.textFile(path);
 	    
-//	    JavaRDD<Vector> parsedData = data               // convert list to stream
-//                .filter(line -> !isHeader(line)) //filter out header with function
-//                .filter(line-> inDateRange(line,startdate,enddate))
-//                .filter(line-> inSeasonRange(line,startSeason,endSeason))
-//                .map(s->getValues(s,reqVars));
+	    JavaRDD<String> data = spark.read().textFile(args[0]).toJavaRDD();
 	    
-	    JavaPairRDD<String,Vector> labeldata = data
+   	    JavaPairRDD<String,Vector> labeldata = data
 	    		.filter(line -> !isHeader(line))
 	    		.filter(line-> inDateRange(line,startdate,enddate))
                 .filter(line-> inSeasonRange(line,startSeason,endSeason))
@@ -49,13 +52,38 @@ public class Clustering {
 	    int numIterations = 20;
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
 	    
-	    Map<Tuple2<Integer, String>, Long> clusterLabel = labeldata.mapToPair(f->classPoint(f,clusters))
-	    		.countByValue();
+	    JavaRDD<String> outputclusters = labeldata.map(f->classPoint2(f,clusters));
+	    outputclusters.saveAsTextFile(args[1]+"\\"+generateUniqueOutputName("results",new DateTime()));
+//	    Map<Tuple2<Integer, String>, Long> clusterLabel = labeldata.mapToPair(f->classPoint(f,clusters))
+//	    		.countByValue();
+//	    for (Map.Entry<Tuple2<Integer, String>, Long> entry : clusterLabel.entrySet())
+//	    {
+//	        System.out.println(entry.getKey() + "/" + entry.getValue());
+//	    }
 	    
-	    for (Map.Entry<Tuple2<Integer, String>, Long> entry : clusterLabel.entrySet())
-	    {
-	        System.out.println(entry.getKey() + "/" + entry.getValue());
-	    }
+	    spark.stop();
+	}
+	private static void writeMapToFile(Map map)
+	{
+		try
+        {
+               FileOutputStream fos =
+                  new FileOutputStream("hashmap.ser");
+               ObjectOutputStream oos = new ObjectOutputStream(fos);
+               oos.writeObject(map);
+               oos.close();
+               fos.close();
+               System.out.printf("Serialized HashMap data is saved in hashmap.ser");
+        }catch(IOException ioe)
+         {
+               ioe.printStackTrace();
+         }
+	}
+	private static String classPoint2(Tuple2<String,Vector> dl,KMeansModel clusters)
+	{
+		int clusNum = clusters.predict(dl._2);
+		String pointinfo = clusNum+","+dl._1+","+dl._2;
+		return pointinfo;
 	}
 	private static Tuple2<Integer,String> classPoint(Tuple2<String,Vector> dl,KMeansModel clusters)
 	{
@@ -66,7 +94,7 @@ public class Clustering {
 	{
 		String[] sarray = line.split(",");
 		Vector data = getValues(line,reqVariables);
-		String label = sarray[0]+"_"+sarray[1];
+		String label = sarray[0]+","+sarray[1];
 		return new Tuple2<String,Vector>(label, data);
 	}
 	private static boolean inSeasonRange(String line,int startmonth,int endmonth)
@@ -92,7 +120,14 @@ public class Clustering {
 	{
 		return line.contains("latitude");
 	}
-	
+	private static String generateUniqueOutputName(String prefix,DateTime timePoint)
+	{
+		
+		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy_MM_dd_HH_mm_ss");
+		String s = prefix+fmt.print(timePoint);
+				//timePoint.format(formatter);
+		return s;
+	}
 	private static Vector getValues(String line,List<String> reqVariables)
 	{
 	      String[] sarray = line.split(",");

@@ -17,6 +17,7 @@ public class Workflow {
 	private String dataSource;
 	private String outputFolder;
 	private String analysisJAR;
+	private String sparkJAR;
 	private String mainClassInJAR;
 	private String status;
 	private String awsID;
@@ -81,7 +82,7 @@ public class Workflow {
 		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/stationAnalysis.jar";
 		this.debugName = "Hadoop MR NOAA Counting"; 
 		this.mainClassInJAR = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
-		this.actionOnFailure = ActionOnFailure.TERMINATE_CLUSTER;
+		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
 		this.commandArgs = Arrays.asList(dataSource,outputFolder);
 		this.appType.setName("Hadoop");
 		setStepConfig();
@@ -112,7 +113,6 @@ public class Workflow {
 	}
 	public void sparkWordCount()
 	{
-
 		this.name = "Spark test";
 		this.debugName = "Spark test debug"; 
 		this.dataSource = "s3://rolyhudsontestbucket1/sparkTests/count.txt";
@@ -129,25 +129,26 @@ public class Workflow {
 				outputFolder);
 		this.appType.setName("Spark");
 		setSparkStepConfig();
-//		spark-submit --deploy-mode cluster --class org.rolson.emr.sparkTest.SparkJob s3://rolyhudsontestbucket1/sparkTests/SparkWordCount.jar s3://rolyhudsontestbucket1/sparkTests/count.txt s3://rolyhudsontestbucket1/sparkTests/output
-//
-//		AddJobFlowStepsRequest req = new AddJobFlowStepsRequest();
-//		req.withJobFlowId("j-1K48XXXXXXHCB");
-//
-//		List<StepConfig> stepConfigs = new ArrayList<StepConfig>();
-//				
-//		HadoopJarStepConfig sparkStepConf = new HadoopJarStepConfig()
-//					.withJar("command-runner.jar")
-//					.withArgs("spark-submit","--executor-memory","1g","--class","org.apache.spark.examples.SparkPi","/usr/lib/spark/lib/spark-examples.jar","10");			
-//				
-//		StepConfig sparkStep = new StepConfig()
-//					.withName("Spark Step")
-//					.withActionOnFailure("CONTINUE")
-//					.withHadoopJarStep(sparkStepConf);
-//
-//		stepConfigs.add(sparkStep);
-//		req.withSteps(stepConfigs);
-//		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);
+	}
+	public void sparkClimateCluster()
+	{
+		this.name = "Spark climate clustering with kmeans";
+		this.debugName = "Spark test debug"; 
+		this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";
+		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		this.analysisJAR = "command-runner.jar";
+		this.mainClassInJAR = "climateClusters.Clustering";
+		this.sparkJAR = "s3://rolyhudsontestbucket1/climateData/climateClusters2.jar";
+		this.commandArgs = Arrays.asList("spark-submit",
+				"--deploy-mode",
+				"cluster",
+				"--class",
+				this.mainClassInJAR,
+				this.sparkJAR,
+				dataSource,
+				outputFolder);
+		this.appType.setName("Spark");
+		setSparkStepConfig();
 	}
 	private void setSparkStepConfig()
 	{
