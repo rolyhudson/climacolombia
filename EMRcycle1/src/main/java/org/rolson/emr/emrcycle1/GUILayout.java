@@ -2,27 +2,15 @@ package org.rolson.emr.emrcycle1;
 
 
 import java.io.File;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
-import java.util.Timer;
-import java.util.TimerTask;
 
-import javax.swing.JComponent;
-
-import org.joda.time.DateTime;
-
-import javafx.animation.Timeline;
-import javafx.beans.binding.Bindings;
-import javafx.beans.property.SimpleStringProperty;
-import javafx.beans.property.StringProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ListChangeListener;
-import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
-import javafx.event.EventHandler;
+
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -30,7 +18,8 @@ import javafx.scene.control.Alert;
 import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.Button;
 import javafx.scene.control.ButtonType;
-import javafx.scene.control.Dialog;
+import javafx.scene.control.DatePicker;
+
 import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
@@ -40,8 +29,9 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.input.InputEvent;
+
 import javafx.scene.layout.GridPane;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
@@ -62,7 +52,7 @@ public class GUILayout {
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	
 	private List<Label> statuslabels = new ArrayList();
-	
+	Label statuslabel = new Label();
 	Stage stage;
 	public GUILayout(ClusterCoordinator wfc,Stage stg)
 	{
@@ -70,14 +60,26 @@ public class GUILayout {
 		stage = stg;
 		
 		StackPane root = new StackPane();
+		Button statusbutton = new Button("Update status");
+		statusbutton.setOnAction(this::handler);
+	    statuslabel.setFont(new Font("Arial", 15));
+	    
+	    HBox hbox = new HBox();
+	    hbox.setAlignment(Pos.CENTER_LEFT);
+	    hbox.getChildren().addAll(statusbutton,statuslabel);
+	    hbox.setSpacing(5);
+        //hbox.setPadding(new Insets(10, 0, 0, 10));
+		VBox vbox = new VBox();
+		
+		vbox.getChildren().addAll(hbox,addTabs());
 
-        root.getChildren().add(addTabs());
+        root.getChildren().add(vbox);
 
         Scene scene = new Scene(root, width, height);
 
         stage.setTitle("Clima Colombia");
         stage.setScene(scene);
-        
+        updateStatusLabel();
         stage.show();
 	}
 	
@@ -88,18 +90,7 @@ public class GUILayout {
         tab1.setText(name);
         pane.getTabs().add(index, tab1);
 	}
-	private List<String> tabSet()
-	{
-		List<String> buttonCmds = new ArrayList<String>();
-		buttonCmds.add("Workflows");
-		buttonCmds.add("Resource monitor");
-		buttonCmds.add("Workflow monitor");
-		buttonCmds.add("Visualise");
-		buttonCmds.add("Data manager");
-		buttonCmds.add("AWS tests");
-		
-		return buttonCmds;
-	}
+	
 	private List<String> btnNames(String tabname)
 	{
 		List<String> buttonCmds = new ArrayList<String>();
@@ -133,6 +124,19 @@ public class GUILayout {
 		}
 		return buttonCmds;
 	}
+	private List<String> tabSet()
+	{
+		List<String> buttonCmds = new ArrayList<String>();
+		buttonCmds.add("Workflows");
+		buttonCmds.add("Resource monitor");
+		buttonCmds.add("Workflow monitor");
+		buttonCmds.add("Visualise");
+		buttonCmds.add("Data manager");
+		buttonCmds.add("AWS tests");
+		buttonCmds.add("Settings");
+		return buttonCmds;
+	}
+	
 	private TabPane addTabs()
 	{
 		TabPane tabPane = new TabPane();
@@ -140,30 +144,59 @@ public class GUILayout {
 		List<String> cols;
 		for(int i=0; i<tabnames.size();i++)
 		{
-			if(tabnames.get(i).contains("monitor"))
+			String tabname = tabnames.get(i);
+			switch(tabname)
 			{
-				
-				if(tabnames.get(i).contains("Resource")) {
-					cols = Arrays.asList("name", "status" , "awsID");
-					addTabWithTableView(i,tabnames.get(i),tabPane, this.resourcetable,cols);
-					
-				}
-				else {
-					cols = Arrays.asList("name", "status" , "awsID","appType");
-					addTabWithTableView(i,tabnames.get(i),tabPane, this.workflowtable,cols);
-					
-				}
-				
+			case "Resource monitor":
+				cols = Arrays.asList("name", "status" , "awsID");
+				addTabWithTableView(i,tabname,tabPane, this.resourcetable,cols);
+				break;
+			case "Workflow monitor":
+				cols = Arrays.asList("name", "status" , "awsID","appType");
+				addTabWithTableView(i,tabname,tabPane, this.workflowtable,cols);
+				break;
+			case "Settings":
+				addSettingsTab(i,tabname,tabPane );
+				break;
+			default:
+				addTabWithButtons(i, tabname, tabPane);
+				break;
 			}
-			else addTabWithButtons(i, tabnames.get(i), tabPane);
+			
 		}
-
         tabPane.getSelectionModel().select(0);
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
         return tabPane;
 	}
-	
+	private void addSettingsTab(int index,String name,TabPane tabpane )
+	{
+		
+		Label daterangelabel = new Label("Monitor clusters and workflows from: ");
+		// Create the DatePicker.
+		DatePicker startdatePicker = new DatePicker();
+		LocalDate now = LocalDate.now();
+		
+		startdatePicker.setValue(now.minusDays(1)); 
+		// Add some action (in Java 8 lambda syntax style).
+		startdatePicker.setOnAction(event -> {
+		    LocalDate date = startdatePicker.getValue();
+		    System.out.println("Selected date: " + date);
+		});
+		final HBox monitordaterange = new HBox();
+		monitordaterange.setSpacing(5);
+		monitordaterange.setPadding(new Insets(10, 0, 0, 10));
+		monitordaterange.getChildren().addAll(daterangelabel,startdatePicker);
+		final VBox vbox = new VBox();
+        vbox.setSpacing(5);
+        vbox.setPadding(new Insets(10, 0, 0, 10));
+
+        vbox.getChildren().addAll(monitordaterange);
+        Tab tab = new Tab();
+        tab.setText(name);
+        tab.setContent(vbox);
+        tabpane.getTabs().add(index, tab);
+	}
 	private TableColumn addColumn(String name,int width,String property)
 	{
 		 TableColumn col = new TableColumn(name);
@@ -173,9 +206,7 @@ public class GUILayout {
 	}
 	public void updateStatusLabel()
 	{
-		for(Label l:statuslabels) {
-		l.setText(coordinator.EMRStatus());
-		}
+		statuslabel.setText(coordinator.EMRStatus());
 	}
 	private void addTabWithTableView(int index,String name,TabPane tabpane,TableView table,List<String> columns)
 	{
@@ -183,9 +214,7 @@ public class GUILayout {
 		else table.setPlaceholder(new Label(name + " could not find any active workflows"));
 		final Label label = new Label(name);
         label.setFont(new Font("Arial", 20));
-        Label statuslabel = new Label("Connecting...");
-        statuslabels.add(statuslabel);
-        statuslabel.setFont(new Font("Arial", 15));
+        
         table.setEditable(true);
  
         List<TableColumn> tabColumns = new ArrayList<TableColumn>();
@@ -201,7 +230,7 @@ public class GUILayout {
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 10));
 
-        vbox.getChildren().addAll(label,statuslabel, table);
+        vbox.getChildren().addAll(label, table);
         Tab tab = new Tab();
         tab.setText(name);
         tab.setContent(vbox);
@@ -263,6 +292,10 @@ public class GUILayout {
 	private void handler(ActionEvent event) {
 		String cmd = ((Button)event.getSource()).getText();
 		switch(cmd) {
+		case "Update status":
+			coordinator.updateAll();
+			updateStatusLabel();
+			break;
 		case "Create Bucket": if(alertMessage("Creating Bucket")) s3b.createBucket("climacolombiabucket");
 			break;
 		case "Delete Bucket":if(alertMessage("Deleting Bucket")) s3b.deleteBucket("climacolombiabucket");

@@ -2,6 +2,7 @@ package org.rolson.emr.emrcycle1;
 
 
 import javafx.animation.Animation;
+
 import javafx.animation.KeyFrame;
 import javafx.animation.Timeline;
 import javafx.application.Application;
@@ -16,13 +17,12 @@ public class GUIFX extends Application {
 
 		ClusterCoordinator coordinator = new ClusterCoordinator();
         GUILayout gui = new GUILayout(coordinator,stage);
-        Timeline timeline = new Timeline(
-        	    new KeyFrame(Duration.seconds(10), e -> gui.updateStatusLabel()),
-        	    new KeyFrame(Duration.seconds(10), e -> coordinator.updateResourceStatus()),
-        	    new KeyFrame(Duration.seconds(10), e -> coordinator.updateWorkflowStatus())
-        	);
-        	timeline.setCycleCount(Animation.INDEFINITE);
-        	timeline.play();
+//        Timeline timeline = new Timeline(
+//        	    new KeyFrame(Duration.seconds(10), e -> gui.updateStatusLabel()),
+//        	    new KeyFrame(Duration.seconds(10), e -> coordinator.updateAll())
+//        	);
+//        	timeline.setCycleCount(Animation.INDEFINITE);
+//        	timeline.play();
     }
     public static void main(String[] args) {
 

@@ -1,76 +1,78 @@
-package climaCluster;
-import java.util.Arrays;
+package climateClusters;
 
+import java.util.Arrays;
 import java.util.List;
-import java.time.*;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 import org.apache.spark.SparkConf;
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.api.java.JavaSparkContext;
-
-import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.clustering.KMeans;
+import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.joda.time.DateTime;
-public class KMeansClimate {
-	
+
+import scala.Tuple2;
+
+public class Clustering {
+
 	public static void main(String[] args) {
-		
-		
 		SparkConf conf = new SparkConf().setMaster("local").setAppName("App");
-	    //val conf = new SparkConf().setMaster("local").setAppName("myApp")
-	    JavaSparkContext jsc = new JavaSparkContext(conf);
+		JavaSparkContext jsc = new JavaSparkContext(conf);
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
-		int startSeason =0;
-		int endSeason=11;
+		int startSeason =1;
+		int endSeason=12;
 	    String path = args[0];
 	    JavaRDD<String> data = jsc.textFile(path);
-	    List<String> head = data.take(10);
 	    
-	    JavaRDD<Vector> parsedData = data               // convert list to stream
-                .filter(line -> !isHeader(line)) //filter out header with function
-                .filter(line-> inDateRange(line,startdate,enddate))
+//	    JavaRDD<Vector> parsedData = data               // convert list to stream
+//                .filter(line -> !isHeader(line)) //filter out header with function
+//                .filter(line-> inDateRange(line,startdate,enddate))
+//                .filter(line-> inSeasonRange(line,startSeason,endSeason))
+//                .map(s->getValues(s,reqVars));
+	    
+	    JavaPairRDD<String,Vector> labeldata = data
+	    		.filter(line -> !isHeader(line))
+	    		.filter(line-> inDateRange(line,startdate,enddate))
                 .filter(line-> inSeasonRange(line,startSeason,endSeason))
-                .map(s->getValues(s,reqVars));
-                //.collect(Collectors.toList());
+	    		.mapToPair(x -> getLabeledData(x,reqVars));
 	    
-	    parsedData.cache();
-	    for (Vector line: parsedData.take(10)) {
-	    	System.out.println(line);
+	    for (Tuple2<String,Vector> line: labeldata.take(10)) {
+	    	System.out.println("label:"+line._1+" data:"+line._2);
 	    	}
-
-
-		    int numClusters = 12;
-		    int numIterations = 20;
-		    KMeansModel clusters = KMeans.train(parsedData.rdd(), numClusters, numIterations);
-
-		    System.out.println("Cluster centers:");
-		    for (Vector center: clusters.clusterCenters()) {
-		      System.out.println(" " + center);
-		    }
-		    double cost = clusters.computeCost(parsedData.rdd());
-		    System.out.println("Cost: " + cost);
-
-		    
-		    // Evaluate clustering by computing Within Set Sum of Squared Errors
-		    double WSSSE = clusters.computeCost(parsedData.rdd());
-		    System.out.println("Within Set Sum of Squared Errors = " + WSSSE);
-
-		    // Save and load model
-		    clusters.save(jsc.sc(), "target/org/apache/spark/JavaKMeansExample/KMeansModel");
-		    KMeansModel sameModel = KMeansModel.load(jsc.sc(),
-		      "target/org/apache/spark/JavaKMeansExample/KMeansModel");
-	    jsc.stop();
-
+	    JavaRDD<Vector> dataPoints = labeldata.values();
+	    int numClusters = 12;
+	    int numIterations = 20;
+	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
+	    
+	    Map<Tuple2<Integer, String>, Long> clusterLabel = labeldata.mapToPair(f->classPoint(f,clusters))
+	    		.countByValue();
+	    
+	    for (Map.Entry<Tuple2<Integer, String>, Long> entry : clusterLabel.entrySet())
+	    {
+	        System.out.println(entry.getKey() + "/" + entry.getValue());
+	    }
+	}
+	private static Tuple2<Integer,String> classPoint(Tuple2<String,Vector> dl,KMeansModel clusters)
+	{
+		int clus = clusters.predict(dl._2);
+		return new Tuple2<Integer,String>(clus,dl._1);
+	}
+	private static Tuple2<String,Vector> getLabeledData(String line,List<String> reqVariables)
+	{
+		String[] sarray = line.split(",");
+		Vector data = getValues(line,reqVariables);
+		String label = sarray[0]+"_"+sarray[1];
+		return new Tuple2<String,Vector>(label, data);
 	}
 	private static boolean inSeasonRange(String line,int startmonth,int endmonth)
 	{
 		String[] sarray = line.split(",");
-		int currentMonth = Integer.parseInt(sarray[3]);
+		int currentMonth = Integer.parseInt(sarray[3])+1;
 		if(currentMonth>=startmonth&&currentMonth<=endmonth)return true;
 		else return false;
 	}
@@ -78,7 +80,7 @@ public class KMeansClimate {
 	{
 		String[] sarray = line.split(",");
 		int currentYr = Integer.parseInt(sarray[2]);
-		int currentMonth = Integer.parseInt(sarray[3]);
+		int currentMonth = Integer.parseInt(sarray[3])+1;
 		DateTime currentDate =new DateTime(currentYr, currentMonth, 1, 1,0,0);
 		if(currentDate.isAfter(startdate)&&currentDate.isBefore(enddate))
 		{

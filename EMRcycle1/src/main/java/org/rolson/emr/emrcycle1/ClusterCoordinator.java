@@ -1,13 +1,13 @@
 package org.rolson.emr.emrcycle1;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.Date;
 import java.util.List;
-import java.util.stream.*;
+
 import java.util.Optional;
 import java.util.Timer;
-import java.util.TimerTask;
+import java.util.concurrent.ExecutorService;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -19,16 +19,13 @@ import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduceClient;
 import com.amazonaws.services.elasticmapreduce.model.AddJobFlowStepsRequest;
 import com.amazonaws.services.elasticmapreduce.model.AddJobFlowStepsResult;
 import com.amazonaws.services.elasticmapreduce.model.ClusterSummary;
-import com.amazonaws.services.elasticmapreduce.model.DescribeClusterRequest;
-import com.amazonaws.services.elasticmapreduce.model.DescribeClusterResult;
-import com.amazonaws.services.elasticmapreduce.model.DescribeStepRequest;
-import com.amazonaws.services.elasticmapreduce.model.DescribeStepResult;
+
 import com.amazonaws.services.elasticmapreduce.model.HadoopJarStepConfig;
 import com.amazonaws.services.elasticmapreduce.model.ListClustersResult;
 import com.amazonaws.services.elasticmapreduce.model.ListStepsRequest;
 import com.amazonaws.services.elasticmapreduce.model.ListStepsResult;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
-import com.amazonaws.services.elasticmapreduce.model.StepStatus;
+
 import com.amazonaws.services.elasticmapreduce.model.StepSummary;
 
 
@@ -41,17 +38,19 @@ public class ClusterCoordinator {
 	public ObservableList<Cluster> monitorResourceData = FXCollections.observableArrayList();
 	public ObservableList<Workflow> monitorWorkflowData = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
-	private Timer timer;
-	private String connectionStatus;
+	private DateTime monitorFrom = DateTime.now().minusDays(2);
 	public ClusterCoordinator()
 	{
-		//
 		this.allWorkflows = new ArrayList<Workflow>();
 		this.clusters = new ArrayList<Cluster>();
 		setEMRClient();
-		
-		//getWorkflowsFromAWS();
-		//dummyWorkflows();
+	}
+	public void updateAll()
+	{
+//updates cannot run on frequent cycle;
+			updateWorkflowStatus();
+			updateResourceStatus();
+
 	}
 	public void setEMRClient()
 	{
@@ -64,6 +63,14 @@ public class ClusterCoordinator {
 		}
 		 
 	}
+	public void setMonitorFrom(LocalDate date)
+	{
+		monitorFrom = new DateTime(date);
+	}
+	public DateTime getMonitorFrom()
+	{
+		return monitorFrom;
+	}
 	public String EMRStatus()
 	{
 		String status = ""; 
@@ -74,7 +81,7 @@ public class ClusterCoordinator {
 		else status = "Connection status: not connected, last update: "+time;
 		return status;
 	}
-	public void updateWorkflowStatus()
+	private void updateWorkflowStatus()
 	{
 		ListClustersResult awsclusters = emr.listClusters();
 		List<ClusterSummary> clusterlist = awsclusters.getClusters();
@@ -84,9 +91,7 @@ public class ClusterCoordinator {
 			String status = cs.getStatus().getState();
 			if(status.equals("STARTING")||
 					status.equals("RUNNING")||
-							status.equals("WAITING")||
-							status.equals("BOOTSTRAPPING"))
-			{
+							status.equals("WAITING") ){
 				String id = cs.getId();
 				ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(id));
 			    StepSummary step = steps.getSteps().get(0);
@@ -107,9 +112,12 @@ public class ClusterCoordinator {
 					allWorkflows.add(wflow);
 				}
 				wflow.setStatus(stepstatus);
+				
 			}
+			
 		}
 		monitorWorkflowData.setAll(allWorkflows);
+		
 	}
 	public void updateResourceStatus()
 	{
@@ -122,10 +130,8 @@ public class ClusterCoordinator {
 		{
 			//STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
 			String status = cs.getStatus().getState();
-			if(status.equals("STARTING")||
-					status.equals("RUNNING")||
-							status.equals("WAITING")||
-							status.equals("BOOTSTRAPPING"))
+			DateTime creationDate = new DateTime(cs.getStatus().getTimeline().getCreationDateTime());
+			if(creationDate.isAfter(monitorFrom))
 			{
 				String name = cs.getName();
 				Optional<Cluster> c = clusters.stream().filter(x->name.equals(x.getName())).findFirst();
@@ -153,16 +159,8 @@ public class ClusterCoordinator {
 	{
 		return emr;
 	}
-	public void getWorkflowFromAWS(String clusterID)
-	{
-//		DescribeClusterResult clusterinfo = emr.describeCluster(new DescribeClusterRequest().withClusterId(clusterID));
-//		Workflow wf = new Workflow(clusterinfo.getCluster().getName());
-//		addWorkflow(wf);
-	}
 	public void runCluster(String name)
 	{
-		//setEMRClient();
-		//get the workflow by name
 		Cluster clus = getCluster(name);
 		if(clus!=null)
 		{
@@ -170,8 +168,8 @@ public class ClusterCoordinator {
 			clus.setRequest();
 			clus.setResult(emr.runJobFlow(clus.getRequest()));
 			clus.setStatus("starting");
+			updateAll();
 		}
-		
 	}
 	public Cluster getCluster(String name)
 	{
