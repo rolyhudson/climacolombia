@@ -9,6 +9,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.beans.property.SimpleBooleanProperty;
+import javafx.beans.value.ObservableValue;
 import javafx.event.ActionEvent;
 
 import javafx.geometry.Insets;
@@ -24,6 +26,7 @@ import javafx.scene.control.Label;
 import javafx.scene.control.Tab;
 import javafx.scene.control.TabPane;
 import javafx.scene.control.TabPane.TabClosingPolicy;
+import javafx.scene.control.TableCell;
 import javafx.scene.control.TableColumn;
 import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
@@ -38,6 +41,7 @@ import javafx.scene.text.Font;
 import javafx.scene.text.Text;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import javafx.util.Callback;
 
 public class GUILayout {
 	
@@ -80,6 +84,7 @@ public class GUILayout {
         stage.setTitle("Clima Colombia");
         stage.setScene(scene);
         updateStatusLabel();
+        coordinator.updateAll();
         stage.show();
 	}
 	
@@ -101,7 +106,7 @@ public class GUILayout {
 			buttonCmds.add("Upload JAR file");
 			break;
 		
-		case "Workflows":
+		case "Predefined workflows":
 			buttonCmds.add("Hadoop Map Reduce");
 			buttonCmds.add("K-means clustering");
 			buttonCmds.add("Linear Regression");
@@ -127,7 +132,7 @@ public class GUILayout {
 	private List<String> tabSet()
 	{
 		List<String> buttonCmds = new ArrayList<String>();
-		buttonCmds.add("Workflows");
+		buttonCmds.add("Predefined workflows");
 		buttonCmds.add("Resource monitor");
 		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
@@ -204,9 +209,36 @@ public class GUILayout {
 	     col.setCellValueFactory(new PropertyValueFactory<Workflow, String>(property));
 	     return col;
 	}
+	
 	public void updateStatusLabel()
 	{
 		statuslabel.setText(coordinator.EMRStatus());
+	}
+	@SuppressWarnings("unchecked")
+	private TableColumn addButtonsColumn(TableView tblView,String buttonName)
+	{
+		TableColumn c3 = new TableColumn<>("Action");
+        c3.setSortable(false);
+        c3.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<Workflow, Boolean>,
+                        ObservableValue<Boolean>>() {
+     
+                    @Override
+                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Workflow, Boolean> p) {
+                        return new SimpleBooleanProperty(p.getValue() != null);
+                    }
+                });
+     
+        c3.setCellFactory(
+                new Callback<TableColumn<Workflow, Boolean>, TableCell<Workflow, Boolean>>() {
+     
+                    @Override
+                    public TableCell<Workflow, Boolean> call(TableColumn<Workflow, Boolean> p) {
+                        return new ButtonCell(tblView,buttonName,coordinator);
+                    }
+                });
+        
+        return c3;
 	}
 	private void addTabWithTableView(int index,String name,TabPane tabpane,TableView table,List<String> columns)
 	{
@@ -220,8 +252,20 @@ public class GUILayout {
         List<TableColumn> tabColumns = new ArrayList<TableColumn>();
         for(String col : columns)
         {
-        	tabColumns.add(addColumn(col,200,col));
+        	tabColumns.add(addColumn(col,150,col));
         }
+        if(name.contains("Workflow")) {
+        	TableColumn runbuttons = addButtonsColumn(table,"run");
+        	TableColumn stopbuttons = addButtonsColumn(table,"stop");
+        	TableColumn mapbuttons = addButtonsColumn(table,"map");
+        	TableColumn statsbuttons = addButtonsColumn(table,"stats");
+        			tabColumns.add(runbuttons);
+        			tabColumns.add(stopbuttons);
+        			tabColumns.add(mapbuttons);
+        			tabColumns.add(statsbuttons);
+        }
+        
+        
         if(name.contains("Resource")) table.setItems(coordinator.monitorResourceData);
         else table.setItems(coordinator.monitorWorkflowData);
         table.getColumns().addAll(tabColumns);
@@ -289,6 +333,7 @@ public class GUILayout {
 		    return false;
 		}
 	}
+	
 	private void handler(ActionEvent event) {
 		String cmd = ((Button)event.getSource()).getText();
 		switch(cmd) {
@@ -322,7 +367,7 @@ public class GUILayout {
 				clus.setName("Map Reduce Cluster");
 				clus.addPredfined(cmd);
 				coordinator.addCluster(clus);
-				coordinator.runCluster("Map Reduce Cluster");
+				coordinator.runCluster(clus);
 			}
 			break;
 		case "Message log agregator": if(alertMessage(cmd))
@@ -331,7 +376,7 @@ public class GUILayout {
 				clus.setName("Message log");
 				clus.addPredfined(cmd);
 				coordinator.addCluster(clus);
-				coordinator.runCluster("Message log");
+				coordinator.runCluster(clus);
 			}
 			break;
 		case "Monthly records totals": if(alertMessage(cmd))
@@ -340,18 +385,22 @@ public class GUILayout {
 				clus.setName("Monthly records");
 				clus.addPredfined(cmd);
 				coordinator.addCluster(clus);
-				coordinator.runCluster("Monthly records");
+				coordinator.runCluster(clus);
 			}
 		break;
 		
-		case "K-means clustering": if(alertMessage(cmd))
-			{
-			Cluster clus = new Cluster();
-			clus.setName("K-means clustering");
-			clus.addPredfined(cmd);
-			coordinator.addCluster(clus);
-			coordinator.runCluster("K-means clustering");
-			}
+		case "K-means clustering": 
+			
+			//make new workflow and push to coordinator
+			Workflow wf = new Workflow(cmd);
+			wf.sparkClimateCluster();
+			coordinator.addWorkflow(wf);
+//			Cluster clus = new Cluster();
+//			clus.setName("K-means clustering");
+//			clus.addPredfined(cmd);
+//			coordinator.addCluster(clus);
+//			coordinator.runCluster("K-means clustering");
+		
 			break;
 		case "Spark word count": if(alertMessage(cmd))
 			{
@@ -359,7 +408,7 @@ public class GUILayout {
 			clus.setName("Spark word count");
 			clus.addPredfined(cmd);
 			coordinator.addCluster(clus);
-			coordinator.runCluster("Spark word count");
+			coordinator.runCluster(clus);
 			}
 			break;
 		case "Upload dataset":if(alertMessage(cmd))

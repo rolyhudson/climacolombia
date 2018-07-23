@@ -1,11 +1,15 @@
 cycle1 todo
 
-monitor by date range
-show workflow cluster
+
+
 
 sequence diagrams for use
 class diagram update
 
-clustering results visualisation
+clustering results visualisation -first pass done
+
+auto generate html / javascript viewer for
+1 .map and 
+2 .statistical summary
 
 linear classification test

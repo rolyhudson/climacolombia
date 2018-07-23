@@ -6,6 +6,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
+import org.joda.time.DateTime;
+
 import com.amazonaws.services.elasticmapreduce.model.*;
 
 
@@ -27,11 +29,16 @@ public class Cluster {
 	private List<StepConfig> allSteps;
 	private Collection<Application> applications;
 	private List<Workflow> workflows;
+	private DateTime creationDate;
 	public Cluster() {
 		workflows = new ArrayList<Workflow>();
 		applications = new ArrayList<Application>();
 		defaultVariables();
 		stepConfig=new StepConfig();
+	}
+	public DateTime getCreationDate()
+	{
+		return this.creationDate;
 	}
 	public RunJobFlowResult getResult()
 	{
@@ -40,6 +47,7 @@ public class Cluster {
 	public void setResult(RunJobFlowResult rjfResult)
 	{
 		result = rjfResult;
+		setAwsID(result.getJobFlowId());
 	}
 	public RunJobFlowRequest getRequest()
 	{

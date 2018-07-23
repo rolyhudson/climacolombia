@@ -47,9 +47,11 @@ public class ClusterCoordinator {
 	}
 	public void updateAll()
 	{
-//updates cannot run on frequent cycle;
-			updateWorkflowStatus();
-			updateResourceStatus();
+		//updates cannot run on frequent cycle geerates a throttling error
+		//get the clusters
+		updateResourceStatus();
+		//based on clusters in time range get the workflows
+		updateWorkflowStatus();
 
 	}
 	public void setEMRClient()
@@ -81,23 +83,29 @@ public class ClusterCoordinator {
 		else status = "Connection status: not connected, last update: "+time;
 		return status;
 	}
+	private void updateWorkflowAwsIDs(Cluster c)
+	{
+		String clusterid = c.getAwsID();
+		ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(clusterid));
+		List<StepSummary> stepsummaries = steps.getSteps();
+		//need to match aws steps with out workflows
+		for(StepSummary ss : stepsummaries)
+		{
+			String stepstatus = ss.getStatus().getState();
+		    String id = ss.getId();
+		    c.getWorkflows().get(0).setAwsID(id);
+		    c.getWorkflows().get(0).setStatus(stepstatus);
+		}
+	}
 	private void updateWorkflowStatus()
 	{
-		ListClustersResult awsclusters = emr.listClusters();
-		List<ClusterSummary> clusterlist = awsclusters.getClusters();
-		for(ClusterSummary cs: clusterlist)
+		for(Cluster c: clusters)
 		{
-			//STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
-			String status = cs.getStatus().getState();
-			if(status.equals("STARTING")||
-					status.equals("RUNNING")||
-							status.equals("WAITING") ){
-				String id = cs.getId();
-				ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(id));
+				ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(c.getAwsID()));
 			    StepSummary step = steps.getSteps().get(0);
 			    String stepstatus = step.getStatus().getState();
-			    String name = step.getName();
-				Optional<Workflow> wf = allWorkflows.stream().filter(x->name.equals(x.getName())).findFirst();
+			    String id = step.getId();
+				Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
 				Workflow wflow;
 				if(wf.isPresent())
 				{
@@ -107,17 +115,14 @@ public class ClusterCoordinator {
 				}
 				else {
 					//if the app starts and clusters are found ruuning
-					wflow = new Workflow(name);
+					wflow = new Workflow(step.getName());
 					wflow.setAwsID(step.getId());
 					allWorkflows.add(wflow);
 				}
 				wflow.setStatus(stepstatus);
-				
-			}
-			
+
 		}
 		monitorWorkflowData.setAll(allWorkflows);
-		
 	}
 	public void updateResourceStatus()
 	{
@@ -134,7 +139,8 @@ public class ClusterCoordinator {
 			if(creationDate.isAfter(monitorFrom))
 			{
 				String name = cs.getName();
-				Optional<Cluster> c = clusters.stream().filter(x->name.equals(x.getName())).findFirst();
+				String id = cs.getId();
+				Optional<Cluster> c = clusters.stream().filter(x->id.equals(x.getAwsID())).findFirst();
 				Cluster clus;
 				if(c.isPresent())
 				{
@@ -159,22 +165,66 @@ public class ClusterCoordinator {
 	{
 		return emr;
 	}
-	public void runCluster(String name)
+	public void stopCluster(String name)
 	{
-		Cluster clus = getCluster(name);
+		
+	}
+	
+	public void runClusterByIndex(int index)
+	{
+		Cluster clus = clusters.get(index);
 		if(clus!=null)
 		{
-			System.out.println("Starting workflow "+name);
+			System.out.println("Starting workflow ");
 			clus.setRequest();
 			clus.setResult(emr.runJobFlow(clus.getRequest()));
 			clus.setStatus("starting");
 			updateAll();
 		}
 	}
-	public Cluster getCluster(String name)
+	public void runWorkflow(Workflow wf)
+	{
+		//workflow is already in allWorkflows list
+		//check for running cluster and give option to add to exsiting
+		Cluster newclus = new Cluster();
+		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
+		newclus.setName("Cluster with workflow: "+wf.getName());
+		addCluster(newclus);
+		runCluster(newclus);
+	}
+	public void runCluster(Cluster clus)
+	{
+		if(clus!=null)
+		{
+			System.out.println("Starting cluster ");
+			clus.setRequest();
+			//setResult assigns awsid to cluster
+			clus.setResult(emr.runJobFlow(clus.getRequest()));
+			//
+			updateWorkflowAwsIDs(clus);
+			clus.setStatus("starting");
+			updateAll();
+		}
+	}
+	private Workflow getWorkflow(DateTime timecreated)
+	{
+		Optional<Workflow> matches = allWorkflows.stream()
+				.filter(t -> t.getCreationDate() ==timecreated)
+				.findAny(); 
+		if(matches.isPresent())
+		{
+			Workflow w = matches.get();
+			return w;
+		}
+		else
+		{
+			return null;
+		}
+	}
+	public Cluster getCluster(DateTime timecreated)
 	{
 		Optional<Cluster> matches = clusters.stream()
-				.filter(t -> t.getName() ==name)
+				.filter(t -> t.getCreationDate() ==timecreated)
 				.findAny(); 
 		if(matches.isPresent())
 		{
@@ -191,11 +241,17 @@ public class ClusterCoordinator {
 		clusters.add(c);
 		for(Workflow w: c.getWorkflows())
 		{
-			this.allWorkflows.add(w);
+			//this is for the tests
+			//this.allWorkflows.add(w);
 		}
-		workflowUpdate();
+		
 	}
-	public void addStepToCluster(String jobflowid)
+	public void addWorkflow(Workflow wf)
+	{
+		this.allWorkflows.add(wf);
+		monitorWorkflowData.setAll(allWorkflows);
+	}
+	public void addWorkflowToCluster(String jobflowid)
 	{
 		AddJobFlowStepsRequest req = new AddJobFlowStepsRequest();
 		req.withJobFlowId(jobflowid);
@@ -215,9 +271,5 @@ public class ClusterCoordinator {
 		req.withSteps(stepConfigs);
 		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);
 	}
-	private void workflowUpdate()
-	{
-		//called to trigger update on monitor
-		//monitorData.setAll(allWorkflows);
-	}
+	
 }

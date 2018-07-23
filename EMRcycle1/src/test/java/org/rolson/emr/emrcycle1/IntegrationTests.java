@@ -21,7 +21,7 @@ public class IntegrationTests {
 		cluster.setName("Hadoop Map Reduce");
 		//add a workfow
 		cluster.addPredfined("Hadoop Map Reduce");
-		coord.runCluster("Hadoop Map Reduce");
+		coord.runCluster(cluster);
 		
 		
 	}

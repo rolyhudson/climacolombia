@@ -10,6 +10,8 @@ import org.joda.time.format.DateTimeFormatter;
 
 import com.amazonaws.services.elasticmapreduce.model.*;
 
+import javafx.scene.control.Button;
+
 public class Workflow {
 	private String name;
 	private Application appType;
@@ -22,6 +24,7 @@ public class Workflow {
 	private String status;
 	private String awsID;
 	private StepConfig stepConfig;
+	private DateTime creationDate;
 	private ActionOnFailure actionOnFailure;
 	
 	private List<String> commandArgs;
@@ -32,8 +35,14 @@ public class Workflow {
 		appType = new Application();
 		defaultVariables();
 		this.name = workflowname;
+		this.status = "INTIALISED";
+		this.setAwsID("undefined");
+		this.creationDate = new DateTime();
 	}
-	
+	public DateTime getCreationDate()
+	{
+		return this.creationDate;
+	}
 	public StepConfig getStepConfig()
 	{
 		return stepConfig;
@@ -132,7 +141,7 @@ public class Workflow {
 	}
 	public void sparkClimateCluster()
 	{
-		this.name = "Spark climate clustering with kmeans";
+		//this.name = "Spark climate clustering with kmeans";
 		this.debugName = "Spark test debug"; 
 		this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";
 		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
@@ -161,7 +170,6 @@ public class Workflow {
 	}
 	public static String generateUniqueOutputName(String prefix,DateTime timePoint)
 	{
-		
 		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy_MM_dd_HH_mm_ss");
 		String s = prefix+fmt.print(timePoint);
 				//timePoint.format(formatter);
