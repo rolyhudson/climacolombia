@@ -34,7 +34,7 @@ public class Clustering {
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
 		int startSeason =1;
-		int endSeason=12;
+		int endSeason=2;
 	    
 	    JavaRDD<String> data = spark.read().textFile(args[0]).toJavaRDD();
 	    
@@ -53,7 +53,7 @@ public class Clustering {
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
 	    
 	    JavaRDD<String> outputclusters = labeldata.map(f->classPoint2(f,clusters));
-	    outputclusters.saveAsTextFile(args[1]+"\\"+generateUniqueOutputName("results",new DateTime()));
+	    outputclusters.saveAsTextFile(args[1]);
 //	    Map<Tuple2<Integer, String>, Long> clusterLabel = labeldata.mapToPair(f->classPoint(f,clusters))
 //	    		.countByValue();
 //	    for (Map.Entry<Tuple2<Integer, String>, Long> entry : clusterLabel.entrySet())

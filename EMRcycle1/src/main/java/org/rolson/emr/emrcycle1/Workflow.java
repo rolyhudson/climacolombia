@@ -35,7 +35,7 @@ public class Workflow {
 		appType = new Application();
 		defaultVariables();
 		this.name = workflowname;
-		this.status = "INTIALISED";
+		this.status = "INITIALISED";
 		this.setAwsID("undefined");
 		this.creationDate = new DateTime();
 	}
@@ -60,7 +60,7 @@ public class Workflow {
 				
 		}
 		this.setAwsID(step.getId());
-		this.creationDate = new DateTime();
+		this.creationDate = new DateTime(step.getStatus().getTimeline().getCreationDateTime());
 		this.analysisJAR = step.getConfig().getJar();
 		this.mainClassInJAR = step.getConfig().getMainClass();
 		this.commandArgs = step.getConfig().getArgs();
@@ -85,7 +85,10 @@ public class Workflow {
 			setSparkStepConfig();
 		}
 	}
-
+	public String getOutputFolder()
+	{
+		return this.outputFolder;
+	}
 	public DateTime getCreationDate()
 	{
 		return this.creationDate;

@@ -36,7 +36,7 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	                				||forAction.getStatus().equals("INTERUPTED")
 	                				||forAction.getStatus().equals("FAILED"))
 	                		{
-	                			if(alertMessage(forAction.getName()))
+	                			if(alertMessage("Run workflow: "+forAction.getName()))
 	                			{
 	                				//run or rerun step
 	                				coord.runWorkflow(forAction);
@@ -47,7 +47,7 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	                		if(forAction.getStatus().equals("PENDING")
 	                				||forAction.getStatus().equals("RUNNING"))
 	                		{
-	                			if(alertMessage(forAction.getName()))
+	                			if(alertMessage("Stopping workflow: "+forAction.getName()))
 	                			{
 	                				//cancel step
 	                				//coord.stopWorkflow(forAction);
@@ -57,10 +57,11 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	                	case "map":
 	                		if(forAction.getStatus().equals("COMPLETED"))
 	                		{
-	                			if(alertMessage(forAction.getName()))
+	                			if(alertMessage("Generate georeferenced visualisation for: "+forAction.getName()))
 	        					{
 	            					//run vis
-	                				//coord.visualGeoWorkflow(forAction);
+	                				GeoVisualisation geovis = new GeoVisualisation(forAction);
+	                				visResults(geovis.getVisResultUri());
 	        					}
 	                		}
 	                		
@@ -68,7 +69,7 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	                	case "stats":
 	                		if(forAction.getStatus().equals("COMPLETED"))
 	                		{
-	                			if(alertMessage(forAction.getName()))
+	                			if(alertMessage("Generate statisitcal visualisation for: "+forAction.getName()))
 	        					{
 	            					//run stats
 	                				//coord.visualStatsWorkflow(forAction);
@@ -116,12 +117,20 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	            setGraphic(cellButton);
 	        }
 	    }
-	    
+	    private void visResults(String uri)
+	    {
+	    	Alert alert = new Alert(AlertType.INFORMATION);
+	    	alert.setTitle("GeoVis");
+	    	alert.setHeaderText("Visualisation available");
+	    	alert.setContentText(uri);
+
+	    	alert.showAndWait();
+	    }
 	    private boolean alertMessage(String text)
 		{
 			Alert alert = new Alert(AlertType.CONFIRMATION);
 			alert.setTitle("Confirmation Dialog");
-			alert.setHeaderText("About to run: "+ text);
+			alert.setHeaderText(text);
 			alert.setContentText("Proceed?");
 
 			Optional<ButtonType> result = alert.showAndWait();

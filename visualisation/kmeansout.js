@@ -42,7 +42,7 @@ rectangles(gridData);
 function plotGrid(){
 //https://s3.amazonaws.com/rolyhudsontestbucket1/climateData/Spark+climate+clustering+with+kmeans_output_2018_07_21_15_37_23%5Cresults2018_07_21_20_44_02/part-00000
   d3.queue()
-    .defer(d3.text, "https://s3.amazonaws.com/rolyhudsontestbucket1/climateData/Spark+climate+clustering+with+kmeans_output_2018_07_21_15_37_23%5Cresults2018_07_21_20_44_02/part-00000")
+    .defer(d3.text, "results")
     .await(readFromS3);
 }
 

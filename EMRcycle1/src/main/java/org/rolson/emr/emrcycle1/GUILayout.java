@@ -39,6 +39,8 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
@@ -48,7 +50,7 @@ public class GUILayout {
 	ClusterTests clustest = new ClusterTests();
 	private DataManager datamanager = new DataManager();
 	private HashMap<String,Text> buttonLabelMap = new HashMap<String,Text>();
-	int width = 1000;
+	int width = 1400;
 	int height =700;
 	private ClusterCoordinator coordinator;
 	private TableView<Cluster> resourcetable = new TableView<Cluster>();
@@ -123,7 +125,16 @@ public class GUILayout {
 		buttonCmds.add("Settings");
 		return buttonCmds;
 	}
-	
+	private void addWebView(int index,String name,TabPane tabpane)
+	{
+		WebView browser = new WebView();
+		WebEngine webEngine = browser.getEngine();
+		webEngine.load("http://lacunae.io/geovis2018_07_24_14_51_28/");
+		Tab tab = new Tab();
+		tab.setText(name);
+		tab.setContent(browser);
+		tabpane.getTabs().add(index, tab);
+	}
 	private TabPane addTabs()
 	{
 		TabPane tabPane = new TabPane();
@@ -139,12 +150,15 @@ public class GUILayout {
 				addTabWithTableView(i,tabname,tabPane, this.resourcetable,cols);
 				break;
 			case "Workflow monitor":
-				cols = Arrays.asList("name", "status" , "awsID","appType");
+				cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType");
 				addTabWithTableView(i,tabname,tabPane, this.workflowtable,cols);
 				break;
 			case "Settings":
 				addSettingsTab(i,tabname,tabPane );
 				break;
+			case "Visualise":
+				addWebView(i,tabname,tabPane);
+			break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);
 				break;
@@ -264,6 +278,7 @@ public class GUILayout {
         
         if(name.contains("Resource")) {
         Button terminateBtn = new Button("Terminate all clusters");
+        terminateBtn.setOnAction(this::handler);
         hbox.getChildren().addAll(label,terminateBtn);
         }
         else
@@ -367,8 +382,13 @@ public class GUILayout {
 	private void handler(ActionEvent event) {
 		String cmd = ((Button)event.getSource()).getText();
 		switch(cmd) {
-		
-		
+		case "Terminate all clusters":
+			if(alertMessage(cmd)) coordinator.stopAllClusters();
+			
+			break;
+		case "Update status":
+			coordinator.updateAll();
+			break;
 		case "K-means clustering": 
 			
 			//make new workflow and push to coordinator

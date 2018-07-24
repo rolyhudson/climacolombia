@@ -1,0 +1,40 @@
+package org.rolson.emr.emrcycle1;
+
+public class GeoVisualisation {
+	Workflow workflow;
+	private String dataSourceUri;
+	private String output;
+	private DataManager datamanager;
+	private String datakey;
+	private String dataBucket;
+	public GeoVisualisation(Workflow wf)
+	{
+		workflow= wf;
+		this.dataSourceUri = wf.getOutputFolder();
+		datamanager = new DataManager();
+		datamanager.setupClient();
+		//get bucketname from uri
+		//https://s3.amazonaws.com/rolyhudsontestbucket1/climateData/K-means+clustering_output_2018_07_24_13_29_48/part-00000
+		//datamanager.accessObject();
+	}
+	
+	private boolean resultsExist()
+	{
+		boolean exists = false;
+		
+		return exists;
+	}
+	private extractBucketAndKey()
+	{
+		
+	}
+	//check results exist
+	//gte the result
+	//move results to lacunae.io
+	//in folder with datasourcename
+	//copy html and js to folder
+	//set results to public access
+	//generate html with ref to results
+	//put html in s3 with public access
+	//return url to gui
+}

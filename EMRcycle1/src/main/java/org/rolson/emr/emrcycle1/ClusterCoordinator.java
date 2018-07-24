@@ -172,7 +172,17 @@ public class ClusterCoordinator {
 		emr.terminateJobFlows(request);
 		updateAll();
 	}
-	
+	public void stopAllClusters()
+	{
+		TerminateJobFlowsRequest request =new TerminateJobFlowsRequest();
+		for(Cluster c:clusters)
+		{
+		
+		request.withJobFlowIds(c.getAwsID());
+		}
+		emr.terminateJobFlows(request);
+		updateAll();
+	}
 	public void runClusterByIndex(int index)
 	{
 		Cluster clus = clusters.get(index);

@@ -5,6 +5,11 @@ import java.io.File;
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
+import com.amazonaws.services.s3.model.CopyObjectResult;
+import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.S3Object;
+import com.amazonaws.services.s3.model.S3ObjectInputStream;
+import com.amazonaws.services.s3.model.S3ObjectSummary;
 import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
@@ -15,7 +20,7 @@ public class DataManager {
 	private TransferManager xfm;
 	private String bucketName = "rolyhudsontestbucket1";
 	private String keyName = "climateData";
-	private void setupClient(){
+	public void setupClient(){
 		s3client = AmazonS3ClientBuilder.standard()
                 .withRegion("us-east-1")
                 .build();
@@ -23,6 +28,47 @@ public class DataManager {
 	private void setupXFManger(){
 		DefaultAWSCredentialsProviderChain credentialProviderChain = new DefaultAWSCredentialsProviderChain();
 		xfm =  new TransferManager(credentialProviderChain.getCredentials());
+	}
+	public void listBucketContents(String container)
+	{
+		ObjectListing objectListing = s3client.listObjects(bucketName);
+		for(S3ObjectSummary os : objectListing.getObjectSummaries()) {
+		    System.out.print((os.getKey()));
+		}
+	}
+	public boolean accessObject(String bucket, String key)
+	{
+		boolean exists = false;
+		try
+		{
+		s3client.getObject(bucket, key);
+		exists = true;
+		}
+		catch(SdkClientException e)
+		{
+			e.printStackTrace();
+		}
+		//S3ObjectInputStream inputStream = s3object.getObjectContent();
+		return exists;
+	}
+	public boolean copyMove(String originBucket,String destinationBucket,String originKey, String destinationKey) throws AmazonServiceException
+	{
+		boolean result = false;
+		try{
+		CopyObjectResult copyresult = s3client.copyObject(
+				originBucket, 
+				originKey, 
+				destinationBucket, 
+				destinationKey
+				);
+		result = true;
+		}
+		catch(SdkClientException e) {
+	        // Amazon S3 couldn't be contacted for a response, or the client
+	        // couldn't parse the response from Amazon S3.
+	        e.printStackTrace();
+	    }
+		return result;
 	}
 	public boolean upload(File f,String keypath)
 	{
@@ -40,7 +86,7 @@ public class DataManager {
         // Optionally, wait for the upload to finish before continuing.
         upload.waitForCompletion();
         System.out.println("Object upload complete");
-        
+        result = true;
 	    }
 	    catch(AmazonServiceException e) {
 	        // The call was transmitted successfully, but Amazon S3 couldn't process 
