@@ -1,0 +1,61 @@
+package org.rolson.emr.emrcycle1;
+
+
+import com.amazonaws.services.elasticmapreduce.model.*;
+
+
+class Cluster {
+	private String name;
+	private String masterInstance;
+	private String slaveInstance;
+	private String logUri;
+	
+	private String ec2KeyName;
+	private String serviceRole;
+	private String jobFlowRole;
+	private String subnetID;
+	
+	private String status; 
+	private String releaseLabel;
+	private RunJobFlowRequest request;
+	private StepConfig stepConfig;
+	
+	private Cluster() {
+		defaultVariables();
+	}
+	private void setUpRequest()
+	{
+		//set request for new cluster
+				this.request = new RunJobFlowRequest()
+				       .withName(this.name)
+				       .withReleaseLabel(this.releaseLabel)
+				       .withSteps(this.stepConfig)
+				       .withLogUri(this.logUri)
+				       .withServiceRole(this.serviceRole)
+				       .withJobFlowRole(this.jobFlowRole)
+				       .withInstances(new JobFlowInstancesConfig()
+				           .withEc2KeyName(this.ec2KeyName)
+				           .withInstanceCount(5)
+				           .withKeepJobFlowAliveWhenNoSteps(true)
+				           .withMasterInstanceType(this.masterInstance)
+				           .withSlaveInstanceType(this.slaveInstance)
+				           .withEc2SubnetId(this.subnetID));
+	}
+	private void defaultVariables()
+	{
+		this.masterInstance = "m4.large";
+		this.slaveInstance = "m4.large";
+		this.logUri = "s3://rolyhudsontestbucket1/climateData";
+		
+		
+		this.ec2KeyName = "monday";
+		this.serviceRole = "EMR_DefaultRole";
+		this.jobFlowRole = "EMR_EC2_DefaultRole";
+		this.subnetID = "subnet-da059bd5";
+		
+		this.status = "NEW"; 
+		this.releaseLabel = "emr-5.14.0";
+	}
+	
+}
+

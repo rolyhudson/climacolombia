@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="com.amazonaws.eclipse.lambda.launching.samLocal">
+<stringAttribute key="action" value="invoke"/>
+<stringAttribute key="debug-port" value="5858"/>
+<stringAttribute key="lambda-id" value="Lambda function not found..."/>
+<stringAttribute key="maven-goals" value="clean package"/>
+<stringAttribute key="profile" value="default"/>
+<stringAttribute key="project" value="EMRtests"/>
+<stringAttribute key="region" value="us-east-1"/>
+<stringAttribute key="sam" value="C:\Users\r.hudson\AppData\Roaming\npm\sam.exe"/>
+<stringAttribute key="timeout" value="300"/>
+</launchConfiguration>

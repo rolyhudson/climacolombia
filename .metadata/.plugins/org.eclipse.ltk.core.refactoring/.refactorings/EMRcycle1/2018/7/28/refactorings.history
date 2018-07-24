@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<session version="1.0">
+<refactoring comment="Move element &apos;WorkflowCoordinatorTest.java&apos; to &apos;EMRcycle1/src/test/java/org.rolson.emr.emrcycle1&apos;&#x0D;&#x0A;- Original project: &apos;EMRcycle1&apos;&#x0D;&#x0A;- Destination element: &apos;EMRcycle1/src/test/java/org.rolson.emr.emrcycle1&apos;&#x0D;&#x0A;- Original element: &apos;org.rolson.emr.emrcycle1.WorkflowCoordinatorTest.java&apos;&#x0D;&#x0A;- Update references to refactored element" description="Move compilation unit" destination="/src\/test\/java&lt;org.rolson.emr.emrcycle1" element1="/src\/main\/java&lt;org.rolson.emr.emrcycle1{WorkflowCoordinatorTest.java" files="0" flags="589830" folders="0" id="org.eclipse.jdt.ui.move" patterns="*" policy="org.eclipse.jdt.ui.moveResources" qualified="false" references="true" stamp="1531150912388" units="1" version="1.0"/>
+</session>
