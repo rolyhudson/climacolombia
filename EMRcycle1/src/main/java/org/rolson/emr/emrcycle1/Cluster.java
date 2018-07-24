@@ -119,10 +119,7 @@ public class Cluster {
 		Workflow wf;
 		switch(testtype)
 		{
-		case "Hadoop Map Reduce":
-			wf = new Workflow(testtype);
-			//use the default wf settings
-			break;
+		
 		case "K-means clustering":
 			wf = new Workflow(testtype);
 			wf.sparkClimateCluster();
@@ -131,22 +128,7 @@ public class Cluster {
 			wf = new Workflow(testtype);
 			//configure for linear classification
 			break;
-		case "Message log agregator":
-			wf = new Workflow(testtype);
-			//configure for ...
-			wf.messageLogAgregator();
-			//configure for linear classification
-			break;
-		case "Monthly records totals":
-			wf = new Workflow(testtype);
-			//configure for ...
-			wf.monthlyResultsConfig();
-			//configure for linear classification
-			break;
-		case "Spark word count":
-			wf = new Workflow(testtype);
-			wf.sparkWordCount();
-			break;
+		
 			default:
 				wf = new Workflow(testtype);
 				break;

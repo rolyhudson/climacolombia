@@ -39,6 +39,53 @@ public class Workflow {
 		this.setAwsID("undefined");
 		this.creationDate = new DateTime();
 	}
+	public Workflow(StepSummary step)
+	{
+		this.name = step.getName();
+		this.status = step.getStatus().getState();
+		switch(step.getActionOnFailure())
+		{
+			case "TERMINATE_CLUSTER":
+				this.actionOnFailure = ActionOnFailure.TERMINATE_CLUSTER;
+				break;
+			case "CANCEL_AND_WAIT":
+				this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
+				break;
+			case "CONTINUE":
+				this.actionOnFailure = ActionOnFailure.CONTINUE;
+				break;
+			case "TERMINATE_JOB_FLOW":
+				this.actionOnFailure = ActionOnFailure.TERMINATE_JOB_FLOW;
+				break;
+				
+		}
+		this.setAwsID(step.getId());
+		this.creationDate = new DateTime();
+		this.analysisJAR = step.getConfig().getJar();
+		this.mainClassInJAR = step.getConfig().getMainClass();
+		this.commandArgs = step.getConfig().getArgs();
+		if(this.commandArgs.size()==2)
+		{
+			//for previously defined hadoop map reduce jobs
+			this.outputFolder = this.commandArgs.get(1);
+			this.dataSource = this.commandArgs.get(0);
+			this.appType = new Application();
+			this.appType.setName("Hadoop Map Reduce");
+			setStepConfig();
+		}
+		else
+		{
+			//otherwise a spark job with more args
+			this.mainClassInJAR = this.commandArgs.get(4);
+			this.outputFolder = this.commandArgs.get(7);
+			this.dataSource = this.commandArgs.get(6);
+			this.sparkJAR = this.commandArgs.get(5);
+			this.appType = new Application();
+			this.appType.setName("Spark");
+			setSparkStepConfig();
+		}
+	}
+
 	public DateTime getCreationDate()
 	{
 		return this.creationDate;
@@ -96,49 +143,7 @@ public class Workflow {
 		this.appType.setName("Hadoop");
 		setStepConfig();
 	}
-	public void monthlyResultsConfig()
-	{
-		this.name = "Monthly records totals";
-		this.debugName = "Monthly records totals debug"; 
-		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV50.txt";
-		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/monthlyrecords.jar";
-		this.mainClassInJAR = "org.rolson.emr.groupStationByMonthYear.App";
-		this.commandArgs = Arrays.asList(dataSource,outputFolder);
-		this.appType.setName("Hadoop");
-		setStepConfig();
-	}
-	public void messageLogAgregator()
-	{
-		this.name = "Message log agregator";
-		this.debugName = "Agregator debug"; 
-		this.dataSource = "s3://rolyhudsontestbucket1/cookbookexamples/access_log_Jul95.txt";
-		this.outputFolder = "s3://rolyhudsontestbucket1/cookbookexamples/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "s3://rolyhudsontestbucket1/cookbookexamples/messageSize.jar";
-		this.mainClassInJAR = "org.rolson.emr.messageSize.App";
-		this.commandArgs = Arrays.asList(dataSource,outputFolder);
-		this.appType.setName("Hadoop");
-		setStepConfig();
-	}
-	public void sparkWordCount()
-	{
-		this.name = "Spark test";
-		this.debugName = "Spark test debug"; 
-		this.dataSource = "s3://rolyhudsontestbucket1/sparkTests/count.txt";
-		this.outputFolder = "s3://rolyhudsontestbucket1/sparkTests/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "command-runner.jar";//"s3://rolyhudsontestbucket1/sparkTests/SparkWordCount2.jar";
-		this.mainClassInJAR = "org.rolson.emr.sparkTest.SparkJob";
-		this.commandArgs = Arrays.asList("spark-submit",
-				"--deploy-mode",
-				"cluster",
-				"--class",
-				"org.rolson.emr.sparkTest.SparkJob",
-				"s3://rolyhudsontestbucket1/sparkTests/SparkWordCount2.jar",
-				dataSource,
-				outputFolder);
-		this.appType.setName("Spark");
-		setSparkStepConfig();
-	}
+	
 	public void sparkClimateCluster()
 	{
 		//this.name = "Spark climate clustering with kmeans";

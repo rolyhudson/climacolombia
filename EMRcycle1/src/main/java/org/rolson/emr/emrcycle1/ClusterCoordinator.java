@@ -27,7 +27,7 @@ import com.amazonaws.services.elasticmapreduce.model.ListStepsResult;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
 
 import com.amazonaws.services.elasticmapreduce.model.StepSummary;
-
+import com.amazonaws.services.elasticmapreduce.model.TerminateJobFlowsRequest;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -102,25 +102,26 @@ public class ClusterCoordinator {
 		for(Cluster c: clusters)
 		{
 				ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(c.getAwsID()));
-			    StepSummary step = steps.getSteps().get(0);
-			    String stepstatus = step.getStatus().getState();
-			    String id = step.getId();
-				Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
-				Workflow wflow;
-				if(wf.isPresent())
-				{
-					//when the cluster was started in or found running by the current session
-					wflow = wf.get();
-					wflow.setAwsID(step.getId());
-				}
-				else {
-					//if the app starts and clusters are found ruuning
-					wflow = new Workflow(step.getName());
-					wflow.setAwsID(step.getId());
-					allWorkflows.add(wflow);
-				}
-				wflow.setStatus(stepstatus);
-
+			    
+			    for(StepSummary step:steps.getSteps())
+			    {
+				    String stepstatus = step.getStatus().getState();
+				    String id = step.getId();
+					Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
+					Workflow wflow;
+					if(wf.isPresent())
+					{
+						//when the cluster was started in or found running by the current session
+						wflow = wf.get();
+					}
+					else {
+						//if the app starts and clusters are found ruuning
+						//create step with details from aws
+						wflow = new Workflow(step);
+						allWorkflows.add(wflow);
+					}
+					wflow.setStatus(stepstatus);
+			    }
 		}
 		monitorWorkflowData.setAll(allWorkflows);
 	}
@@ -165,9 +166,11 @@ public class ClusterCoordinator {
 	{
 		return emr;
 	}
-	public void stopCluster(String name)
+	public void stopCluster(Cluster c)
 	{
-		
+		TerminateJobFlowsRequest request =new TerminateJobFlowsRequest().withJobFlowIds(c.getAwsID());
+		emr.terminateJobFlows(request);
+		updateAll();
 	}
 	
 	public void runClusterByIndex(int index)

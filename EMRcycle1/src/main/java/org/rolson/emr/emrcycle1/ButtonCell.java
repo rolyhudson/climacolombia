@@ -2,6 +2,7 @@ package org.rolson.emr.emrcycle1;
 
 import java.util.Optional;
 
+
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;
@@ -29,23 +30,82 @@ class ButtonCell extends TableCell<Workflow, Boolean> {
                 {
                 	case "run":
                 		//check status 
-                		if(alertMessage(forAction.getName()))
+                		if(forAction.getStatus().equals("INITIALISED")
+                				||forAction.getStatus().equals("CANCELLED")
+                				||forAction.getStatus().equals("COMPLETED")
+                				||forAction.getStatus().equals("INTERUPTED")
+                				||forAction.getStatus().equals("FAILED"))
                 		{
-                			coord.runWorkflow(forAction);
+                			if(alertMessage(forAction.getName()))
+                			{
+                				//run or rerun step
+                				coord.runWorkflow(forAction);
+                			}
                 		}
                 		break;
                 	case "stop":
-                		alertMessage(forAction.getName());
-                		break;
+                		if(forAction.getStatus().equals("PENDING")
+                				||forAction.getStatus().equals("RUNNING"))
+                		{
+                			if(alertMessage(forAction.getName()))
+                			{
+                				//cancel step
+                				//coord.stopWorkflow(forAction);
+                			}
+                		}
+                		 break;
                 	case "map":
-                		alertMessage(forAction.getName());
+                		if(forAction.getStatus().equals("COMPLETED"))
+                		{
+                			if(alertMessage(forAction.getName()))
+        					{
+            					//run vis
+                				//coord.visualGeoWorkflow(forAction);
+        					}
+                		}
+                		
                 		break;
                 	case "stats":
-                		alertMessage(forAction.getName());
+                		if(forAction.getStatus().equals("COMPLETED"))
+                		{
+                			if(alertMessage(forAction.getName()))
+        					{
+            					//run stats
+                				//coord.visualStatsWorkflow(forAction);
+        					}
+                		}
+                		break;
+                	case "edit":
+                		if(forAction.getStatus().equals("INITIALISED")
+                				||forAction.getStatus().equals("CANCELLED")
+                				||forAction.getStatus().equals("COMPLETED")
+                				||forAction.getStatus().equals("INTERUPTED")
+                				||forAction.getStatus().equals("FAILED"))
+                		{
+                			if(alertMessage(forAction.getName()))
+        					{
+            					//edit
+                				//coord.editWorkflow(forAction);
+        					}
+                		}
+                		break;
+                	case "copy":
+                		if(forAction.getStatus().equals("INITIALISED")
+                				||forAction.getStatus().equals("CANCELLED")
+                				||forAction.getStatus().equals("COMPLETED")
+                				||forAction.getStatus().equals("INTERUPTED")
+                				||forAction.getStatus().equals("FAILED"))
+                		{
+                			if(alertMessage(forAction.getName()))
+        					{
+                				//edit
+                				//coord.copyWorkflow(forAction);
+        					}
+                		}
                 		break;
                 }
             }
-        });
+            });
     }
  
     //Display button if the row is not empty
