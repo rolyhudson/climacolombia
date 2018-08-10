@@ -2,6 +2,7 @@ package org.rolson.emr.emrcycle1;
 
 
 import java.io.File;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -51,7 +52,7 @@ public class GUILayout {
 	private DataManager datamanager = new DataManager();
 	private HashMap<String,Text> buttonLabelMap = new HashMap<String,Text>();
 	int width = 1400;
-	int height =700;
+	int height =1040;
 	private ClusterCoordinator coordinator;
 	private TableView<Cluster> resourcetable = new TableView<Cluster>();
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
@@ -116,8 +117,9 @@ public class GUILayout {
 	private List<String> tabSet()
 	{
 		List<String> buttonCmds = new ArrayList<String>();
-		buttonCmds.add("Predefined workflows");
+		
 		buttonCmds.add("Workflow builder");
+		buttonCmds.add("Predefined workflows");
 		buttonCmds.add("Resource monitor");
 		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
@@ -159,6 +161,9 @@ public class GUILayout {
 			case "Visualise":
 				addWebView(i,tabname,tabPane);
 			break;
+			case "Workflow builder":
+				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator);
+				break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);
 				break;

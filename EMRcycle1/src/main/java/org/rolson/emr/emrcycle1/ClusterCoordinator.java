@@ -259,6 +259,12 @@ public class ClusterCoordinator {
 		}
 		
 	}
+	public void updateWorkflowList()
+	{
+		
+		//update the observable
+		monitorWorkflowData.setAll(allWorkflows);
+	}
 	public void addWorkflow(Workflow wf)
 	{
 		this.allWorkflows.add(wf);

@@ -4,18 +4,10 @@
 	</section>
 	<section name="MavenProjectWizardArtifactPage">
 		<list key="groupId">
-			<item value="org.rolson.emr"/>
-			<item value="climateClusters"/>
-			<item value="org.rolson"/>
 		</list>
 		<list key="name">
 		</list>
 		<list key="artifactId">
-			<item value="climateClusters"/>
-			<item value="org.rolson.emr"/>
-			<item value="climaCluster"/>
-			<item value="SimpleApp"/>
-			<item value="Line_Count_Spark"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>
@@ -26,7 +18,6 @@
 			<item value="[name]"/>
 		</list>
 		<list key="version">
-			<item value="1"/>
 			<item value="0.0.1-SNAPSHOT"/>
 		</list>
 	</section>
@@ -53,6 +44,7 @@
 	</section>
 	<section name="MavenProjectWizardLocationPage">
 		<list key="location">
+			<item value="C:\Users\r.hudson\Documents\WORK\softEng\Diss\Design\scalaSOM\spark-som\pom.xml"/>
 			<item value="C:\Users\r.hudson\Documents\WORK\softEng\Diss\Design\cycle1\Line_Count_Spark"/>
 			<item value="C:\Users\r.hudson\Documents\WORK\softEng\Diss\Design\cycle1\sparkKmeans"/>
 			<item value="C:\Users\r.hudson\Documents\WORK\softEng\Diss\Design\cycle1\EMRcycle1\src\main\java\org\rolson\emr\emrcycle1\main.java"/>

@@ -1,13 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <qualifiedTypeNameHistroy>
-<fullyQualifiedTypeName name="javafx.collections.ObservableList"/>
-<fullyQualifiedTypeName name="javafx.collections.FXCollections"/>
-<fullyQualifiedTypeName name="javafx.collections.ListChangeListener"/>
-<fullyQualifiedTypeName name="java.awt.List"/>
-<fullyQualifiedTypeName name="java.util.stream.Collectors"/>
-<fullyQualifiedTypeName name="java.util.Arrays"/>
-<fullyQualifiedTypeName name="java.util.Calendar"/>
-<fullyQualifiedTypeName name="java.util.List"/>
 <fullyQualifiedTypeName name="com.amazonaws.services.elasticmapreduce.model.HadoopJarStepConfig"/>
 <fullyQualifiedTypeName name="com.amazonaws.services.elasticmapreduce.model.StepConfig"/>
 <fullyQualifiedTypeName name="com.amazonaws.services.elasticmapreduce.model.AddJobFlowStepsResult"/>
@@ -59,5 +51,13 @@
 <fullyQualifiedTypeName name="java.beans.EventHandler"/>
 <fullyQualifiedTypeName name="javafx.event.EventHandler"/>
 <fullyQualifiedTypeName name="javafx.event.ActionEvent"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.elasticmapreduce.model.TerminateJobFlowsRequest"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.ObjectListing"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.S3ObjectSummary"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.S3Object"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.S3ObjectInputStream"/>
+<fullyQualifiedTypeName name="com.amazonaws.services.s3.model.CopyObjectResult"/>
 <fullyQualifiedTypeName name="org.joda.time.DateTime"/>
+<fullyQualifiedTypeName name="javafx.scene.web.WebEngine"/>
+<fullyQualifiedTypeName name="javafx.scene.web.WebView"/>
 </qualifiedTypeNameHistroy>

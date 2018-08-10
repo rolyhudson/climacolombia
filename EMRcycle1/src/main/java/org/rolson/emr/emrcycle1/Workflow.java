@@ -25,6 +25,7 @@ public class Workflow {
 	private String awsID;
 	private StepConfig stepConfig;
 	private DateTime creationDate;
+	private AnalysisParameters analysisParameters;
 	private ActionOnFailure actionOnFailure;
 	
 	private List<String> commandArgs;
@@ -143,7 +144,7 @@ public class Workflow {
 		this.mainClassInJAR = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
 		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
 		this.commandArgs = Arrays.asList(dataSource,outputFolder);
-		this.appType.setName("Hadoop");
+		this.appType.setName("Spark");
 		setStepConfig();
 	}
 	

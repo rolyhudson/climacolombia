@@ -12,12 +12,74 @@
 	<atom:link href="https://www.genuitec.com/feed/" rel="self" type="application/rss+xml" />
 	<link>https://www.genuitec.com</link>
 	<description>The Cloud Control Company</description>
-	<lastBuildDate>Mon, 23 Jul 2018 14:45:09 +0000</lastBuildDate>
+	<lastBuildDate>Fri, 10 Aug 2018 15:21:27 +0000</lastBuildDate>
 	<language>en-US</language>
 	<sy:updatePeriod>hourly</sy:updatePeriod>
 	<sy:updateFrequency>1</sy:updateFrequency>
 	<generator>https://wordpress.org/?v=4.9.2</generator>
 	<item>
+		<title>MyEclipse 2018: Java 10, Java EE 8, Code Mining &#038; More!</title>
+		<link>https://www.genuitec.com/myeclipse-2018-java-10-java-ee-8-code-mining/</link>
+		<pubDate>Mon, 06 Aug 2018 22:12:56 +0000</pubDate>
+		<dc:creator><![CDATA[Brian Fernandes]]></dc:creator>
+				<category><![CDATA[Eclipse]]></category>
+		<category><![CDATA[Genuitec]]></category>
+		<category><![CDATA[MyEclipse]]></category>
+		<category><![CDATA[Programming Tips]]></category>
+		<category><![CDATA[Webclipse]]></category>
+		<category><![CDATA[codemix]]></category>
+		<category><![CDATA[eclipse extensions]]></category>
+		<category><![CDATA[eclipse plugins]]></category>
+		<category><![CDATA[myeclipse 2018]]></category>
+
+		<guid isPermaLink="false">https://www.genuitec.com/?p=594999</guid>
+		<description><![CDATA[<p>MyEclipse 2018 is finally here, and as you will see and experience, this release has been well worth the wait. We&#8217;ve got Java 10 support, Java EE 8 across our enterprise wizards, and core improvements from building on Eclipse Photon. New features include code mining for efficient source analysis, an enhanced startup experience, a new [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://www.genuitec.com/myeclipse-2018-java-10-java-ee-8-code-mining/">MyEclipse 2018: Java 10, Java EE 8, Code Mining &#038; More!</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
+]]></description>
+		</item>
+		<item>
+		<title>Vue Example: Creating a TODO App using Vue.js 2, Vuex and CodeMix</title>
+		<link>https://www.genuitec.com/vue-example-creating-todo-app/</link>
+		<pubDate>Wed, 01 Aug 2018 15:43:02 +0000</pubDate>
+		<dc:creator><![CDATA[Wanda Muriy]]></dc:creator>
+				<category><![CDATA[Eclipse]]></category>
+		<category><![CDATA[Genuitec]]></category>
+		<category><![CDATA[MyEclipse]]></category>
+		<category><![CDATA[Programming Tips]]></category>
+		<category><![CDATA[Webclipse]]></category>
+		<category><![CDATA[todo app]]></category>
+		<category><![CDATA[todo list app]]></category>
+		<category><![CDATA[vue]]></category>
+		<category><![CDATA[vue apps]]></category>
+		<category><![CDATA[vue.js 2]]></category>
+		<category><![CDATA[vuex]]></category>
+
+		<guid isPermaLink="false">https://www.genuitec.com/?p=594703</guid>
+		<description><![CDATA[<p>Looking for an efficient way to create web apps? Look no further—CodeMix is here to give you an entirely new experience. The following video shows you how to create a Vue example app, created in Eclipse powered up by CodeMix. CodeMix is an Eclipse plugin that unlocks a wide array of technologies from VS Code and [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://www.genuitec.com/vue-example-creating-todo-app/">Vue Example: Creating a TODO App using Vue.js 2, Vuex and CodeMix</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
+]]></description>
+		</item>
+		<item>
+		<title>A Day with Dani: Getting Started with Python and CodeMix</title>
+		<link>https://www.genuitec.com/a-day-with-dani-getting-started-with-python-and-codemix/</link>
+		<pubDate>Thu, 26 Jul 2018 15:33:33 +0000</pubDate>
+		<dc:creator><![CDATA[Dani Faris]]></dc:creator>
+				<category><![CDATA[Eclipse]]></category>
+		<category><![CDATA[Genuitec]]></category>
+		<category><![CDATA[MyEclipse]]></category>
+		<category><![CDATA[Programming Tips]]></category>
+		<category><![CDATA[Webclipse]]></category>
+		<category><![CDATA[Python]]></category>
+		<category><![CDATA[Python development]]></category>
+		<category><![CDATA[Python development in Eclipse]]></category>
+		<category><![CDATA[Python development with CodeMix]]></category>
+
+		<guid isPermaLink="false">https://www.genuitec.com/?p=594203</guid>
+		<description><![CDATA[<p>Like I mentioned in my last blog, CodeMix is a plugin I use that adds a ton of powerful tools and capabilities to my Eclipse environment. After working without it and seeing how much better my development experience is with it, I don’t think I’ll ever go back to the old Eclipse. Why? I’ve been [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://www.genuitec.com/a-day-with-dani-getting-started-with-python-and-codemix/">A Day with Dani: Getting Started with Python and CodeMix</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
+]]></description>
+		</item>
+		<item>
 		<title>A Day with Dani: Eclipse Plugin for Awesome Workspace Customization</title>
 		<link>https://www.genuitec.com/a-day-with-dani-eclipse-plugin-for-awesome-workspace-customization/</link>
 		<pubDate>Tue, 17 Jul 2018 21:04:46 +0000</pubDate>
@@ -241,66 +303,6 @@
 <p>The post <a rel="nofollow" href="https://www.genuitec.com/angular-observables-and-promises/">Angular Observables and Promises &#8211; How to Use Them</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
 ]]></description>
 		</item>
-		<item>
-		<title>Top Angular Courses &#8211; Our Ten Picks!</title>
-		<link>https://www.genuitec.com/top-angular-courses/</link>
-		<pubDate>Thu, 15 Feb 2018 18:21:33 +0000</pubDate>
-		<dc:creator><![CDATA[Wanda Muriy]]></dc:creator>
-				<category><![CDATA[Eclipse]]></category>
-		<category><![CDATA[Genuitec]]></category>
-		<category><![CDATA[MyEclipse]]></category>
-		<category><![CDATA[Programming Tips]]></category>
-		<category><![CDATA[Webclipse]]></category>
-		<category><![CDATA[Angular]]></category>
-		<category><![CDATA[angular 2]]></category>
-		<category><![CDATA[Angular 4]]></category>
-		<category><![CDATA[angular 5]]></category>
-		<category><![CDATA[angular courses]]></category>
-
-		<guid isPermaLink="false">https://www.genuitec.com/?p=550821</guid>
-		<description><![CDATA[<p>You just know that frontend development is your cup of tea, but where do you start your adventure? Or perhaps you already have some skills and are wondering how to continue. Today we would like to share our choice of the top Angular courses, going from general, all-inclusive ones to area-specific.Angular &#8211; the Whole ThingAngular [&#8230;]</p>
-<p>The post <a rel="nofollow" href="https://www.genuitec.com/top-angular-courses/">Top Angular Courses &#8211; Our Ten Picks!</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
-]]></description>
-		</item>
-		<item>
-		<title>2017 CI 11 &#8211; Sprucing up Your IDE</title>
-		<link>https://www.genuitec.com/2017-ci-11-sprucing-up-ide/</link>
-		<pubDate>Tue, 13 Feb 2018 15:57:32 +0000</pubDate>
-		<dc:creator><![CDATA[Wanda Muriy]]></dc:creator>
-				<category><![CDATA[Eclipse]]></category>
-		<category><![CDATA[Genuitec]]></category>
-		<category><![CDATA[Programming Tips]]></category>
-		<category><![CDATA[Webclipse]]></category>
-		<category><![CDATA[2017 CI 11 release]]></category>
-		<category><![CDATA[new release]]></category>
-		<category><![CDATA[software updates]]></category>
-
-		<guid isPermaLink="false">https://www.genuitec.com/?p=550554</guid>
-		<description><![CDATA[<p>2017 is over, but our commitment to improving our products continues, as we bring to you our 2017 CI 11 release. It comes with key fixes and improvements in the TypeScript space, as well as the new two-way theme sharing in DevStyle, among others.NOTE: This release does not include MyEclipse, which will be released shortly.Angular [&#8230;]</p>
-<p>The post <a rel="nofollow" href="https://www.genuitec.com/2017-ci-11-sprucing-up-ide/">2017 CI 11 &#8211; Sprucing up Your IDE</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
-]]></description>
-		</item>
-		<item>
-		<title>Angular 5 Authentication: Getting Started</title>
-		<link>https://www.genuitec.com/angular-5-authentication/</link>
-		<pubDate>Tue, 06 Feb 2018 15:05:21 +0000</pubDate>
-		<dc:creator><![CDATA[Bob at Genuitec]]></dc:creator>
-				<category><![CDATA[Genuitec]]></category>
-		<category><![CDATA[MyEclipse]]></category>
-		<category><![CDATA[Programming Tips]]></category>
-		<category><![CDATA[Webclipse]]></category>
-		<category><![CDATA[angular and firebase integration]]></category>
-		<category><![CDATA[authentication in Angular 5]]></category>
-		<category><![CDATA[firebase integration]]></category>
-		<category><![CDATA[firestore database]]></category>
-		<category><![CDATA[set up authentication]]></category>
-		<category><![CDATA[set up authentication in Angular 5]]></category>
-
-		<guid isPermaLink="false">https://www.genuitec.com/?p=547349</guid>
-		<description><![CDATA[<p>In this tutorial, we are going to build an Angular 5 authentication system using Google’s Cloud Firestore. Most of the applications we build require some kind of authentication, and the simplest and fastest way to get started with that is by using the Firestore &#8211; a flexible, scalable database for mobile, web and server development. [&#8230;]</p>
-<p>The post <a rel="nofollow" href="https://www.genuitec.com/angular-5-authentication/">Angular 5 Authentication: Getting Started</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
-]]></description>
-		</item>
 	</channel>
 </rss>
 
@@ -309,7 +311,7 @@ Performance optimized by W3 Total Cache. Learn more: https://www.w3-edge.com/pro
 
 Page Caching using disk: enhanced (SSL caching disabled) 
 Content Delivery Network via resources.cloud.genuitec.com
-Database Caching 147/156 queries in 1.412 seconds using disk
+Database Caching 73/156 queries in 1.426 seconds using disk
 
-Served from: www.genuitec.com @ 2018-07-23 11:53:03 by W3 Total Cache
+Served from: www.genuitec.com @ 2018-08-10 17:43:16 by W3 Total Cache
 -->

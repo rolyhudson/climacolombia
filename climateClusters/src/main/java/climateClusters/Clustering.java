@@ -29,7 +29,7 @@ public class Clustering {
                 .builder()
                 .appName("SparkJob")
                 .getOrCreate();
-		
+		//this is all incoming with args
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
@@ -120,14 +120,7 @@ public class Clustering {
 	{
 		return line.contains("latitude");
 	}
-	private static String generateUniqueOutputName(String prefix,DateTime timePoint)
-	{
-		
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy_MM_dd_HH_mm_ss");
-		String s = prefix+fmt.print(timePoint);
-				//timePoint.format(formatter);
-		return s;
-	}
+	
 	private static Vector getValues(String line,List<String> reqVariables)
 	{
 	      String[] sarray = line.split(",");

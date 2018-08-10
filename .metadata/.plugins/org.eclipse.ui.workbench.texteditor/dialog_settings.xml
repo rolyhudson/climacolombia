@@ -2,20 +2,20 @@
 <section name="Workbench">
 	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
 		<item value="false" key="isRegEx"/>
-		<item value="addCluster(" key="selection"/>
+		<item value="inSeasonRange" key="selection"/>
 		<item value="false" key="casesensitive"/>
 		<item value="false" key="incremental"/>
 		<item value="true" key="wrap"/>
 		<item value="false" key="wholeword"/>
 		<list key="findhistory">
+			<item value="inSeasonRange"/>
+			<item value="web"/>
+			<item value="termin"/>
+			<item value="stop"/>
+			<item value="appType"/>
+			<item value="stepConfig"/>
 			<item value="addCluster("/>
 			<item value="get"/>
-			<item value="run"/>
-			<item value="createclus//shcclusterusters "/>
-			<item value="setemr"/>
-			<item value="stoppublic ublic bllll"/>
-			<item value="setreq"/>
-			<item value="setupre"/>
 		</list>
 		<list key="replacehistory">
 			<item value="private"/>
