@@ -219,7 +219,7 @@ public class ClusterCoordinator {
 			updateAll();
 		}
 	}
-	private Workflow getWorkflow(DateTime timecreated)
+	public Workflow getWorkflow(DateTime timecreated)
 	{
 		Optional<Workflow> matches = allWorkflows.stream()
 				.filter(t -> t.getCreationDate() ==timecreated)

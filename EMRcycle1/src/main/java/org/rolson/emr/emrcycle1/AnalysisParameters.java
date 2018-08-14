@@ -30,7 +30,7 @@ public class AnalysisParameters {
 	}
 	private Dataset dataset;
 	private AnalysisMethod analysisMethod;;
-	private List<Variables> variables = new ArrayList<Variables>();
+	private List<Variables> variables; 
 	private LocalDate start;
 	private LocalDate end;
 	private int seasonStartMonth;
@@ -43,17 +43,114 @@ public class AnalysisParameters {
 	{
 		setDefaults();
 	}
-	private void setVariables(List<Variables> vars)
-	{
-		for(Variables v : vars)variables.add(v);
-		
-	}
+	
 	private void setDefaults()
 	{
 		dataset = Dataset.MONTHLY_GRID;
 		analysisMethod = AnalysisMethod.K_MEANS;
-		List<Variables> vars = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED);	
-		setVariables(vars);
+		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED);	
+		
+		this.start =LocalDate.of(2008, 1, 1);
+		this.end =LocalDate.now();
+		this.seasonStartMonth = 1;
+		this.seasonStartDay = 1;
+		this.seasonEndMonth =12;
+		this.seasonEndDay=31;
+		this.dayStartHour=1;
+		this.dayEndHour=24;
+	}
+	public void setDataSet(String data)
+	{
+		this.dataset = Dataset.valueOf(data);
+	}
+	public String getDataSet()
+	{
+		return this.dataset.toString();
+	}
+	public List<String> getVariablesAsString()
+	{
+		List<String> vstr = new ArrayList<String>();
+		for(Variables v : variables)
+		{
+			vstr.add(v.toString());
+		}
+		return vstr;
+	}
+	public void setAnalysisMethod(String aMethod)
+	{
+		this.analysisMethod = AnalysisMethod.valueOf(aMethod);
+	}
+	public void setOneVariable(int i,String aVariable)
+	{
+		variables.set(i, Variables.valueOf(aVariable));
+	}
+	public String getAnalysisMethod()
+	{
+		return this.analysisMethod.toString();
+	}
+	public void setStartDate(LocalDate dt)
+	{
+		this.start = dt;
+	}
+	public LocalDate getStartDate()
+	{
+		return this.start;
+	}
+	public void setEndDate(LocalDate dt)
+	{
+		this.end = dt;
+	}
+	public void setSeasonStartMonth(int i)
+	{
+		this.seasonStartMonth=i;
+	}
+	public int getSeasonStartMonth()
+	{
+		return this.seasonStartMonth;
+	}
+	public void setSeasonEndMonth(int i)
+	{
+		this.seasonEndMonth=i;
+	}
+	public int getSeasonEndMonth()
+	{
+		return this.seasonEndMonth;
+	}
+	public void setSeasonStartDay(int i)
+	{
+		this.seasonStartDay=i;
+	}
+	public int getSeasonStartDay()
+	{
+		return this.seasonStartDay;
+	}
+	public void setSeasonEndDay(int i)
+	{
+		this.seasonEndDay=i;
+	}
+	public int getSeasonEndDay()
+	{
+		return this.seasonEndDay;
+	}
+	public int getDayStartHour()
+	{
+		return this.dayStartHour;
+	}
+	public void setDayStartHour(int i)
+	{
+		this.dayStartHour = i;
+	}
+	public int getDayEndHour()
+	{
+		return this.dayEndHour;
+	}
+	public void setDayEndHour(int i)
+	{
+		this.dayEndHour = i;
+	}
+	public LocalDate getEndDate()
+	{
+		return this.end;
 	}
 	public static List<String> enumToStringDataset()
 	{

@@ -60,10 +60,13 @@
 	</section>
 	<section name="Maven2ProjectWizardArchifactPage">
 		<list key="package">
+			<item value="org.rolson.emr.maptest"/>
 		</list>
 		<list key="groupId">
+			<item value="org.rolson.emr"/>
 		</list>
 		<list key="artifactId">
+			<item value="maptest"/>
 		</list>
 		<list key="projectNameTemplate">
 			<item value="[artifactId]"/>

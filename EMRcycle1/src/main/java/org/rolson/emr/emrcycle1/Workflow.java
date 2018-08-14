@@ -39,9 +39,11 @@ public class Workflow {
 		this.status = "INITIALISED";
 		this.setAwsID("undefined");
 		this.creationDate = new DateTime();
+		this.analysisParameters = new AnalysisParameters();
 	}
 	public Workflow(StepSummary step)
 	{
+		//workflow from stepsummary
 		this.name = step.getName();
 		this.status = step.getStatus().getState();
 		switch(step.getActionOnFailure())
@@ -85,6 +87,10 @@ public class Workflow {
 			this.appType.setName("Spark");
 			setSparkStepConfig();
 		}
+	}
+	public AnalysisParameters getAnalysisParameters()
+	{
+		return this.analysisParameters;
 	}
 	public String getOutputFolder()
 	{

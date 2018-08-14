@@ -12,12 +12,32 @@
 	<atom:link href="https://www.genuitec.com/feed/" rel="self" type="application/rss+xml" />
 	<link>https://www.genuitec.com</link>
 	<description>The Cloud Control Company</description>
-	<lastBuildDate>Fri, 10 Aug 2018 15:21:27 +0000</lastBuildDate>
+	<lastBuildDate>Tue, 14 Aug 2018 19:06:49 +0000</lastBuildDate>
 	<language>en-US</language>
 	<sy:updatePeriod>hourly</sy:updatePeriod>
 	<sy:updateFrequency>1</sy:updateFrequency>
 	<generator>https://wordpress.org/?v=4.9.2</generator>
 	<item>
+		<title>A Day with Dani: Python Support at Its Best</title>
+		<link>https://www.genuitec.com/python-support-best/</link>
+		<pubDate>Tue, 14 Aug 2018 15:58:42 +0000</pubDate>
+		<dc:creator><![CDATA[Dani Faris]]></dc:creator>
+				<category><![CDATA[Eclipse]]></category>
+		<category><![CDATA[Genuitec]]></category>
+		<category><![CDATA[MyEclipse]]></category>
+		<category><![CDATA[Programming Tips]]></category>
+		<category><![CDATA[Webclipse]]></category>
+		<category><![CDATA[Python development]]></category>
+		<category><![CDATA[Python development in Eclipse]]></category>
+		<category><![CDATA[Python development with CodeMix]]></category>
+		<category><![CDATA[support for Python development]]></category>
+
+		<guid isPermaLink="false">https://www.genuitec.com/?p=594485</guid>
+		<description><![CDATA[<p>Python support provided by CodeMix has proven to make a world of difference to me. In this blog, I will highlight some of my favorite aspects.Intelligent Code Completion and MoreCodeMix IntelliSense tools are amazing, hands down. As shown below you can see an outside Python library import in another Python program I created that analyzes [&#8230;]</p>
+<p>The post <a rel="nofollow" href="https://www.genuitec.com/python-support-best/">A Day with Dani: Python Support at Its Best</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
+]]></description>
+		</item>
+		<item>
 		<title>MyEclipse 2018: Java 10, Java EE 8, Code Mining &#038; More!</title>
 		<link>https://www.genuitec.com/myeclipse-2018-java-10-java-ee-8-code-mining/</link>
 		<pubDate>Mon, 06 Aug 2018 22:12:56 +0000</pubDate>
@@ -283,26 +303,6 @@
 <p>The post <a rel="nofollow" href="https://www.genuitec.com/codemix-a-genesis/">CodeMix &#8211; A Genesis</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
 ]]></description>
 		</item>
-		<item>
-		<title>Angular Observables and Promises &#8211; How to Use Them</title>
-		<link>https://www.genuitec.com/angular-observables-and-promises/</link>
-		<pubDate>Wed, 21 Feb 2018 14:43:29 +0000</pubDate>
-		<dc:creator><![CDATA[dunebook7]]></dc:creator>
-				<category><![CDATA[Eclipse]]></category>
-		<category><![CDATA[Genuitec]]></category>
-		<category><![CDATA[MyEclipse]]></category>
-		<category><![CDATA[Programming Tips]]></category>
-		<category><![CDATA[Webclipse]]></category>
-		<category><![CDATA[observables]]></category>
-		<category><![CDATA[promises]]></category>
-		<category><![CDATA[RxJS]]></category>
-		<category><![CDATA[using promises and observables]]></category>
-
-		<guid isPermaLink="false">https://www.genuitec.com/?p=556961</guid>
-		<description><![CDATA[<p>Angular, as we all know, is a JavaScript framework that makes it easy to build web applications. RxJS is really about bringing the principles of functional programming to JavaScript.Functional Programming in JavaScript?It all started with the rise of asynchronicity or asynchronous JavaScript,where we have data that is flowing through our application coming from different sources, [&#8230;]</p>
-<p>The post <a rel="nofollow" href="https://www.genuitec.com/angular-observables-and-promises/">Angular Observables and Promises &#8211; How to Use Them</a> appeared first on <a rel="nofollow" href="https://www.genuitec.com">Genuitec</a>.</p>
-]]></description>
-		</item>
 	</channel>
 </rss>
 
@@ -311,7 +311,7 @@ Performance optimized by W3 Total Cache. Learn more: https://www.w3-edge.com/pro
 
 Page Caching using disk: enhanced (SSL caching disabled) 
 Content Delivery Network via resources.cloud.genuitec.com
-Database Caching 73/156 queries in 1.426 seconds using disk
+Database Caching 109/156 queries in 1.400 seconds using disk
 
-Served from: www.genuitec.com @ 2018-08-10 17:43:16 by W3 Total Cache
+Served from: www.genuitec.com @ 2018-08-14 14:58:42 by W3 Total Cache
 -->
