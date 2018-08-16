@@ -1,6 +1,8 @@
 package org.rolson.emr.emrcycle1;
 
+import java.io.IOException;
 import java.util.ArrayList;
+
 import java.util.Arrays;
 import java.util.List;
 
@@ -8,9 +10,15 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.core.JsonParseException;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.amazonaws.services.elasticmapreduce.model.*;
 
-import javafx.scene.control.Button;
+
 
 public class Workflow {
 	private String name;
@@ -40,6 +48,7 @@ public class Workflow {
 		this.setAwsID("undefined");
 		this.creationDate = new DateTime();
 		this.analysisParameters = new AnalysisParameters();
+		
 	}
 	public Workflow(StepSummary step)
 	{
@@ -88,6 +97,40 @@ public class Workflow {
 			setSparkStepConfig();
 		}
 	}
+	public void setWorkflowFromJSON(String jsontext)
+	{
+		
+		try {
+			ObjectMapper mapper = new ObjectMapper();
+			SimpleModule module = new SimpleModule();
+			module.addDeserializer(Workflow.class, new WorkflowDeserializer());
+			mapper.registerModule(module);
+			 
+			Workflow readValue = mapper.readValue(jsontext, Workflow.class);
+		} catch (JsonParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (JsonMappingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+	}
+	public String seraliseWorkflow()
+	{
+		String serialized = "";
+		try {
+			
+			serialized = new ObjectMapper().writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		//System.out.println(serialized);
+		return serialized;
+	}
 	public AnalysisParameters getAnalysisParameters()
 	{
 		return this.analysisParameters;
@@ -108,13 +151,13 @@ public class Workflow {
 	{
 		return awsID;
 	}
-	public void setAwsID(String id)
-	{
-		awsID =id;
-	}
 	public String getName()
 	{
 		return name;
+	}
+	public void setAwsID(String id)
+	{
+		awsID =id;
 	}
 	public void setName(String n)
 	{
@@ -123,6 +166,58 @@ public class Workflow {
 	public void setStatus(String s)
 	{
 		status = s;
+	}
+	public void setApplication(Application app)
+	{
+		this.appType = app;
+	}
+	public void setAppTypeName(String apptype)
+	{
+		this.appType.setName(apptype);
+	}
+	public void setDebugName(String n)
+	{
+		this.debugName = n;
+	}
+	public void setDataSource(String source)
+	{
+		this.dataSource = source;
+	}
+	public void setOutputFolder(String folder)
+	{
+	this.outputFolder = folder;
+	}
+	public void setAnalysisJar (String jar)
+	{
+	this.analysisJAR = jar;
+	}
+	public void setSaprkJar(String jar)
+	{
+		this.sparkJAR = jar;
+	}
+	public void setMainClassInJar(String mainclass)
+	{
+		this.mainClassInJAR = mainclass;
+	}
+	public void setStepCongfig(StepConfig config)
+	{
+		this.stepConfig = config;
+	}
+	public void setCreationDate(DateTime date)
+	{
+		this.creationDate =date;
+	}
+	public void setAnalysisParameters(AnalysisParameters ap)
+	{
+		this.analysisParameters =ap;
+	}
+	public void setActionOnFailure(String action)
+	{
+		this.actionOnFailure = ActionOnFailure.valueOf(action);
+	}
+	public void setCommandArgs(List<String> args)
+	{
+		this.commandArgs =args;
 	}
 	public String getStatus()
 	{
@@ -139,6 +234,7 @@ public class Workflow {
 	public List<String> getCommandArgs(){
 		return commandArgs;
 	}
+	
 	private void defaultVariables()
 	{
 		//setup for basic MapReduce job

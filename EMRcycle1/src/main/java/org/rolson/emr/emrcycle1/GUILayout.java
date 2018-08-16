@@ -105,6 +105,7 @@ public class GUILayout {
 		case "Data manager":
 			buttonCmds.add("Upload dataset");
 			buttonCmds.add("Upload JAR file");
+			buttonCmds.add("Upload text");
 			break;
 		
 		case "Predefined workflows":
@@ -420,7 +421,19 @@ public class GUILayout {
 				getFileForUpload(processexts, cmd);
 			}
 		break;
-		
+		case "Upload text": if(alertMessage(cmd))
+		{
+			Workflow wfjson = new Workflow("serialise test");
+			if(this.datamanager.uploadTextToFile("jsontest/test1.txt", wfjson.seraliseWorkflow()))
+			{
+				System.out.println("Testworkflow uploaded with success");
+			}
+			else
+			{
+				System.out.println("Testworkflow upload failed");
+			}
+		}
+	break;
 		}
 	}
 	public void getFileForUpload(List<String> extensions, String cmd)

@@ -1,12 +1,15 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectResult;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
 import com.amazonaws.services.s3.model.S3ObjectSummary;
@@ -20,6 +23,10 @@ public class DataManager {
 	private TransferManager xfm;
 	private String bucketName = "rolyhudsontestbucket1";
 	private String keyName = "climateData";
+	public DataManager()
+	{
+		setupClient();
+	}
 	public void setupClient(){
 		s3client = AmazonS3ClientBuilder.standard()
                 .withRegion("us-east-1")
@@ -29,12 +36,28 @@ public class DataManager {
 		DefaultAWSCredentialsProviderChain credentialProviderChain = new DefaultAWSCredentialsProviderChain();
 		xfm =  new TransferManager(credentialProviderChain.getCredentials());
 	}
-	public void listBucketContents(String container)
+	public List<String> listBucketContents()
 	{
+		List<String> keys = new ArrayList<String>();
 		ObjectListing objectListing = s3client.listObjects(bucketName);
 		for(S3ObjectSummary os : objectListing.getObjectSummaries()) {
-		    System.out.print((os.getKey()));
+		    //System.out.print((os.getKey()));
+			keys.add(os.getKey());
 		}
+		return keys;
+	}
+	public String getString(String key) throws AmazonServiceException
+	{
+		String contents = "";
+		try{
+			contents = s3client.getObjectAsString(bucketName, key);
+		}
+		catch(SdkClientException e) {
+	        // Amazon S3 couldn't be contacted for a response, or the client
+	        // couldn't parse the response from Amazon S3.
+	        e.printStackTrace();
+	    }
+		return contents;
 	}
 	public boolean accessObject(String bucket, String key)
 	{
@@ -51,6 +74,7 @@ public class DataManager {
 		//S3ObjectInputStream inputStream = s3object.getObjectContent();
 		return exists;
 	}
+	
 	public boolean copyMove(String originBucket,String destinationBucket,String originKey, String destinationKey) throws AmazonServiceException
 	{
 		boolean result = false;
@@ -70,10 +94,27 @@ public class DataManager {
 	    }
 		return result;
 	}
+	public boolean uploadTextToFile(String keypath,String text) throws AmazonServiceException
+	{
+		boolean result = false;
+		this.keyName=keypath;
+		
+		setupXFManger();
+		try {
+			PutObjectResult putResult = this.s3client.putObject(this.bucketName, keypath, text);
+			result = true;
+		}
+		catch(SdkClientException e) {
+	        // Amazon S3 couldn't be contacted for a response, or the client
+	        // couldn't parse the response from Amazon S3.
+	        e.printStackTrace();
+	    }
+		return result;
+	}
 	public boolean upload(File f,String keypath)
 	{
 		this.keyName=keypath;
-		setupClient();
+		
 		setupXFManger();
 		//see https://docs.aws.amazon.com/sdk-for-java/v1/developer-guide/examples-s3-transfermanager.html
 		boolean result = false;

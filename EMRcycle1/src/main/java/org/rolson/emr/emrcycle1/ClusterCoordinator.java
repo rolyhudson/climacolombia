@@ -39,6 +39,7 @@ public class ClusterCoordinator {
 	public ObservableList<Workflow> monitorWorkflowData = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
 	private DateTime monitorFrom = DateTime.now().minusDays(2);
+	private DataManager dataManager = new DataManager();
 	public ClusterCoordinator()
 	{
 		this.allWorkflows = new ArrayList<Workflow>();
@@ -47,6 +48,8 @@ public class ClusterCoordinator {
 	}
 	public void updateAll()
 	{
+		//get stored workflows from text files 
+		updateStoredWorkflows();
 		//updates cannot run on frequent cycle geerates a throttling error
 		//get the clusters
 		updateResourceStatus();
@@ -124,6 +127,23 @@ public class ClusterCoordinator {
 			    }
 		}
 		monitorWorkflowData.setAll(allWorkflows);
+	}
+	public void updateStoredWorkflows()
+	{
+		List<String> keys = this.dataManager.listBucketContents();
+		for(String k : keys)
+		{
+			if(k.contains("jsontest"))
+			{
+				String jsonstring = this.dataManager.getString(k);
+				if(jsonstring!="")
+				{
+					Workflow wf = new Workflow("new");
+					wf.setWorkflowFromJSON(jsonstring);
+					allWorkflows.add(wf);
+				}
+			}
+		}
 	}
 	public void updateResourceStatus()
 	{
