@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<launchConfiguration type="org.eclipse.jdt.launching.localJavaApplication">
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_PATHS">
+<listEntry value="/sparkKmeans/src/main/java/org/rolson/emr/sparkKmeans/App.java"/>
+</listAttribute>
+<listAttribute key="org.eclipse.debug.core.MAPPED_RESOURCE_TYPES">
+<listEntry value="1"/>
+</listAttribute>
+<stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="org.rolson.emr.sparkKmeans.App"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="&quot;C:\\Users\\r.hudson\\Documents\\WORK\\softEng\\Diss\\Design\\cycle1\\sparkKmeans\\kmeanstest.txt&quot;&#13;&#10;C:\Spark\data\results.txt"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="sparkKmeans"/>
+</launchConfiguration>

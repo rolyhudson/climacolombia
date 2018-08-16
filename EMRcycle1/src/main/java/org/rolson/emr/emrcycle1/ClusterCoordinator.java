@@ -27,7 +27,7 @@ import com.amazonaws.services.elasticmapreduce.model.ListStepsResult;
 import com.amazonaws.services.elasticmapreduce.model.StepConfig;
 
 import com.amazonaws.services.elasticmapreduce.model.StepSummary;
-
+import com.amazonaws.services.elasticmapreduce.model.TerminateJobFlowsRequest;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -39,6 +39,7 @@ public class ClusterCoordinator {
 	public ObservableList<Workflow> monitorWorkflowData = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
 	private DateTime monitorFrom = DateTime.now().minusDays(2);
+	private DataManager dataManager = new DataManager();
 	public ClusterCoordinator()
 	{
 		this.allWorkflows = new ArrayList<Workflow>();
@@ -47,6 +48,8 @@ public class ClusterCoordinator {
 	}
 	public void updateAll()
 	{
+		//get stored workflows from text files 
+		updateStoredWorkflows();
 		//updates cannot run on frequent cycle geerates a throttling error
 		//get the clusters
 		updateResourceStatus();
@@ -102,27 +105,45 @@ public class ClusterCoordinator {
 		for(Cluster c: clusters)
 		{
 				ListStepsResult steps = emr.listSteps(new ListStepsRequest().withClusterId(c.getAwsID()));
-			    StepSummary step = steps.getSteps().get(0);
-			    String stepstatus = step.getStatus().getState();
-			    String id = step.getId();
-				Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
-				Workflow wflow;
-				if(wf.isPresent())
-				{
-					//when the cluster was started in or found running by the current session
-					wflow = wf.get();
-					wflow.setAwsID(step.getId());
-				}
-				else {
-					//if the app starts and clusters are found ruuning
-					wflow = new Workflow(step.getName());
-					wflow.setAwsID(step.getId());
-					allWorkflows.add(wflow);
-				}
-				wflow.setStatus(stepstatus);
-
+			    
+			    for(StepSummary step:steps.getSteps())
+			    {
+				    String stepstatus = step.getStatus().getState();
+				    String id = step.getId();
+					Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
+					Workflow wflow;
+					if(wf.isPresent())
+					{
+						//when the cluster was started in or found running by the current session
+						wflow = wf.get();
+					}
+					else {
+						//if the app starts and clusters are found ruuning
+						//create step with details from aws
+						wflow = new Workflow(step);
+						allWorkflows.add(wflow);
+					}
+					wflow.setStatus(stepstatus);
+			    }
 		}
 		monitorWorkflowData.setAll(allWorkflows);
+	}
+	public void updateStoredWorkflows()
+	{
+		List<String> keys = this.dataManager.listBucketContents();
+		for(String k : keys)
+		{
+			if(k.contains("jsontest"))
+			{
+				String jsonstring = this.dataManager.getString(k);
+				if(jsonstring!="")
+				{
+					Workflow wf = new Workflow("new");
+					wf.setWorkflowFromJSON(jsonstring);
+					allWorkflows.add(wf);
+				}
+			}
+		}
 	}
 	public void updateResourceStatus()
 	{
@@ -165,11 +186,23 @@ public class ClusterCoordinator {
 	{
 		return emr;
 	}
-	public void stopCluster(String name)
+	public void stopCluster(Cluster c)
 	{
-		
+		TerminateJobFlowsRequest request =new TerminateJobFlowsRequest().withJobFlowIds(c.getAwsID());
+		emr.terminateJobFlows(request);
+		updateAll();
 	}
-	
+	public void stopAllClusters()
+	{
+		TerminateJobFlowsRequest request =new TerminateJobFlowsRequest();
+		for(Cluster c:clusters)
+		{
+		
+		request.withJobFlowIds(c.getAwsID());
+		}
+		emr.terminateJobFlows(request);
+		updateAll();
+	}
 	public void runClusterByIndex(int index)
 	{
 		Cluster clus = clusters.get(index);
@@ -206,7 +239,7 @@ public class ClusterCoordinator {
 			updateAll();
 		}
 	}
-	private Workflow getWorkflow(DateTime timecreated)
+	public Workflow getWorkflow(DateTime timecreated)
 	{
 		Optional<Workflow> matches = allWorkflows.stream()
 				.filter(t -> t.getCreationDate() ==timecreated)
@@ -245,6 +278,12 @@ public class ClusterCoordinator {
 			//this.allWorkflows.add(w);
 		}
 		
+	}
+	public void updateWorkflowList()
+	{
+		
+		//update the observable
+		monitorWorkflowData.setAll(allWorkflows);
 	}
 	public void addWorkflow(Workflow wf)
 	{

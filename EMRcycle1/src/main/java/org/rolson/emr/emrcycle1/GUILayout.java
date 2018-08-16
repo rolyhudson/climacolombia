@@ -2,6 +2,7 @@ package org.rolson.emr.emrcycle1;
 
 
 import java.io.File;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -39,23 +40,23 @@ import javafx.scene.layout.StackPane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import javafx.scene.text.Text;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import javafx.util.Callback;
 
 public class GUILayout {
 	
-	ClimaBucket s3b = new ClimaBucket();
 	ClusterTests clustest = new ClusterTests();
 	private DataManager datamanager = new DataManager();
 	private HashMap<String,Text> buttonLabelMap = new HashMap<String,Text>();
-	int width = 1000;
-	int height =700;
+	int width = 1400;
+	int height =1040;
 	private ClusterCoordinator coordinator;
 	private TableView<Cluster> resourcetable = new TableView<Cluster>();
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	
-	private List<Label> statuslabels = new ArrayList();
 	Label statuslabel = new Label();
 	Stage stage;
 	public GUILayout(ClusterCoordinator wfc,Stage stg)
@@ -104,27 +105,12 @@ public class GUILayout {
 		case "Data manager":
 			buttonCmds.add("Upload dataset");
 			buttonCmds.add("Upload JAR file");
+			buttonCmds.add("Upload text");
 			break;
 		
 		case "Predefined workflows":
-			buttonCmds.add("Hadoop Map Reduce");
 			buttonCmds.add("K-means clustering");
 			buttonCmds.add("Linear Regression");
-			buttonCmds.add("Message log agregator");
-			buttonCmds.add("Monthly records totals");
-			buttonCmds.add("Spark word count");
-			break;
-		case "AWS tests":
-			buttonCmds.add("Start Cluster");
-			buttonCmds.add("Stop Cluster");
-			buttonCmds.add("Start Spark Cluster");
-			buttonCmds.add("Create Bucket");
-			buttonCmds.add("Delete Bucket");
-			buttonCmds.add("List all Buckets");
-			buttonCmds.add("Cluster Status");
-			buttonCmds.add("Terminate all clusters");
-			buttonCmds.add("Count NOAA Stations");
-			buttonCmds.add("Put a file in bucket");
 			break;
 		}
 		return buttonCmds;
@@ -132,16 +118,26 @@ public class GUILayout {
 	private List<String> tabSet()
 	{
 		List<String> buttonCmds = new ArrayList<String>();
+		
+		buttonCmds.add("Workflow builder");
 		buttonCmds.add("Predefined workflows");
 		buttonCmds.add("Resource monitor");
 		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
 		buttonCmds.add("Data manager");
-		buttonCmds.add("AWS tests");
 		buttonCmds.add("Settings");
 		return buttonCmds;
 	}
-	
+	private void addWebView(int index,String name,TabPane tabpane)
+	{
+		WebView browser = new WebView();
+		WebEngine webEngine = browser.getEngine();
+		webEngine.load("http://lacunae.io/geovis2018_07_24_14_51_28/");
+		Tab tab = new Tab();
+		tab.setText(name);
+		tab.setContent(browser);
+		tabpane.getTabs().add(index, tab);
+	}
 	private TabPane addTabs()
 	{
 		TabPane tabPane = new TabPane();
@@ -157,11 +153,17 @@ public class GUILayout {
 				addTabWithTableView(i,tabname,tabPane, this.resourcetable,cols);
 				break;
 			case "Workflow monitor":
-				cols = Arrays.asList("name", "status" , "awsID","appType");
+				cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType");
 				addTabWithTableView(i,tabname,tabPane, this.workflowtable,cols);
 				break;
 			case "Settings":
 				addSettingsTab(i,tabname,tabPane );
+				break;
+			case "Visualise":
+				addWebView(i,tabname,tabPane);
+			break;
+			case "Workflow builder":
+				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator);
 				break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);
@@ -215,9 +217,9 @@ public class GUILayout {
 		statuslabel.setText(coordinator.EMRStatus());
 	}
 	@SuppressWarnings("unchecked")
-	private TableColumn addButtonsColumn(TableView tblView,String buttonName)
+	private TableColumn addWorkflowActionColumn(TableView tblView,String buttonName,String colName)
 	{
-		TableColumn c3 = new TableColumn<>("Action");
+		TableColumn c3 = new TableColumn<>(colName);
         c3.setSortable(false);
         c3.setCellValueFactory(
                 new Callback<TableColumn.CellDataFeatures<Workflow, Boolean>,
@@ -234,7 +236,33 @@ public class GUILayout {
      
                     @Override
                     public TableCell<Workflow, Boolean> call(TableColumn<Workflow, Boolean> p) {
-                        return new ButtonCell(tblView,buttonName,coordinator);
+                        return new WorkflowActionCell(tblView,buttonName,coordinator);
+                    }
+                });
+        
+        return c3;
+	}
+	@SuppressWarnings("unchecked")
+	private TableColumn addClusterActionColumn(TableView tblView,String buttonName,String colName)
+	{
+		TableColumn c3 = new TableColumn<>(colName);
+        c3.setSortable(false);
+        c3.setCellValueFactory(
+                new Callback<TableColumn.CellDataFeatures<Cluster, Boolean>,
+                        ObservableValue<Boolean>>() {
+     
+                    @Override
+                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Cluster, Boolean> p) {
+                        return new SimpleBooleanProperty(p.getValue() != null);
+                    }
+                });
+     
+        c3.setCellFactory(
+                new Callback<TableColumn<Cluster, Boolean>, TableCell<Cluster, Boolean>>() {
+     
+                    @Override
+                    public TableCell<Cluster, Boolean> call(TableColumn<Cluster, Boolean> p) {
+                        return new ClusterActionCell(tblView,buttonName,coordinator);
                     }
                 });
         
@@ -242,11 +270,27 @@ public class GUILayout {
 	}
 	private void addTabWithTableView(int index,String name,TabPane tabpane,TableView table,List<String> columns)
 	{
-		if(name.contains("Resource"))table.setPlaceholder(new Label(name + " could not find any active clusters"));
-		else table.setPlaceholder(new Label(name + " could not find any active workflows"));
+		
+        //placeholder for no contents
+		if(name.contains("Resource"))table.setPlaceholder(new Label("no active clusters found in date range"));
+
+		else table.setPlaceholder(new Label("no active workflows found in date range")); 
+		//title
 		final Label label = new Label(name);
         label.setFont(new Font("Arial", 20));
+        final HBox hbox = new HBox();
+        hbox.setSpacing(5);
+        hbox.setAlignment(Pos.BOTTOM_LEFT);
         
+        if(name.contains("Resource")) {
+        Button terminateBtn = new Button("Terminate all clusters");
+        terminateBtn.setOnAction(this::handler);
+        hbox.getChildren().addAll(label,terminateBtn);
+        }
+        else
+        {
+        	hbox.getChildren().addAll(label);
+        }
         table.setEditable(true);
  
         List<TableColumn> tabColumns = new ArrayList<TableColumn>();
@@ -255,16 +299,24 @@ public class GUILayout {
         	tabColumns.add(addColumn(col,150,col));
         }
         if(name.contains("Workflow")) {
-        	TableColumn runbuttons = addButtonsColumn(table,"run");
-        	TableColumn stopbuttons = addButtonsColumn(table,"stop");
-        	TableColumn mapbuttons = addButtonsColumn(table,"map");
-        	TableColumn statsbuttons = addButtonsColumn(table,"stats");
+        	TableColumn runbuttons = addWorkflowActionColumn(table,"run","Go");
+        	TableColumn stopbuttons = addWorkflowActionColumn(table,"stop","Terminate");
+        	TableColumn mapbuttons = addWorkflowActionColumn(table,"map","Visualise");
+        	TableColumn statsbuttons = addWorkflowActionColumn(table,"stats","Stats");
+        	TableColumn editbuttons = addWorkflowActionColumn(table,"copy","Copy");
+        	TableColumn copybuttons = addWorkflowActionColumn(table,"edit","Edit");
         			tabColumns.add(runbuttons);
         			tabColumns.add(stopbuttons);
         			tabColumns.add(mapbuttons);
         			tabColumns.add(statsbuttons);
+        			tabColumns.add(copybuttons);
+        			tabColumns.add(editbuttons);
         }
-        
+        else
+        {
+        	TableColumn stopbuttons = addClusterActionColumn(table,"stop","Terminate");
+        	tabColumns.add(stopbuttons);
+        }
         
         if(name.contains("Resource")) table.setItems(coordinator.monitorResourceData);
         else table.setItems(coordinator.monitorWorkflowData);
@@ -274,12 +326,11 @@ public class GUILayout {
         vbox.setSpacing(5);
         vbox.setPadding(new Insets(10, 0, 0, 10));
 
-        vbox.getChildren().addAll(label, table);
+        vbox.getChildren().addAll(hbox, table);
         Tab tab = new Tab();
         tab.setText(name);
         tab.setContent(vbox);
         tabpane.getTabs().add(index, tab);
-        //((Group) scene.getRoot()).getChildren().addAll(vbox);
 	}
 	
 	private void addButtonLabel(Tab tab,List<String> buttons)
@@ -337,58 +388,13 @@ public class GUILayout {
 	private void handler(ActionEvent event) {
 		String cmd = ((Button)event.getSource()).getText();
 		switch(cmd) {
+		case "Terminate all clusters":
+			if(alertMessage(cmd)) coordinator.stopAllClusters();
+			
+			break;
 		case "Update status":
 			coordinator.updateAll();
-			updateStatusLabel();
 			break;
-		case "Create Bucket": if(alertMessage("Creating Bucket")) s3b.createBucket("climacolombiabucket");
-			break;
-		case "Delete Bucket":if(alertMessage("Deleting Bucket")) s3b.deleteBucket("climacolombiabucket");
-			break;
-		case "Start Cluster": if(alertMessage("Starting Cluster")) clustest.launch();
-			break;
-		case "Stop Cluster": if (alertMessage("Stopping Cluster"))
-			break;
-		case "List all Buckets": if(alertMessage("Listing buckets"))s3b.listBuckets();
-			break;
-		case "Cluster Status": if(alertMessage("Status of clusters"))clustest.clusterStatusReport();
-			break;
-		case "Terminate all clusters": if(alertMessage("Status of clusters"))clustest.terminateAllClusters();
-			break;
-		case "Start Spark Cluster": if(alertMessage("Starting a spark cluster"))clustest.launchSparkCluster();
-			break;
-		case "Count NOAA Stations": if(alertMessage("Starting a spark cluster"))clustest.launchNOAACounter();
-			break;
-		case "Put a file in bucket": if(alertMessage("Adding file to bucket"))s3b.uploadMultiPart();
-			break;
-		case "Hadoop Map Reduce": if(alertMessage(cmd))
-			{
-				Cluster clus = new Cluster();
-				clus.setName("Map Reduce Cluster");
-				clus.addPredfined(cmd);
-				coordinator.addCluster(clus);
-				coordinator.runCluster(clus);
-			}
-			break;
-		case "Message log agregator": if(alertMessage(cmd))
-			{
-				Cluster clus = new Cluster();
-				clus.setName("Message log");
-				clus.addPredfined(cmd);
-				coordinator.addCluster(clus);
-				coordinator.runCluster(clus);
-			}
-			break;
-		case "Monthly records totals": if(alertMessage(cmd))
-			{
-				Cluster clus = new Cluster();
-				clus.setName("Monthly records");
-				clus.addPredfined(cmd);
-				coordinator.addCluster(clus);
-				coordinator.runCluster(clus);
-			}
-		break;
-		
 		case "K-means clustering": 
 			
 			//make new workflow and push to coordinator
@@ -402,15 +408,7 @@ public class GUILayout {
 //			coordinator.runCluster("K-means clustering");
 		
 			break;
-		case "Spark word count": if(alertMessage(cmd))
-			{
-			Cluster clus = new Cluster();
-			clus.setName("Spark word count");
-			clus.addPredfined(cmd);
-			coordinator.addCluster(clus);
-			coordinator.runCluster(clus);
-			}
-			break;
+		
 		case "Upload dataset":if(alertMessage(cmd))
 			{
 				List<String> dataexts = Arrays.asList("csv", "txt");
@@ -423,7 +421,19 @@ public class GUILayout {
 				getFileForUpload(processexts, cmd);
 			}
 		break;
-		
+		case "Upload text": if(alertMessage(cmd))
+		{
+			Workflow wfjson = new Workflow("serialise test");
+			if(this.datamanager.uploadTextToFile("jsontest/test1.txt", wfjson.seraliseWorkflow()))
+			{
+				System.out.println("Testworkflow uploaded with success");
+			}
+			else
+			{
+				System.out.println("Testworkflow upload failed");
+			}
+		}
+	break;
 		}
 	}
 	public void getFileForUpload(List<String> extensions, String cmd)

@@ -29,12 +29,12 @@ public class Clustering {
                 .builder()
                 .appName("SparkJob")
                 .getOrCreate();
-		
+		//this is all incoming with args
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
 		int startSeason =1;
-		int endSeason=12;
+		int endSeason=2;
 	    
 	    JavaRDD<String> data = spark.read().textFile(args[0]).toJavaRDD();
 	    
@@ -53,7 +53,7 @@ public class Clustering {
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
 	    
 	    JavaRDD<String> outputclusters = labeldata.map(f->classPoint2(f,clusters));
-	    outputclusters.saveAsTextFile(args[1]+"\\"+generateUniqueOutputName("results",new DateTime()));
+	    outputclusters.saveAsTextFile(args[1]);
 //	    Map<Tuple2<Integer, String>, Long> clusterLabel = labeldata.mapToPair(f->classPoint(f,clusters))
 //	    		.countByValue();
 //	    for (Map.Entry<Tuple2<Integer, String>, Long> entry : clusterLabel.entrySet())
@@ -120,14 +120,7 @@ public class Clustering {
 	{
 		return line.contains("latitude");
 	}
-	private static String generateUniqueOutputName(String prefix,DateTime timePoint)
-	{
-		
-		DateTimeFormatter fmt = DateTimeFormat.forPattern("yyyy_MM_dd_HH_mm_ss");
-		String s = prefix+fmt.print(timePoint);
-				//timePoint.format(formatter);
-		return s;
-	}
+	
 	private static Vector getValues(String line,List<String> reqVariables)
 	{
 	      String[] sarray = line.split(",");
