@@ -13,11 +13,15 @@
 /* ############################## JDT syntax highlighting ############################## */
 
 
+
+
 BulletListBlock > StyledText {
 background-color: #394146;
 color: #b3bbc1;
 }
 
-
-
-
+FormatterPreferenceSectionComposite {
+background-color:#49535a;
+color:#ebedef;
+swt-titlebar-color: #c7cdd1;
+}

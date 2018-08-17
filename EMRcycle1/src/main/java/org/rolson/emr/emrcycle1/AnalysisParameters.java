@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.joda.time.DateTime;
+
 public class AnalysisParameters {
 	public enum Dataset {
 	    MONTHLY_GRID,
@@ -31,8 +33,8 @@ public class AnalysisParameters {
 	private Dataset dataset;
 	private AnalysisMethod analysisMethod;;
 	private List<Variables> variables; 
-	private LocalDate start;
-	private LocalDate end;
+	private DateTime start;
+	private DateTime end;
 	private int seasonStartMonth;
 	private int seasonStartDay;
 	private int seasonEndMonth;
@@ -50,8 +52,8 @@ public class AnalysisParameters {
 		analysisMethod = AnalysisMethod.K_MEANS;
 		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED);	
 		
-		this.start =LocalDate.of(2008, 1, 1);
-		this.end =LocalDate.now();
+		this.start = new DateTime(2008, 1, 1, 0, 0, 0, 0);
+		this.end = new DateTime();
 		this.seasonStartMonth = 1;
 		this.seasonStartDay = 1;
 		this.seasonEndMonth =12;
@@ -88,15 +90,15 @@ public class AnalysisParameters {
 	{
 		return this.analysisMethod.toString();
 	}
-	public void setStartDate(LocalDate dt)
+	public void setStartDate(DateTime dt)
 	{
 		this.start = dt;
 	}
-	public LocalDate getStartDate()
+	public DateTime getStartDate()
 	{
 		return this.start;
 	}
-	public void setEndDate(LocalDate dt)
+	public void setEndDate(DateTime dt)
 	{
 		this.end = dt;
 	}
@@ -148,7 +150,7 @@ public class AnalysisParameters {
 	{
 		this.dayEndHour = i;
 	}
-	public LocalDate getEndDate()
+	public DateTime getEndDate()
 	{
 		return this.end;
 	}

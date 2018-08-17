@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 
 import java.util.Arrays;
@@ -15,7 +16,9 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.amazonaws.services.elasticmapreduce.model.*;
 
 
@@ -36,19 +39,11 @@ public class Workflow {
 	private AnalysisParameters analysisParameters;
 	private ActionOnFailure actionOnFailure;
 	
-	private List<String> commandArgs;
+	private List<String> commandArgs = new ArrayList<String>();
 	
-	public Workflow(String workflowname)
+	public Workflow()
 	{
-		commandArgs = new ArrayList<String>();
-		appType = new Application();
 		defaultVariables();
-		this.name = workflowname;
-		this.status = "INITIALISED";
-		this.setAwsID("undefined");
-		this.creationDate = new DateTime();
-		this.analysisParameters = new AnalysisParameters();
-		
 	}
 	public Workflow(StepSummary step)
 	{
@@ -97,6 +92,38 @@ public class Workflow {
 			setSparkStepConfig();
 		}
 	}
+	public void copyWorkflow(Workflow toCopy)
+	{
+		this.name = toCopy.getName();
+		this.status = toCopy.getStatus();
+		this.actionOnFailure = toCopy.getActionOnFailure();
+		
+		this.setAwsID(toCopy.getAwsID());
+		this.creationDate = toCopy.getCreationDate();
+		this.analysisJAR = toCopy.getAnalysisJar();
+		this.mainClassInJAR = toCopy.getMainClass();
+		this.commandArgs = toCopy.getCommandArgs();
+		if(this.commandArgs.size()==2)
+		{
+			//for previously defined hadoop map reduce jobs
+			this.outputFolder = this.commandArgs.get(1);
+			this.dataSource = this.commandArgs.get(0);
+			this.appType = new Application();
+			this.appType.setName("Hadoop Map Reduce");
+			setStepConfig();
+		}
+		else
+		{
+			//otherwise a spark job with more args
+			this.mainClassInJAR = this.commandArgs.get(4);
+			this.outputFolder = this.commandArgs.get(7);
+			this.dataSource = this.commandArgs.get(6);
+			this.sparkJAR = this.commandArgs.get(5);
+			this.appType = new Application();
+			this.appType.setName("Spark");
+			setSparkStepConfig();
+		}
+	}
 	public void setWorkflowFromJSON(String jsontext)
 	{
 		
@@ -105,8 +132,7 @@ public class Workflow {
 			SimpleModule module = new SimpleModule();
 			module.addDeserializer(Workflow.class, new WorkflowDeserializer());
 			mapper.registerModule(module);
-			 
-			Workflow readValue = mapper.readValue(jsontext, Workflow.class);
+			copyWorkflow( mapper.readValue(jsontext, Workflow.class));
 		} catch (JsonParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -121,15 +147,31 @@ public class Workflow {
 	public String seraliseWorkflow()
 	{
 		String serialized = "";
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.registerModule(new JodaModule());
+		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
 		try {
 			
-			serialized = new ObjectMapper().writeValueAsString(this);
+			serialized = mapper.writeValueAsString(this);
 		} catch (JsonProcessingException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		//System.out.println(serialized);
 		return serialized;
+	}
+	public String getAnalysisJar()
+	{
+		return this.analysisJAR;
+	}
+	public String getMainClass()
+	{
+		return this.mainClassInJAR;
+	}
+	public ActionOnFailure getActionOnFailure()
+	{
+		return this.actionOnFailure;
 	}
 	public AnalysisParameters getAnalysisParameters()
 	{
@@ -219,6 +261,7 @@ public class Workflow {
 	{
 		this.commandArgs =args;
 	}
+	
 	public String getStatus()
 	{
 		return status;
@@ -239,6 +282,8 @@ public class Workflow {
 	{
 		//setup for basic MapReduce job
 		this.name = "MapReduce Station Counter";
+		this.status = "INITIALISED";
+		this.setAwsID("undefined");
 		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV50.txt";
 		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/stationAnalysis.jar";
@@ -246,13 +291,17 @@ public class Workflow {
 		this.mainClassInJAR = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
 		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
 		this.commandArgs = Arrays.asList(dataSource,outputFolder);
-		this.appType.setName("Spark");
+		this.appType = new Application();
+		this.appType.setName("Map Reduce");
+		
+		this.creationDate = new DateTime();
+		this.analysisParameters = new AnalysisParameters();
 		setStepConfig();
 	}
 	
 	public void sparkClimateCluster()
 	{
-		//this.name = "Spark climate clustering with kmeans";
+		this.name = "Spark climate clustering with kmeans";
 		this.debugName = "Spark test debug"; 
 		this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";
 		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
@@ -265,8 +314,8 @@ public class Workflow {
 				"--class",
 				this.mainClassInJAR,
 				this.sparkJAR,
-				dataSource,
-				outputFolder);
+				this.dataSource,
+				this.outputFolder);
 		this.appType.setName("Spark");
 		setSparkStepConfig();
 	}

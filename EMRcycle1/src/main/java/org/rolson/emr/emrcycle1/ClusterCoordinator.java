@@ -49,12 +49,12 @@ public class ClusterCoordinator {
 	public void updateAll()
 	{
 		//get stored workflows from text files 
-		updateStoredWorkflows();
-		//updates cannot run on frequent cycle geerates a throttling error
-		//get the clusters
-		updateResourceStatus();
-		//based on clusters in time range get the workflows
-		updateWorkflowStatus();
+//		updateStoredWorkflows();
+//		//updates cannot run on frequent cycle geerates a throttling error
+//		//get the clusters
+//		updateResourceStatus();
+//		//based on clusters in time range get the workflows
+//		updateWorkflowStatus();
 
 	}
 	public void setEMRClient()
@@ -138,7 +138,7 @@ public class ClusterCoordinator {
 				String jsonstring = this.dataManager.getString(k);
 				if(jsonstring!="")
 				{
-					Workflow wf = new Workflow("new");
+					Workflow wf = new Workflow();
 					wf.setWorkflowFromJSON(jsonstring);
 					allWorkflows.add(wf);
 				}

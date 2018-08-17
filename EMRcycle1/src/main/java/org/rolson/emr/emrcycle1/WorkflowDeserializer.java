@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -28,29 +29,45 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	    @Override
 	    public Workflow deserialize(JsonParser jp, DeserializationContext ctxt) 
 	      throws IOException, JsonProcessingException {
+	    	//get the nodes for each object
 	        JsonNode workflownode = jp.getCodec().readTree(jp);
-	        String name = workflownode.get("name").asText();
-	        Workflow wf = new Workflow(name);
+	        JsonNode analysisParamsNode = workflownode.get("analysisParameters");
+	        JsonNode variables = analysisParamsNode.get("variablesAsString");
+	        JsonNode args = workflownode.get("commandArgs");
+	        JsonNode applicationNode = workflownode.get("application");
+	        JsonNode stepConfigNode = workflownode.get("stepConfig");
+	        JsonNode hadoopJarStepNode = stepConfigNode.get("hadoopJarStep");
+	        //set the workflow up
+	        Workflow wf = new Workflow();
+	        wf.setName(workflownode.get("name").asText());
 	        wf.setAwsID(workflownode.get("awsID").asText());	
 	        wf.setStatus(workflownode.get("status").asText());
-	        
+	        wf.setCreationDate(new DateTime(workflownode.get("creationDate").asText()));
 	        wf.setOutputFolder(workflownode.get("outputFolder").asText());
-	        wf.setCommandArgs(workflownode.findValuesAsText("commandArgs"));
-	        
-	        JsonNode analysisParamsNode = workflownode.get("analysisParameters");
+	        wf.setActionOnFailure(stepConfigNode.get("actionOnFailure").asText());
+	        wf.setAnalysisJar(hadoopJarStepNode.get("jar").asText());
+	        	if(args.isArray())
+	        	{
+	        		List<String> comargs = new ArrayList<String>();
+	        		for(JsonNode objNode : args)
+			        {
+			        	comargs.add(objNode.asText());
+			        }
+	        		wf.setCommandArgs(comargs);
+	        	}
+	        //set the analysis parameters
 	        AnalysisParameters aparams = new AnalysisParameters();
 	        aparams.setAnalysisMethod(analysisParamsNode.get("analysisMethod").asText());
 	        aparams.setDataSet(analysisParamsNode.get("dataSet").asText());
 	        aparams.setDayEndHour(analysisParamsNode.get("dayEndHour").asInt());
 	        aparams.setDayStartHour(analysisParamsNode.get("dayStartHour").asInt());
-	        //aparams.setEndDate(analysisParamsNode.get("endDate").as);
-	       //aparams.setStartDate(analysisParamsNode.get("endDate").as);
-	        JsonNode variables = analysisParamsNode.get("variablesAsString");
+	        aparams.setEndDate(new DateTime(analysisParamsNode.get("endDate").asText()));
+	        aparams.setStartDate(new DateTime(analysisParamsNode.get("endDate").asText()));
+	        
 	        if (variables.isArray()) {
 	        	int count =0;
 		        for(JsonNode objNode : variables)
 		        {
-		        	
 		        	aparams.setOneVariable(count,objNode.asText());
 		        	count++;
 		        }
@@ -60,22 +77,10 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setSeasonStartDay(analysisParamsNode.get("seasonStartDay").asInt());
 	        aparams.setSeasonStartMonth(analysisParamsNode.get("seasonStartMonth").asInt());
 	        wf.setAnalysisParameters(aparams);
-	        
-	        JsonNode applicationNode = workflownode.get("application");
+	        //set the application
 	        Application app = new Application();
 	        app.setName(applicationNode.get("name").asText());
 	        wf.setApplication(app);
-	        
-	        JsonNode stepConfigNode = workflownode.get("stepConfig");
-	        JsonNode hadoopJarStepNode = stepConfigNode.get("hadoopJarStep");
-	        StepConfig config  = new StepConfig()
-	        		.withName(stepConfigNode.get("name").asText())
-	        		.withActionOnFailure(stepConfigNode.get("actionOnFailure").asText())
-	        		.withHadoopJarStep(new HadoopJarStepConfig()
-	        				.withJar(hadoopJarStepNode.get("jar").asText())
-	        				.withArgs(wf.getCommandArgs()));		
-	        wf.setStepCongfig(config);				
-	    	
 	    	return wf;
 	    }
 }

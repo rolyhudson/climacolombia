@@ -398,7 +398,7 @@ public class GUILayout {
 		case "K-means clustering": 
 			
 			//make new workflow and push to coordinator
-			Workflow wf = new Workflow(cmd);
+			Workflow wf = new Workflow();
 			wf.sparkClimateCluster();
 			coordinator.addWorkflow(wf);
 //			Cluster clus = new Cluster();
@@ -423,7 +423,7 @@ public class GUILayout {
 		break;
 		case "Upload text": if(alertMessage(cmd))
 		{
-			Workflow wfjson = new Workflow("serialise test");
+			Workflow wfjson = new Workflow();
 			if(this.datamanager.uploadTextToFile("jsontest/test1.txt", wfjson.seraliseWorkflow()))
 			{
 				System.out.println("Testworkflow uploaded with success");

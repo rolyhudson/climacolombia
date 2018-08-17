@@ -121,16 +121,16 @@ public class Cluster {
 		{
 		
 		case "K-means clustering":
-			wf = new Workflow(testtype);
+			wf = new Workflow();
 			wf.sparkClimateCluster();
 			break;
 		case "Linear Regression":
-			wf = new Workflow(testtype);
+			wf = new Workflow();
 			//configure for linear classification
 			break;
 		
 			default:
-				wf = new Workflow(testtype);
+				wf = new Workflow();
 				break;
 		}
 		addWorkflow(wf);
