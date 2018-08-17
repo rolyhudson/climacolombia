@@ -43,7 +43,10 @@ public class Workflow {
 	
 	public Workflow()
 	{
+		//create the analysis parameters
 		defaultVariables();
+		this.analysisParameters = new AnalysisParameters();
+		setWorkflowFromAnalysisParams();
 	}
 	public Workflow(StepSummary step)
 	{
@@ -92,6 +95,7 @@ public class Workflow {
 			setSparkStepConfig();
 		}
 	}
+	
 	public void copyWorkflow(Workflow toCopy)
 	{
 		this.name = toCopy.getName();
@@ -204,6 +208,8 @@ public class Workflow {
 	public void setName(String n)
 	{
 		name =n;
+		this.debugName = this.name+" debug"; 
+		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 	}
 	public void setStatus(String s)
 	{
@@ -277,8 +283,57 @@ public class Workflow {
 	public List<String> getCommandArgs(){
 		return commandArgs;
 	}
-	
 	private void defaultVariables()
+	{
+		//setup for basic MapReduce job
+		this.name = "New workflow";
+		this.status = "INITIALISED";
+		this.setAwsID("undefined");
+		this.creationDate = new DateTime();
+		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
+		this.appType = new Application();
+		this.appType.setName("Spark");
+	}
+	public void setWorkflowFromAnalysisParams()
+	{
+		if(this.analysisParameters.getDataSet().equals("MONTHLY_GRID"))
+		{
+			//source monthly not avaialble yet
+			this.dataSource = "s3://rolyhudsontestbucket1/climateData/monthly.csv";
+		}
+		else
+		{
+			this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";;
+		}
+		this.analysisJAR = "command-runner.jar";
+		switch(this.analysisParameters.getAnalysisMethod())
+		{
+		case "K_MEANS":
+			this.mainClassInJAR = "climateClusters.Clustering";
+			this.sparkJAR = "s3://rolyhudsontestbucket1/climateData/climateClusters2.jar";
+			break;
+		case "BI_K_MEANS":
+			break;
+		case "POWER_ITERATION":
+			break;
+		case "GAUSSIAN_MIX":
+			break;
+		}
+		this.debugName = this.name+" debug"; 
+		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		//some how the space and time params need to be passed to args
+		this.commandArgs = Arrays.asList("spark-submit",
+				"--deploy-mode",
+				"cluster",
+				"--class",
+				this.mainClassInJAR,
+				this.sparkJAR,
+				this.dataSource,
+				this.outputFolder);
+		
+		setStepConfig();
+	}
+	private void mapReduceVariables()
 	{
 		//setup for basic MapReduce job
 		this.name = "MapReduce Station Counter";
@@ -316,7 +371,9 @@ public class Workflow {
 				this.sparkJAR,
 				this.dataSource,
 				this.outputFolder);
+		this.appType = new Application();
 		this.appType.setName("Spark");
+		
 		setSparkStepConfig();
 	}
 	private void setSparkStepConfig()

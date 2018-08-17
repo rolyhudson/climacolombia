@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -61,8 +62,8 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setDataSet(analysisParamsNode.get("dataSet").asText());
 	        aparams.setDayEndHour(analysisParamsNode.get("dayEndHour").asInt());
 	        aparams.setDayStartHour(analysisParamsNode.get("dayStartHour").asInt());
-	        aparams.setEndDate(new DateTime(analysisParamsNode.get("endDate").asText()));
-	        aparams.setStartDate(new DateTime(analysisParamsNode.get("endDate").asText()));
+//	        aparams.setEndDate(new LocalDate(analysisParamsNode.get("endDate").asText()));
+//	        aparams.setStartDate(new LocalDate(analysisParamsNode.get("endDate").asText()));
 	        
 	        if (variables.isArray()) {
 	        	int count =0;

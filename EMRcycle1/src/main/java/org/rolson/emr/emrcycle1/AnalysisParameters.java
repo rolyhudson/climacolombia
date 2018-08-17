@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.time.LocalDate;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -8,6 +9,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.joda.time.DateTime;
+import org.joda.time.format.DateTimeFormat;
+import org.joda.time.format.DateTimeFormatter;
+
+import com.lynden.gmapsfx.javascript.object.LatLong;
+import com.lynden.gmapsfx.javascript.object.MVCArray;
+
+import netscape.javascript.JSObject;
 
 public class AnalysisParameters {
 	public enum Dataset {
@@ -33,14 +41,16 @@ public class AnalysisParameters {
 	private Dataset dataset;
 	private AnalysisMethod analysisMethod;;
 	private List<Variables> variables; 
-	private DateTime start;
-	private DateTime end;
+	private LocalDate start;
+	private LocalDate end;
 	private int seasonStartMonth;
 	private int seasonStartDay;
 	private int seasonEndMonth;
 	private int seasonEndDay;
 	private int dayStartHour;
 	private int dayEndHour;
+	private List<LatLong> selectionCoords;
+	private String selectionShape;
 	public AnalysisParameters()
 	{
 		setDefaults();
@@ -48,18 +58,32 @@ public class AnalysisParameters {
 	
 	private void setDefaults()
 	{
-		dataset = Dataset.MONTHLY_GRID;
+		dataset = Dataset.HOURLY_CITIES;
 		analysisMethod = AnalysisMethod.K_MEANS;
 		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED);	
 		
-		this.start = new DateTime(2008, 1, 1, 0, 0, 0, 0);
-		this.end = new DateTime();
+		this.start = LocalDate.of(2010,3,12);
+		this.end = LocalDate.of(2012,2,13);
 		this.seasonStartMonth = 1;
 		this.seasonStartDay = 1;
 		this.seasonEndMonth =12;
 		this.seasonEndDay=31;
-		this.dayStartHour=1;
-		this.dayEndHour=24;
+		this.dayStartHour=8;
+		this.dayEndHour=16;
+		this.selectionShape = "polygon";
+		LatLong p1 = new LatLong(8.766635, -78.221568);
+		LatLong p2 = new LatLong(1.024341, -79.778153);
+		LatLong p3 = new LatLong(-4.519759, -69.824647);
+		LatLong p4 = new LatLong(1.114824, -66.675034);
+		LatLong p5 = new LatLong(6.280859, -67.190206);
+		LatLong p6 = new LatLong(13.615007, -71.219707);
+		this.selectionCoords = new ArrayList<LatLong>();
+		this.selectionCoords.add(p1);
+		this.selectionCoords.add(p2);
+		this.selectionCoords.add(p3);
+		this.selectionCoords.add(p4);
+		this.selectionCoords.add(p5);
+		this.selectionCoords.add(p6);
 	}
 	public void setDataSet(String data)
 	{
@@ -80,8 +104,18 @@ public class AnalysisParameters {
 	}
 	public void setAnalysisMethod(String aMethod)
 	{
+		
 		this.analysisMethod = AnalysisMethod.valueOf(aMethod);
 	}
+	public void setSelectionCoords(List<LatLong> coords)
+	{
+		this.selectionCoords = coords;
+	}
+	public List<LatLong> getSelectionCoords()
+	{
+		return this.selectionCoords;
+	}
+	 
 	public void setOneVariable(int i,String aVariable)
 	{
 		variables.set(i, Variables.valueOf(aVariable));
@@ -90,17 +124,30 @@ public class AnalysisParameters {
 	{
 		return this.analysisMethod.toString();
 	}
-	public void setStartDate(DateTime dt)
+	public void setStartDate(int y,int m,int d)
 	{
-		this.start = dt;
+		this.start = LocalDate.of(y, m, d);
 	}
-	public DateTime getStartDate()
+	public LocalDate getStartDate()
 	{
 		return this.start;
 	}
-	public void setEndDate(DateTime dt)
+	
+	public LocalDate getEndDate()
 	{
-		this.end = dt;
+		return this.end;
+	}
+	public void setSelectionShape(String shape)
+	{
+		this.selectionShape =shape;
+	}
+	public String getSelectionShape()
+	{
+		return this.selectionShape;
+	}
+	public void setEndDate(int y,int m,int d)
+	{
+		this.end = LocalDate.of(y, m, d);
 	}
 	public void setSeasonStartMonth(int i)
 	{
@@ -150,10 +197,7 @@ public class AnalysisParameters {
 	{
 		this.dayEndHour = i;
 	}
-	public DateTime getEndDate()
-	{
-		return this.end;
-	}
+	
 	public static List<String> enumToStringDataset()
 	{
 		List<String> enumNames = Stream.of(Dataset.values())
