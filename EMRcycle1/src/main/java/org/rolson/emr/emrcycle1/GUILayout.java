@@ -121,7 +121,7 @@ public class GUILayout {
 		List<String> buttonCmds = new ArrayList<String>();
 		
 		buttonCmds.add("Workflow builder");
-		buttonCmds.add("Predefined workflows");
+		//buttonCmds.add("Predefined workflows");
 		buttonCmds.add("Resource monitor");
 		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
@@ -164,7 +164,7 @@ public class GUILayout {
 				addWebView(i,tabname,tabPane);
 			break;
 			case "Workflow builder":
-				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator);
+				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator,this.datamanager);
 				break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);
@@ -217,32 +217,32 @@ public class GUILayout {
 	{
 		statuslabel.setText(coordinator.EMRStatus());
 	}
-	@SuppressWarnings("unchecked")
-	private TableColumn addWorkflowActionColumn(TableView tblView,String buttonName,String colName)
-	{
-		TableColumn c3 = new TableColumn<>(colName);
-        c3.setSortable(false);
-        c3.setCellValueFactory(
-                new Callback<TableColumn.CellDataFeatures<Workflow, Boolean>,
-                        ObservableValue<Boolean>>() {
-     
-                    @Override
-                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Workflow, Boolean> p) {
-                        return new SimpleBooleanProperty(p.getValue() != null);
-                    }
-                });
-     
-        c3.setCellFactory(
-                new Callback<TableColumn<Workflow, Boolean>, TableCell<Workflow, Boolean>>() {
-     
-                    @Override
-                    public TableCell<Workflow, Boolean> call(TableColumn<Workflow, Boolean> p) {
-                        return new WorkflowActionCell(tblView,buttonName,coordinator);
-                    }
-                });
-        
-        return c3;
-	}
+//	@SuppressWarnings("unchecked")
+//	private TableColumn addWorkflowActionColumn(TableView tblView,String buttonName,String colName)
+//	{
+//		TableColumn c3 = new TableColumn<>(colName);
+//        c3.setSortable(false);
+//        c3.setCellValueFactory(
+//                new Callback<TableColumn.CellDataFeatures<Workflow, Boolean>,
+//                        ObservableValue<Boolean>>() {
+//     
+//                    @Override
+//                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Workflow, Boolean> p) {
+//                        return new SimpleBooleanProperty(p.getValue() != null);
+//                    }
+//                });
+//     
+//        c3.setCellFactory(
+//                new Callback<TableColumn<Workflow, Boolean>, TableCell<Workflow, Boolean>>() {
+//     
+//                    @Override
+//                    public TableCell<Workflow, Boolean> call(TableColumn<Workflow, Boolean> p) {
+//                        return new WorkflowActionCell(tblView,buttonName,coordinator);
+//                    }
+//                });
+//        
+//        return c3;
+//	}
 	@SuppressWarnings("unchecked")
 	private TableColumn addClusterActionColumn(TableView tblView,String buttonName,String colName)
 	{
@@ -300,18 +300,18 @@ public class GUILayout {
         	tabColumns.add(addColumn(col,150,col));
         }
         if(name.contains("Workflow")) {
-        	TableColumn runbuttons = addWorkflowActionColumn(table,"run","Go");
-        	TableColumn stopbuttons = addWorkflowActionColumn(table,"stop","Terminate");
-        	TableColumn mapbuttons = addWorkflowActionColumn(table,"map","Visualise");
-        	TableColumn statsbuttons = addWorkflowActionColumn(table,"stats","Stats");
-        	TableColumn editbuttons = addWorkflowActionColumn(table,"copy","Copy");
-        	TableColumn copybuttons = addWorkflowActionColumn(table,"edit","Edit");
-        			tabColumns.add(runbuttons);
-        			tabColumns.add(stopbuttons);
-        			tabColumns.add(mapbuttons);
-        			tabColumns.add(statsbuttons);
-        			tabColumns.add(copybuttons);
-        			tabColumns.add(editbuttons);
+//        	TableColumn runbuttons = addWorkflowActionColumn(table,"run","Go");
+//        	TableColumn stopbuttons = addWorkflowActionColumn(table,"stop","Terminate");
+//        	TableColumn mapbuttons = addWorkflowActionColumn(table,"map","Visualise");
+//        	TableColumn statsbuttons = addWorkflowActionColumn(table,"stats","Stats");
+//        	TableColumn editbuttons = addWorkflowActionColumn(table,"copy","Copy");
+//        	TableColumn copybuttons = addWorkflowActionColumn(table,"edit","Edit");
+//        			tabColumns.add(runbuttons);
+//        			tabColumns.add(stopbuttons);
+//        			tabColumns.add(mapbuttons);
+//        			tabColumns.add(statsbuttons);
+//        			tabColumns.add(copybuttons);
+//        			tabColumns.add(editbuttons);
         }
         else
         {
@@ -394,7 +394,9 @@ public class GUILayout {
 			
 			break;
 		case "Update status":
+			updateStatusLabel();
 			coordinator.updateAll();
+			
 			break;
 		case "K-means clustering": 
 			

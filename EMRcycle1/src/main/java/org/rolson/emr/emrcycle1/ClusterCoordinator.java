@@ -48,14 +48,14 @@ public class ClusterCoordinator {
 	}
 	public void updateAll()
 	{
-		//get stored workflows from text files 
-//		updateStoredWorkflows();
-//		//updates cannot run on frequent cycle geerates a throttling error
-//		//get the clusters
-//		updateResourceStatus();
-//		//based on clusters in time range get the workflows
-//		updateWorkflowStatus();
-
+		//get stored workflows from text files in s3 
+		updateStoredWorkflows();
+		//updates cannot run on frequent cycle geerates a throttling error
+		//get the clusters
+		updateResourceStatus();
+		//based on clusters in time range get the workflows from aws
+		updateWorkflowStatus();
+		//manage s3 workflows vs emr workflows?
 	}
 	public void setEMRClient()
 	{
@@ -108,6 +108,7 @@ public class ClusterCoordinator {
 			    
 			    for(StepSummary step:steps.getSteps())
 			    {
+			    	//"PENDING,CANCEL_PENDING, RUNNING,COMPLETED,CANCELLED,FAILED,INTERRUPTED"
 				    String stepstatus = step.getStatus().getState();
 				    String id = step.getId();
 					Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();

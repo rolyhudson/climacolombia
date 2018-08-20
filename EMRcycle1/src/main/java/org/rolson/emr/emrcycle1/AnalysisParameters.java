@@ -12,6 +12,7 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.lynden.gmapsfx.javascript.object.LatLong;
 import com.lynden.gmapsfx.javascript.object.MVCArray;
 
@@ -49,7 +50,7 @@ public class AnalysisParameters {
 	private int seasonEndDay;
 	private int dayStartHour;
 	private int dayEndHour;
-	private List<LatLong> selectionCoords;
+	private List<double[]> selectionCoords;
 	private String selectionShape;
 	public AnalysisParameters()
 	{
@@ -71,19 +72,14 @@ public class AnalysisParameters {
 		this.dayStartHour=8;
 		this.dayEndHour=16;
 		this.selectionShape = "polygon";
-		LatLong p1 = new LatLong(8.766635, -78.221568);
-		LatLong p2 = new LatLong(1.024341, -79.778153);
-		LatLong p3 = new LatLong(-4.519759, -69.824647);
-		LatLong p4 = new LatLong(1.114824, -66.675034);
-		LatLong p5 = new LatLong(6.280859, -67.190206);
-		LatLong p6 = new LatLong(13.615007, -71.219707);
-		this.selectionCoords = new ArrayList<LatLong>();
-		this.selectionCoords.add(p1);
-		this.selectionCoords.add(p2);
-		this.selectionCoords.add(p3);
-		this.selectionCoords.add(p4);
-		this.selectionCoords.add(p5);
-		this.selectionCoords.add(p6);
+		
+		this.selectionCoords = new ArrayList<double[]>();
+		this.selectionCoords.add(new double[] {8.766635, -78.221568});
+		this.selectionCoords.add(new double[] {1.024341, -79.778153});
+		this.selectionCoords.add(new double[] {-4.519759, -69.824647});
+		this.selectionCoords.add(new double[] {1.114824, -66.675034});
+		this.selectionCoords.add(new double[] {6.280859, -67.190206});
+		this.selectionCoords.add(new double[] {13.615007, -71.219707});
 	}
 	public void setDataSet(String data)
 	{
@@ -109,13 +105,33 @@ public class AnalysisParameters {
 	}
 	public void setSelectionCoords(List<LatLong> coords)
 	{
-		this.selectionCoords = coords;
+		this.selectionCoords.clear();
+		for(LatLong ll : coords)
+		{
+			this.selectionCoords.add(new double[] {ll.getLatitude(),ll.getLongitude()});
+		}
+		
 	}
-	public List<LatLong> getSelectionCoords()
+	public void setSelectionCoordsDouble(List<double[]> coords)
+	{
+		this.selectionCoords.clear();
+		this.selectionCoords = coords;
+		
+	}
+	@JsonIgnore
+	public List<LatLong> getSelectionCoordsLatLon()
+	{
+		List<LatLong> coords = new ArrayList<LatLong>();
+		for(double[] p:this.selectionCoords)
+		{
+			coords.add(new LatLong(p[0],p[1]));
+		}
+		return coords;
+	}
+	public List<double[]> getSelectionCoords()
 	{
 		return this.selectionCoords;
 	}
-	 
 	public void setOneVariable(int i,String aVariable)
 	{
 		variables.set(i, Variables.valueOf(aVariable));

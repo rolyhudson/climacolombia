@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.time.LocalDate;
+
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -38,32 +39,16 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
-import netscape.javascript.JSObject;
 
-import com.lynden.gmapsfx.GoogleMapView;
-import com.lynden.gmapsfx.MapComponentInitializedListener;
-import com.lynden.gmapsfx.javascript.event.GMapMouseEvent;
-import com.lynden.gmapsfx.javascript.event.UIEventType;
-import com.lynden.gmapsfx.javascript.object.GoogleMap;
-import com.lynden.gmapsfx.javascript.object.LatLong;
-import com.lynden.gmapsfx.javascript.object.LatLongBounds;
-import com.lynden.gmapsfx.javascript.object.MVCArray;
-import com.lynden.gmapsfx.javascript.object.MapOptions;
-import com.lynden.gmapsfx.javascript.object.MapTypeIdEnum;
-import com.lynden.gmapsfx.javascript.object.Marker;
-import com.lynden.gmapsfx.javascript.object.MarkerOptions;
-import com.lynden.gmapsfx.shapes.Polygon;
-import com.lynden.gmapsfx.shapes.PolygonOptions;
-import com.lynden.gmapsfx.shapes.Polyline;
-import com.lynden.gmapsfx.shapes.PolylineOptions;
-import com.lynden.gmapsfx.shapes.Rectangle;
-import com.lynden.gmapsfx.shapes.RectangleOptions;
 
-public class GUIWorkflowBuilder implements MapComponentInitializedListener {
+public class GUIWorkflowBuilder {
 	private ClusterCoordinator coordinator;
+	private DataManager datamanager;
 	private HBox mainBox;
 	private VBox wfSelectorBox;
 	private VBox wfEditorBox;
+	private VBox configTools;
+	VBox mappingBox = new VBox();
 	private TextField wfNameTextField;
 	private ComboBox<String> datasetCB;
 	private DatePicker startdatePicker;
@@ -75,25 +60,23 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 	private ComboBox<String> variableCB1;
 	private ComboBox<String> variableCB2;
 	private ComboBox<String> variableCB3;
-	ComboBox<String> analysisMethodCB;
-	ComboBox<String> dayStartHour;
-	ComboBox<String> dayEndHour;
+	private ComboBox<String> analysisMethodCB;
+	private ComboBox<String> dayStartHour;
+	private ComboBox<String> dayEndHour;
 	private boolean newWorkflow;
 	private Label statusLbl;
+	private Button copyBtn;
+	private Button saveBtn;
+	private Button runBtn;
+	private Button stopBtn;
+	private Button map2dBtn;
+	private Button map3dBtn;
+	private Button statsBtn;
+	private SelectionMap selectionMap; 
 	
-	
-	private Polygon selectionPolygon;
-	private Rectangle selectionRectangle;
-	private MVCArray selectionPointObs;
-	private boolean drawRectangle;
-	private boolean draw;
-	private List<LatLong> selectionLatLongs;
-
-	private GoogleMapView mapView; 
-	private GoogleMap map;
 	
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
-	private TableView<Workflow> currentworkflow = new TableView<Workflow>();
+	
 	private  ObservableList<Workflow> data = FXCollections.observableArrayList();
 	private Workflow forAction;//currently editing this workflow
 	int[] daysInMonths = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
@@ -101,11 +84,10 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 
 	List<String> hours;
 	
-	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord)
+	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord,DataManager dm)
 	{
-		mapView = new GoogleMapView(null,"AIzaSyCWfTPB17ZBhMclyRk9j__M0BlayA_xUuA"); 
-		
-		mapView.addMapInializedListener(this);
+		selectionMap = new SelectionMap(this.forAction);
+		this.datamanager = dm;
 		coordinator = coord;
 		setHours();
 		Tab tab = new Tab();
@@ -150,10 +132,11 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		HBox def = new HBox();
 		
 		BorderPane bp = new BorderPane();
-		VBox mappingBox = new VBox();
-		mappingBox.getChildren().addAll(mapTools(),mapView);
+		
+		mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
 		bp.setRight(mappingBox);
-		bp.setLeft(configTools());
+		this.configTools = configTools();
+		bp.setLeft(this.configTools);
 		def.getChildren().setAll(bp);
 		wfEditorBox.getChildren().add(def);
 		
@@ -184,31 +167,41 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		
 		//copy button
 		
-		Button copyBtn = new Button("Copy");
+		this.copyBtn = new Button("Copy");
 		copyBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		copyBtn.setOnAction((event) -> {
 		    // Button was clicked, do something...
 			if(forAction!=null)
 			{
 			Workflow wf = new Workflow();
+			wf.setWorkflowFromJSON(forAction.seraliseWorkflow());
+			
+			wf.setName(forAction.getName()+" copy");
 			coordinator.addWorkflow(wf);
 			this.workflowtable.getSelectionModel().select(wf);
 			}
 		});
 		tools.add(copyBtn,2,0);
 		//save button
-		Button saveBtn = new Button("Save");
+		this.saveBtn = new Button("Save");
 		saveBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		saveBtn.setOnAction((event) -> {
 
 			if(forAction!=null)
 			{
-			
+				if(this.datamanager.uploadTextToFile("jsontest/"+forAction.getName()+"_"+forAction.getCreationDate()+".txt", forAction.seraliseWorkflow()))
+				{
+					System.out.println(forAction.getName()+" uploaded with success");
+				}
+				else
+				{
+					System.out.println(forAction.getName()+" upload failed");
+				}
 			}
 		});
 		tools.add(saveBtn,3,0);
 		//run button
-		Button runBtn = new Button("Run");
+		this.runBtn = new Button("Run");
 		runBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		runBtn.setOnAction((event) -> {
 		    
@@ -219,7 +212,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		});
 		tools.add(runBtn,4,0);
 		//stop button
-		Button stopBtn = new Button("Stop");
+		this.stopBtn = new Button("Stop");
 		stopBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		stopBtn.setOnAction((event) -> {
 		    
@@ -230,7 +223,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		});
 		tools.add(stopBtn,5,0);
 		//2d map
-		Button map2dBtn = new Button("2d map");
+		this.map2dBtn = new Button("2d map");
 		map2dBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		map2dBtn.setOnAction((event) -> {
 		    
@@ -244,7 +237,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		Label resLbl = new Label("Results: ");
 		tools.add(resLbl,2,1);
 		//3d map
-		Button map3dBtn = new Button("3d map");
+		this.map3dBtn = new Button("3d map");
 		map3dBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		map3dBtn.setOnAction((event) -> {
 		    
@@ -255,7 +248,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		});
 		tools.add(map3dBtn,4,1);
 		//stats
-		Button statsBtn = new Button("Stats");
+		this.statsBtn = new Button("Stats");
 		statsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		statsBtn.setOnAction((event) -> {
 		    
@@ -266,8 +259,10 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		});
 		tools.add(statsBtn,5,1);
 		//status label
-				this.statusLbl = new Label("STATUS: ");
-				tools.add(statusLbl,0,1);
+		Label status = new Label("STATUS: ");
+				this.statusLbl = new Label("");
+				tools.add(status,0,1);
+				tools.add(statusLbl,1,1);
 				box.getChildren().add(tools);
 		return box;
 	}
@@ -282,10 +277,10 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 			toolpanel.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
 			        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 			        + "-fx-border-color: rgb(220,220,220);");
-			if(!p.equals("Copy")) {
+			
 			Label nameLbl = new Label(p);
-			nameLbl.setFont(Font.font (20));
-			toolpanel.getChildren().add(nameLbl);}
+			nameLbl.setFont(Font.font (15));
+			toolpanel.getChildren().add(nameLbl);
 			
 			switch(p)
 			{
@@ -296,15 +291,21 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 			case "Dataset":
 				
 				this.datasetCB = createCombo( AnalysisParameters.enumToStringDataset(),0);
+				
 				toolpanel.getChildren().add(datasetCB);
 				datasetCB.setOnAction((event) -> {
+					String data = (String)datasetCB.getSelectionModel().getSelectedItem();
+					if(data.equals("MONTHLY_GRID")) this.selectionMap.drawGridMarkers();
+				    else this.selectionMap.drawCityMarkers();
 					if(forAction!=null&&!this.newWorkflow)
 					{
-				    String data = (String)datasetCB.getSelectionModel().getSelectedItem();
+				    
 				    AnalysisParameters ap = forAction.getAnalysisParameters();
+				    
 				    System.out.println("dataset is "+ap.getDataSet());
 				    ap.setDataSet(data);
 				    System.out.println("dataset changed to "+ap.getDataSet());
+				    
 					}
 				    
 				});
@@ -516,8 +517,10 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		    if (newSelection != null) {
 
                 this.forAction = (Workflow) table.getSelectionModel().getSelectedItem();
-                wfNameTextField.setText(forAction.getName());
+                
         		data.setAll(forAction);
+        		//set the map foraction selected
+        		this.selectionMap.setForAction(forAction);
         		updateUIWithWorkflow();
 		    }
 		});
@@ -525,11 +528,65 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		table.getColumns().addAll(tabColumns);
 	    wfSelectorBox.getChildren().addAll(title,addWorkflowBtn,workflowtable);
 	}
+	private void enableDisableNodes()
+	{
+		String status = statusLbl.getText();
+		//POSSIBLE VALUES: "PENDING,CANCEL_PENDING, RUNNING,COMPLETED,CANCELLED,FAILED,INTERRUPTED"//ALSO INITIALISED 
+		if(status.equals("INITIALISED")||status.equals("CANCELLED")||status.equals("FAILED")||status.equals("INTERRUPTED"))
+		{
+			//full editing permitted no results
+			//disabled stop 2d map 3d map stats
+			this.map2dBtn.setDisable(true);
+			this.map3dBtn.setDisable(true);
+			this.statsBtn.setDisable(true);
+			this.stopBtn.setDisable(true);
+			
+			this.copyBtn.setDisable(false);
+			this.saveBtn.setDisable(false);
+			this.runBtn.setDisable(false);
+			this.configTools.setDisable(false);
+			this.mappingBox.setDisable(false);
+		}
+		if(status.equals("COMPLETED"))
+		{
+			//editing disabled
+			this.configTools.setDisable(true);
+			this.mappingBox.setDisable(true);
+			//results enabled
+			this.map2dBtn.setDisable(false);
+			this.map3dBtn.setDisable(false);
+			this.statsBtn.setDisable(false);
+			this.stopBtn.setDisable(false);
+			
+			this.copyBtn.setDisable(false);
+			this.saveBtn.setDisable(true);
+			this.runBtn.setDisable(true);
+		}
+		if(status.equals("PENDING")||status.equals("CANCEL_PENDING")||status.equals("RUNNING"))
+		{
+			//only copy and stop
+			this.configTools.setDisable(true);
+			this.mappingBox.setDisable(true);
+			
+			this.map2dBtn.setDisable(true);
+			this.map3dBtn.setDisable(true);
+			this.statsBtn.setDisable(true);
+			this.stopBtn.setDisable(false);
+			
+			this.copyBtn.setDisable(false);
+			this.saveBtn.setDisable(true);
+			this.runBtn.setDisable(true);
+		}
+		
+	}
 	private void updateUIWithWorkflow()
 	{
 		//event handlers to ignore changes
 		this.newWorkflow = true;
-		this.draw =false;
+		this.selectionMap.setDraw(false);
+		wfNameTextField.setText(forAction.getName());
+		statusLbl.setText(forAction.getStatus());
+		enableDisableNodes();
 		AnalysisParameters ap = forAction.getAnalysisParameters();
 		this.datasetCB.getSelectionModel().select(ap.enumToStringDataset().indexOf(ap.getDataSet()));
 		this.variableCB1.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(0)));
@@ -549,7 +606,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 		dayStartHour.getSelectionModel().select(ap.getDayStartHour()-1);
 		dayEndHour.getSelectionModel().select(ap.getDayEndHour()-1);
 		
-		addMapShapeFromWorkflow();
+		this.selectionMap.addMapShapeFromWorkflow();
 		this.newWorkflow = false;
 	}
 	private void handler(ActionEvent event) {
@@ -559,7 +616,7 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 			Workflow wf = new Workflow();
 			coordinator.addWorkflow(wf);
 			this.workflowtable.getSelectionModel().select(wf);
-			updateUIWithWorkflow();
+
 			break;
 		}
 	}
@@ -584,296 +641,6 @@ public class GUIWorkflowBuilder implements MapComponentInitializedListener {
 	     col.setCellValueFactory(new PropertyValueFactory<Workflow, String>(property));
 	     return col;
 	}
-	private void addMapShapeFromWorkflow()
-	{
-		clearSelection();
-		this.selectionLatLongs = forAction.getAnalysisParameters().getSelectionCoords();
-		for(LatLong ll : this.selectionLatLongs)
-		{
-			this.selectionPointObs.push(ll);
-		}
-		if(forAction.getAnalysisParameters().getSelectionShape().equals("polygon"))
-		{
-			drawPolygon();
-		}
-		else
-		{
-			drawRectangle(this.selectionLatLongs.get(0),this.selectionLatLongs.get(2));
-		}
-	}
-	private HBox mapTools()
-	{
-		HBox mapControl = new HBox();
-		mapControl.setSpacing(5);
-		mapControl.setPadding(new Insets(10, 0, 0, 10));
-		mapControl.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
-		        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
-		        + "-fx-border-color: rgb(220,220,220);");
-		Button clearBtn = new Button("Clear selection");
-		 clearBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		 clearBtn.setOnAction((event) -> {
-			this.clearSelection();
-		});
-		 Button polyBtn = new Button("Selection polygon");
-		 polyBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		 polyBtn.setOnAction((event) -> {
-			 clearSelection();
-			 this.draw =false;
-			 drawPolygon();
-			 
-		});
-		 Button polyDrawBtn = new Button("Draw polygon");
-		 polyDrawBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		 polyDrawBtn.setOnAction((event) -> {
-			 clearSelection();
-			this.drawRectangle =false;
-			this.draw =true;
-		});
-		 Button rectBtn = new Button("Selection rectangle");
-		 rectBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		 rectBtn.setOnAction((event) -> {
-			 this.draw =false;
-			 clearSelection();
-			 setUpMaxRectangle();
-		     
-		});
-		 Button rectDrawBtn = new Button("Draw rectangle");
-		 rectDrawBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		 rectDrawBtn.setOnAction((event) -> {
-			 clearSelection();
-			 this.drawRectangle =true;
-			 this.draw =true;
-		});
-		 mapControl.getChildren().addAll(polyBtn,polyDrawBtn,rectBtn,rectDrawBtn,clearBtn);
-		return mapControl;
-	}
-	private void clearSelection()
-	{
-		map.removeMapShape(this.selectionRectangle);
-		map.removeMapShape(this.selectionPolygon);
-		this.selectionPointObs.clear();
-		this.selectionLatLongs.clear();
-		this.selectionRectangle = new Rectangle();
-		this.selectionPolygon = new Polygon();
-	}
-	private void setUpMaxRectangle()
-	{
-		LatLong topleft = new LatLong(11.422499, -78.362942);
-		LatLong bottomright = new LatLong(-4.533734, -65.735365);
-		drawRectangle(topleft, bottomright);
-	}
-	private void drawPolygon()
-	{
-		if(!this.draw)
-		{
-			setupMaxPolygonPoints();
-		}
-		else
-		{
-			//point data has been collected by map events
-		}
-		PolygonOptions options = new PolygonOptions()
-				   .paths(this.selectionPointObs)
-				   .strokeColor("black")
-	                .strokeWeight(2)
-	                .fillColor("null")
-	                .editable(true).draggable(true);
-		   
-		   this.selectionPolygon =new Polygon(options);
-		   map.addMapShape(selectionPolygon);
-		 //if not in draw mode update from the shape data
-	        if(!this.draw) updateSelectionFromShape();
-	}
-	private void drawRectangle(LatLong topleft, LatLong bottomright)
-	{
-		LatLongBounds llb = new LatLongBounds( topleft,bottomright);
-        RectangleOptions rOpts = new RectangleOptions()
-                .bounds(llb)
-                .strokeColor("black")
-                .strokeWeight(2)
-                .fillColor("null")
-                .editable(true).draggable(true);
-
-        this.selectionRectangle = new Rectangle(rOpts);
-        map.addMapShape(this.selectionRectangle);
-        //if not in draw mode update from the shape data
-        if(!this.draw) updateSelectionFromShape();
-        //convertRectangleToPolygon(topleft,bottomright);
-        
-	}
-	private void convertRectangleToPolygon(LatLong topleft, LatLong bottomright)
-	{
-		LatLong topright =new LatLong(topleft.getLatitude(),bottomright.getLongitude());
-		LatLong bottomleft = new LatLong(bottomright.getLatitude(),topleft.getLongitude());
-        this.selectionLatLongs.clear();
-        
-        this.selectionLatLongs.add(topleft);
-        this.selectionLatLongs.add(topright);
-        this.selectionLatLongs.add(bottomright);
-        this.selectionLatLongs.add(bottomleft);
-        this.selectionLatLongs.add(topleft);
-        //test the rectangle as a polygon
-//        this.selectionPointObs.clear();
-//        this.selectionPointObs.push(topleft);
-//        this.selectionPointObs.push(topright);
-//        this.selectionPointObs.push(bottomright);
-//        this.selectionPointObs.push(bottomleft);
-//        this.selectionPointObs.push(topleft);
-//        //test as polygon
-//        PolygonOptions options = new PolygonOptions()
-//				   .paths(this.selectionPointObs)
-//				   .strokeColor("black")
-//	                .strokeWeight(2)
-//	                .fillColor("null")
-//	                .editable(true).draggable(true);
-//        this.selectionPolygon =new Polygon(options);
-//		   map.addMapShape(this.selectionPolygon);
-//        updateSelection();
-	}
-	private void setupMaxPolygonPoints()
-	{
-		LatLong p1 = new LatLong(8.766635, -78.221568);
-		LatLong p2 = new LatLong(1.024341, -79.778153);
-		LatLong p3 = new LatLong(-4.519759, -69.824647);
-		LatLong p4 = new LatLong(1.114824, -66.675034);
-		LatLong p5 = new LatLong(6.280859, -67.190206);
-		LatLong p6 = new LatLong(13.615007, -71.219707);
-		this.selectionPointObs.clear();
-		this.selectionPointObs.push(p1);
-		this.selectionPointObs.push(p2);
-		this.selectionPointObs.push(p3);
-		this.selectionPointObs.push(p4);
-		this.selectionPointObs.push(p5);
-		this.selectionPointObs.push(p6);
-		this.selectionLatLongs.clear();
-		this.selectionLatLongs.add(p1);
-		this.selectionLatLongs.add(p2);
-		this.selectionLatLongs.add(p3);
-		this.selectionLatLongs.add(p4);
-		this.selectionLatLongs.add(p5);
-		this.selectionLatLongs.add(p6);
-		
-		
-	}
-	private void updateSelection(String shapetype)
-	{
-		
-		if(forAction!=null) {
-			forAction.getAnalysisParameters().setSelectionCoords(this.selectionLatLongs);
-			forAction.getAnalysisParameters().setSelectionShape(shapetype);
-			System.out.println("selection boundary updated");
-		}
-	}
-	private void updateSelectionFromShape()
-	{
-		if(forAction!=null) {
-			JSObject points;
-			points = this.selectionPolygon.getPath().getArray();
-			String pString = points.toString();
-			LatLongBounds llb = this.selectionRectangle.getBounds();
-			String shape="";
-			if(!points.toString().equals(""))
-			{
-				//polygon is defined
-				shape="polygon";
-				this.selectionLatLongs.clear();
-				double lat=0;
-				double lon =0;
-				pString = pString.replace("(", "");
-				pString = pString.replace(")", "");
-				String[] c = pString.split(",");
-				for(int s=0;s<c.length;s++) {
-					if(s%2==0) {
-						lat= Double.parseDouble(c[s]);
-						
-					}
-					else {
-						lon= Double.parseDouble(c[s]);
-						this.selectionLatLongs.add(new  LatLong (lat,lon));
-					}
-				}
-				
-			}
-			if(llb.getJSObject()!=null)
-			{
-				//rectangle exists
-				shape="rectangle";
-				LatLong ne =llb.getNorthEast();
-				LatLong sw = llb.getSouthWest();
-				LatLong nw = new LatLong(ne.getLatitude(),sw.getLongitude());
-				LatLong se = new LatLong(sw.getLatitude(),ne.getLongitude());
-				this.selectionLatLongs.clear();
-				this.selectionLatLongs.add(nw);
-				this.selectionLatLongs.add(ne);
-				this.selectionLatLongs.add(se);
-				this.selectionLatLongs.add(sw);
-				this.selectionLatLongs.add(nw);
-			}
-		updateSelection(shape);
-		}
-	}
-	@Override
-    public void mapInitialized() {
-
-        //Set the initial properties of the map.
-        MapOptions mapOptions = new MapOptions();
-        
-        mapOptions.center(new LatLong(3.791898,-74.1868241))
-        		.mapType(MapTypeIdEnum.TERRAIN)
-                .overviewMapControl(false)
-                .panControl(false)
-                .rotateControl(false)
-                .scaleControl(false)
-                .streetViewControl(false)
-                .zoomControl(false)
-                .zoom(5);   
-        this.selectionRectangle = new Rectangle();
-        this.selectionPolygon = new Polygon();
-        this.selectionPointObs = new MVCArray();
-        this.drawRectangle = true;
-        this.draw =false;
-        this.selectionLatLongs = new ArrayList<LatLong>();
-        map = mapView.createMap(mapOptions);
-        
-        mapView.addEventHandler(MouseEvent.MOUSE_CLICKED, 
-                new EventHandler<MouseEvent>() {
-            public void handle(MouseEvent mEvent) { 
-            	updateSelectionFromShape();
-            	System.out.println("mouse click detected! " + mEvent.getSource());
-            	
-            };
-        });
-        
-        
-        map.addMouseEventHandler(UIEventType.click, (GMapMouseEvent event) -> {
-        	if(this.draw) {
-        	   LatLong latLong = event.getLatLong();
-        	   this.selectionPointObs.push(latLong);
-        	   this.selectionLatLongs.add(latLong);
-        	   //todo add custom markers? 
-        	   if(this.drawRectangle)
-        	   {
-        		   if(this.selectionPointObs.getLength()==2)
-        		   {
-        			   	LatLong topleft =new LatLong(this.selectionLatLongs.get(0).getLatitude(),this.selectionLatLongs.get(0).getLongitude());
-        				LatLong bottomright = new LatLong(this.selectionLatLongs.get(1).getLatitude(),this.selectionLatLongs.get(1).getLongitude());
-        				drawRectangle(topleft,bottomright);
-        		   }
-        	   }
-        	   else
-        	   {
-        		   //draw a polygon
-        		   if(this.selectionPointObs.getLength()>2)
-        		   {
-        			  map.removeMapShape(selectionPolygon);
-        			  drawPolygon();
-        			  
-        		   }
-        	   }
-        	}
-        	
-        	});
-        
-    }  
+	
 	
 }

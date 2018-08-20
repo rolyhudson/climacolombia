@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.IOException;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -18,6 +19,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 
+
 public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	 public WorkflowDeserializer() { 
 	        this(null); 
@@ -34,6 +36,9 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        JsonNode workflownode = jp.getCodec().readTree(jp);
 	        JsonNode analysisParamsNode = workflownode.get("analysisParameters");
 	        JsonNode variables = analysisParamsNode.get("variablesAsString");
+	        JsonNode start = analysisParamsNode.get("startDate");
+	        JsonNode end = analysisParamsNode.get("endDate");
+	        JsonNode coords = analysisParamsNode.get("selectionCoords");
 	        JsonNode args = workflownode.get("commandArgs");
 	        JsonNode applicationNode = workflownode.get("application");
 	        JsonNode stepConfigNode = workflownode.get("stepConfig");
@@ -62,9 +67,9 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setDataSet(analysisParamsNode.get("dataSet").asText());
 	        aparams.setDayEndHour(analysisParamsNode.get("dayEndHour").asInt());
 	        aparams.setDayStartHour(analysisParamsNode.get("dayStartHour").asInt());
-//	        aparams.setEndDate(new LocalDate(analysisParamsNode.get("endDate").asText()));
-//	        aparams.setStartDate(new LocalDate(analysisParamsNode.get("endDate").asText()));
-	        
+	        aparams.setEndDate(end.get("year").asInt(),end.get("monthValue").asInt(),end.get("dayOfMonth").asInt());
+	        aparams.setStartDate(start.get("year").asInt(),start.get("monthValue").asInt(),start.get("dayOfMonth").asInt());
+	        aparams.setSelectionShape(analysisParamsNode.get("selectionShape").asText());
 	        if (variables.isArray()) {
 	        	int count =0;
 		        for(JsonNode objNode : variables)
@@ -73,6 +78,29 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 		        	count++;
 		        }
 	        }
+	        if(coords.isArray()) {
+	        	List<double[]> selcoords = new ArrayList<double[]>();
+	        	for(JsonNode objNode : coords)
+		        {
+		        	if(objNode.isArray())
+		        	{
+		        		double lat =0;
+		        		double lon =0;
+		        		boolean first = true;
+		        		for(JsonNode c : objNode)
+		        		{
+		        			if(first) lat = c.asDouble();
+		        			else lon = c.asDouble();
+		        			first=false;
+		        		}
+		        		
+		        		selcoords.add(new double[] {lat,lon});
+		        	}
+		        	
+		        }
+	        	aparams.setSelectionCoordsDouble(selcoords);
+	        }
+	        
 	        aparams.setSeasonEndDay(analysisParamsNode.get("seasonEndDay").asInt());
 	        aparams.setSeasonEndMonth(analysisParamsNode.get("seasonEndMonth").asInt());
 	        aparams.setSeasonStartDay(analysisParamsNode.get("seasonStartDay").asInt());

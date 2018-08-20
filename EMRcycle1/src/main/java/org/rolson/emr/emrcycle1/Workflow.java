@@ -101,7 +101,7 @@ public class Workflow {
 		this.name = toCopy.getName();
 		this.status = toCopy.getStatus();
 		this.actionOnFailure = toCopy.getActionOnFailure();
-		
+		this.analysisParameters = toCopy.getAnalysisParameters();
 		this.setAwsID(toCopy.getAwsID());
 		this.creationDate = toCopy.getCreationDate();
 		this.analysisJAR = toCopy.getAnalysisJar();
@@ -155,6 +155,7 @@ public class Workflow {
 
 		mapper.registerModule(new JodaModule());
 		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		
 		try {
 			
 			serialized = mapper.writeValueAsString(this);
