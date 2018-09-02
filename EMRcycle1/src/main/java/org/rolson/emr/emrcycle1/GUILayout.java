@@ -57,6 +57,7 @@ public class GUILayout {
 	private ClusterCoordinator coordinator;
 	private TableView<Cluster> resourcetable = new TableView<Cluster>();
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
+	private SelectionMap selectionMap = new SelectionMap();
 	
 	Label statuslabel = new Label();
 	Stage stage;
@@ -83,7 +84,7 @@ public class GUILayout {
 
         Scene scene = new Scene(root, width, height);
 
-        stage.setTitle("Clima Colombia");
+        stage.setTitle("Clima Cluster Colombia");
         stage.setScene(scene);
         updateStatusLabel();
         coordinator.updateAll();
@@ -164,7 +165,8 @@ public class GUILayout {
 				addWebView(i,tabname,tabPane);
 			break;
 			case "Workflow builder":
-				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator,this.datamanager);
+				
+				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator,this.datamanager,selectionMap);
 				break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);
@@ -217,32 +219,7 @@ public class GUILayout {
 	{
 		statuslabel.setText(coordinator.EMRStatus());
 	}
-//	@SuppressWarnings("unchecked")
-//	private TableColumn addWorkflowActionColumn(TableView tblView,String buttonName,String colName)
-//	{
-//		TableColumn c3 = new TableColumn<>(colName);
-//        c3.setSortable(false);
-//        c3.setCellValueFactory(
-//                new Callback<TableColumn.CellDataFeatures<Workflow, Boolean>,
-//                        ObservableValue<Boolean>>() {
-//     
-//                    @Override
-//                    public ObservableValue<Boolean> call(TableColumn.CellDataFeatures<Workflow, Boolean> p) {
-//                        return new SimpleBooleanProperty(p.getValue() != null);
-//                    }
-//                });
-//     
-//        c3.setCellFactory(
-//                new Callback<TableColumn<Workflow, Boolean>, TableCell<Workflow, Boolean>>() {
-//     
-//                    @Override
-//                    public TableCell<Workflow, Boolean> call(TableColumn<Workflow, Boolean> p) {
-//                        return new WorkflowActionCell(tblView,buttonName,coordinator);
-//                    }
-//                });
-//        
-//        return c3;
-//	}
+
 	@SuppressWarnings("unchecked")
 	private TableColumn addClusterActionColumn(TableView tblView,String buttonName,String colName)
 	{
@@ -300,18 +277,7 @@ public class GUILayout {
         	tabColumns.add(addColumn(col,150,col));
         }
         if(name.contains("Workflow")) {
-//        	TableColumn runbuttons = addWorkflowActionColumn(table,"run","Go");
-//        	TableColumn stopbuttons = addWorkflowActionColumn(table,"stop","Terminate");
-//        	TableColumn mapbuttons = addWorkflowActionColumn(table,"map","Visualise");
-//        	TableColumn statsbuttons = addWorkflowActionColumn(table,"stats","Stats");
-//        	TableColumn editbuttons = addWorkflowActionColumn(table,"copy","Copy");
-//        	TableColumn copybuttons = addWorkflowActionColumn(table,"edit","Edit");
-//        			tabColumns.add(runbuttons);
-//        			tabColumns.add(stopbuttons);
-//        			tabColumns.add(mapbuttons);
-//        			tabColumns.add(statsbuttons);
-//        			tabColumns.add(copybuttons);
-//        			tabColumns.add(editbuttons);
+
         }
         else
         {
@@ -404,11 +370,7 @@ public class GUILayout {
 			Workflow wf = new Workflow();
 			wf.sparkClimateCluster();
 			coordinator.addWorkflow(wf);
-//			Cluster clus = new Cluster();
-//			clus.setName("K-means clustering");
-//			clus.addPredfined(cmd);
-//			coordinator.addCluster(clus);
-//			coordinator.runCluster("K-means clustering");
+
 		
 			break;
 		

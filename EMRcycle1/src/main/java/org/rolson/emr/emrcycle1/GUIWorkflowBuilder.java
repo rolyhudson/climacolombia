@@ -7,8 +7,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-
-
+import java.util.concurrent.TimeUnit;
 
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -84,9 +83,10 @@ public class GUIWorkflowBuilder {
 
 	List<String> hours;
 	
-	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord,DataManager dm)
+	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord,DataManager dm,SelectionMap sm)
 	{
-		selectionMap = new SelectionMap(this.forAction);
+		selectionMap = sm;
+		
 		this.datamanager = dm;
 		coordinator = coord;
 		setHours();
@@ -133,14 +133,16 @@ public class GUIWorkflowBuilder {
 		
 		BorderPane bp = new BorderPane();
 		
-		mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
-		bp.setRight(mappingBox);
+		
 		this.configTools = configTools();
 		bp.setLeft(this.configTools);
 		def.getChildren().setAll(bp);
+		mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
+		bp.setRight(mappingBox);
 		wfEditorBox.getChildren().add(def);
 		
 	}
+	
 	private HBox workFlowTools()
 	{
 		HBox box = new HBox();
@@ -159,7 +161,7 @@ public class GUIWorkflowBuilder {
 		wfNameTextField.textProperty().addListener((obs, oldText, newText) -> {
 		   if(!this.newWorkflow) {
 			forAction.setName(newText);
-			data.setAll(forAction);
+			
 			this.coordinator.updateWorkflowList();
 		   }
 		});
@@ -170,13 +172,15 @@ public class GUIWorkflowBuilder {
 		this.copyBtn = new Button("Copy");
 		copyBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		copyBtn.setOnAction((event) -> {
-		    // Button was clicked, do something...
+		    
 			if(forAction!=null)
 			{
 			Workflow wf = new Workflow();
 			wf.setWorkflowFromJSON(forAction.seraliseWorkflow());
 			
 			wf.setName(forAction.getName()+" copy");
+			wf.setStatus("INITIALISED");
+			wf.generateNewGuid();
 			coordinator.addWorkflow(wf);
 			this.workflowtable.getSelectionModel().select(wf);
 			}
@@ -207,7 +211,7 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-			
+				this.coordinator.runWorkflow(forAction);
 			}
 		});
 		tools.add(runBtn,4,0);
@@ -269,7 +273,7 @@ public class GUIWorkflowBuilder {
 	private VBox configTools()
 	{
 		VBox tools = new VBox();
-		List<String> panels = Arrays.asList("Dataset","Variables", "Analysis method","Date range","Season range","Daily range");
+		List<String> panels = Arrays.asList("Dataset","Variables", "Analysis method","Date range","Season range","Daily range","Map refresh");
 
 		for(String p : panels)
 		{
@@ -277,15 +281,23 @@ public class GUIWorkflowBuilder {
 			toolpanel.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
 			        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 			        + "-fx-border-color: rgb(220,220,220);");
-			
+			if(!p.equals("Map refresh")) {
 			Label nameLbl = new Label(p);
 			nameLbl.setFont(Font.font (15));
 			toolpanel.getChildren().add(nameLbl);
-			
+			}
 			switch(p)
 			{
-			case "Copy":	
-				
+			case "Map refresh":	
+				Button mapUpdateBtn = new Button(p);
+				toolpanel.getChildren().add(mapUpdateBtn);
+				 mapUpdateBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+				 mapUpdateBtn.setOnAction((event) -> {
+				 this.selectionMap = new SelectionMap();
+				 mappingBox.getChildren().remove(0);
+				 mappingBox.getChildren().remove(0);
+				 mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
+				});
 				break;
 			
 			case "Dataset":
@@ -393,7 +405,7 @@ public class GUIWorkflowBuilder {
 				break;
 			}
 			tools.getChildren().add(toolpanel);
-	        //tools.getChildren().add(comboBox);
+	        
 		}
 		return tools;
 	}
@@ -518,7 +530,7 @@ public class GUIWorkflowBuilder {
 
                 this.forAction = (Workflow) table.getSelectionModel().getSelectedItem();
                 
-        		data.setAll(forAction);
+        		//data.setAll(forAction);
         		//set the map foraction selected
         		this.selectionMap.setForAction(forAction);
         		updateUIWithWorkflow();
@@ -556,7 +568,7 @@ public class GUIWorkflowBuilder {
 			this.map2dBtn.setDisable(false);
 			this.map3dBtn.setDisable(false);
 			this.statsBtn.setDisable(false);
-			this.stopBtn.setDisable(false);
+			this.stopBtn.setDisable(true);
 			
 			this.copyBtn.setDisable(false);
 			this.saveBtn.setDisable(true);

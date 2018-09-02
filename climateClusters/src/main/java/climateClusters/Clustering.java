@@ -3,6 +3,7 @@ package climateClusters;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.time.LocalDate;
 import java.util.Arrays;
 
 import java.util.List;
@@ -19,17 +20,34 @@ import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
+
 import scala.Tuple2;
 
 public class Clustering {
 
 	public static void main(String[] args) {
-	
-		SparkSession spark = SparkSession
-                .builder()
-                .appName("SparkJob")
-                .getOrCreate();
+		// on EMR use
+//		SparkSession spark = SparkSession
+//                .builder()
+//                .appName("SparkJob")
+//                .getOrCreate();
+		
+		//local debug
+		SparkSession spark = SparkSession.builder()
+				  .master("local")
+				  .appName("SparkJob")
+				  .getOrCreate();
 		//this is all incoming with args
+//		private List<Variables> variables; 
+//		private LocalDate start;
+//		private LocalDate end;
+//		private int seasonStartMonth;
+//		private int seasonStartDay;
+//		private int seasonEndMonth;
+//		private int seasonEndDay;
+//		private int dayStartHour;
+//		private int dayEndHour;
+//		private List<double[]> selectionCoords;
 	    List<String> reqVars  = Arrays.asList("t", "ws", "rh");
 	    DateTime startdate = new DateTime(2005, 1, 1, 1, 0, 0, 0);
 		DateTime enddate = new DateTime(2008, 1, 1, 1,0,0,0);
@@ -40,8 +58,8 @@ public class Clustering {
 	    
    	    JavaPairRDD<String,Vector> labeldata = data
 	    		.filter(line -> !isHeader(line))
-	    		.filter(line-> inDateRange(line,startdate,enddate))
-                .filter(line-> inSeasonRange(line,startSeason,endSeason))
+	    		.filter(line -> inDateRange(line,startdate,enddate))
+                .filter(line -> inSeasonRange(line,startSeason,endSeason))
 	    		.mapToPair(x -> getLabeledData(x,reqVars));
 	    
 	    for (Tuple2<String,Vector> line: labeldata.take(10)) {

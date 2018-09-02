@@ -13,6 +13,10 @@ import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.joda.JodaModule;
 import com.lynden.gmapsfx.javascript.object.LatLong;
 import com.lynden.gmapsfx.javascript.object.MVCArray;
 
@@ -234,5 +238,23 @@ public class AnalysisParameters {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 		return enumNames;
+	}
+	public String seraliseWorkflow()
+	{
+		String serialized = "";
+		ObjectMapper mapper = new ObjectMapper();
+
+		mapper.registerModule(new JodaModule());
+		mapper.configure(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS, false);
+		
+		try {
+			
+			serialized = mapper.writeValueAsString(this);
+		} catch (JsonProcessingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return serialized;
 	}
 }

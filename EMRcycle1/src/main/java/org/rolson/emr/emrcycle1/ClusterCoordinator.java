@@ -50,7 +50,7 @@ public class ClusterCoordinator {
 	{
 		//get stored workflows from text files in s3 
 		updateStoredWorkflows();
-		//updates cannot run on frequent cycle geerates a throttling error
+		//updates cannot run on frequent cycle generates a throttling error
 		//get the clusters
 		updateResourceStatus();
 		//based on clusters in time range get the workflows from aws
@@ -110,21 +110,26 @@ public class ClusterCoordinator {
 			    {
 			    	//"PENDING,CANCEL_PENDING, RUNNING,COMPLETED,CANCELLED,FAILED,INTERRUPTED"
 				    String stepstatus = step.getStatus().getState();
-				    String id = step.getId();
-					Optional<Workflow> wf = allWorkflows.stream().filter(x->id.equals(x.getAwsID())).findFirst();
-					Workflow wflow;
-					if(wf.isPresent())
-					{
-						//when the cluster was started in or found running by the current session
-						wflow = wf.get();
-					}
-					else {
-						//if the app starts and clusters are found ruuning
-						//create step with details from aws
-						wflow = new Workflow(step);
-						allWorkflows.add(wflow);
-					}
-					wflow.setStatus(stepstatus);
+				    
+				    //get the guid from the command args
+				    List<String> args = step.getConfig().getArgs();
+				    try {
+					    String guid =args.get(8);
+					   
+						Optional<Workflow> wf = allWorkflows.stream().filter(x->guid.equals(x.getGuid())).findFirst();
+						Workflow wflow;
+							if(wf.isPresent())
+							{
+								//when the cluster was started in or found running by the current session
+								wflow = wf.get();
+								wflow.setStatus(stepstatus);
+							}
+					    }
+				    catch(Exception e)
+				    {
+				    	
+				    }
+				    
 			    }
 		}
 		monitorWorkflowData.setAll(allWorkflows);
@@ -134,14 +139,21 @@ public class ClusterCoordinator {
 		List<String> keys = this.dataManager.listBucketContents();
 		for(String k : keys)
 		{
-			if(k.contains("jsontest"))
+			if(k.contains("workflowJSON"))
 			{
-				String jsonstring = this.dataManager.getString(k);
-				if(jsonstring!="")
+				//does the wf exsit?
+				String guid  = k.substring(k.lastIndexOf("/")+1);
+				//check if the wf is already loaded
+				Optional<Workflow> owf = allWorkflows.stream().filter(x->guid.equals(x.getGuid())).findFirst();
+				if(!owf.isPresent())
 				{
-					Workflow wf = new Workflow();
-					wf.setWorkflowFromJSON(jsonstring);
-					allWorkflows.add(wf);
+					String jsonstring = this.dataManager.getString(k);
+					if(!jsonstring.equals(""))
+					{
+						Workflow wf = new Workflow();
+						wf.setWorkflowFromJSON(jsonstring);
+						allWorkflows.add(wf);
+					}
 				}
 			}
 		}
@@ -220,6 +232,9 @@ public class ClusterCoordinator {
 	{
 		//workflow is already in allWorkflows list
 		//check for running cluster and give option to add to exsiting
+		String wfString = wf.seraliseWorkflow();
+		
+		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid(),wfString);
 		Cluster newclus = new Cluster();
 		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
 		newclus.setName("Cluster with workflow: "+wf.getName());

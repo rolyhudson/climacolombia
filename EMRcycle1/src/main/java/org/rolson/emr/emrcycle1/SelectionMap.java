@@ -1,12 +1,15 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.BufferedReader;
+
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.IOUtils;
 
@@ -42,6 +45,7 @@ import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
 import netscape.javascript.JSObject;
 
+
 public class SelectionMap implements MapComponentInitializedListener{
 	private Workflow forAction;
 	
@@ -50,22 +54,23 @@ public class SelectionMap implements MapComponentInitializedListener{
 	private MVCArray selectionPointObs;
 	private boolean drawRectangle;
 	private boolean draw;
+	
 	private List<LatLong> selectionLatLongs;
 	private List<Marker> mapMarkers;
 
 	private GoogleMapView mapView; 
 	private GoogleMap map;
 	
-	public SelectionMap(Workflow action)
+	public SelectionMap()
 	{
-		this.forAction =action;
 		
-		mapView = new GoogleMapView(null,"api"); 
-		
+		mapView = new GoogleMapView("en","AIzaSyAj9C3s1dVtL3WA8BRsSWKoutIFYdJlfBc");
 		mapView.addMapInializedListener(this);
 	}
+	
 	public GoogleMapView getMapView()
 	{
+		
 		return mapView;
 	}
 	public void setDraw(boolean drawOnOff)
@@ -138,6 +143,7 @@ public class SelectionMap implements MapComponentInitializedListener{
         	}
         	
         	}); 
+        
     }  
 	public void addMapShapeFromWorkflow()
 	{
@@ -203,6 +209,7 @@ public class SelectionMap implements MapComponentInitializedListener{
 			 this.drawRectangle =true;
 			 this.draw =true;
 		});
+		 
 		 mapControl.getChildren().addAll(polyBtn,polyDrawBtn,rectBtn,rectDrawBtn,clearBtn);
 		 box.getChildren().add(mapControl);
 		return box;

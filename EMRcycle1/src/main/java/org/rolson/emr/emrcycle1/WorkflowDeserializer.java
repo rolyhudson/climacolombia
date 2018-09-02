@@ -46,7 +46,8 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        //set the workflow up
 	        Workflow wf = new Workflow();
 	        wf.setName(workflownode.get("name").asText());
-	        wf.setAwsID(workflownode.get("awsID").asText());	
+	        wf.setAwsID(workflownode.get("awsID").asText());
+	        wf.setGuid(workflownode.get("guid").asText());
 	        wf.setStatus(workflownode.get("status").asText());
 	        wf.setCreationDate(new DateTime(workflownode.get("creationDate").asText()));
 	        wf.setOutputFolder(workflownode.get("outputFolder").asText());
@@ -112,4 +113,5 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        wf.setApplication(app);
 	    	return wf;
 	    }
+	    
 }

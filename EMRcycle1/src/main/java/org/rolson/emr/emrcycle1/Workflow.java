@@ -6,6 +6,7 @@ import java.util.ArrayList;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.UUID;
 
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
@@ -34,6 +35,7 @@ public class Workflow {
 	private String mainClassInJAR;
 	private String status;
 	private String awsID;
+	private String Guid;
 	private StepConfig stepConfig;
 	private DateTime creationDate;
 	private AnalysisParameters analysisParameters;
@@ -99,6 +101,7 @@ public class Workflow {
 	public void copyWorkflow(Workflow toCopy)
 	{
 		this.name = toCopy.getName();
+		this.Guid = toCopy.getGuid();
 		this.status = toCopy.getStatus();
 		this.actionOnFailure = toCopy.getActionOnFailure();
 		this.analysisParameters = toCopy.getAnalysisParameters();
@@ -166,6 +169,18 @@ public class Workflow {
 		//System.out.println(serialized);
 		return serialized;
 	}
+	public String getGuid()
+	{
+		return this.Guid;
+	}
+	public void setGuid(String uid)
+	{
+		this.Guid = uid;
+	}
+	public void generateNewGuid()
+	{
+		this.Guid = UUID.randomUUID().toString();
+	}
 	public String getAnalysisJar()
 	{
 		return this.analysisJAR;
@@ -210,7 +225,7 @@ public class Workflow {
 	{
 		name =n;
 		this.debugName = this.name+" debug"; 
-		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 	}
 	public void setStatus(String s)
 	{
@@ -294,24 +309,26 @@ public class Workflow {
 		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
 		this.appType = new Application();
 		this.appType.setName("Spark");
+		this.Guid = UUID.randomUUID().toString();
+		
 	}
 	public void setWorkflowFromAnalysisParams()
 	{
 		if(this.analysisParameters.getDataSet().equals("MONTHLY_GRID"))
 		{
 			//source monthly not avaialble yet
-			this.dataSource = "s3://rolyhudsontestbucket1/climateData/monthly.csv";
+			this.dataSource = "s3://clustercolombia/data/monthly.csv";
 		}
 		else
 		{
-			this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";;
+			this.dataSource = "s3://clustercolombia/data/flatdata.csv";;
 		}
 		this.analysisJAR = "command-runner.jar";
 		switch(this.analysisParameters.getAnalysisMethod())
 		{
 		case "K_MEANS":
 			this.mainClassInJAR = "climateClusters.Clustering";
-			this.sparkJAR = "s3://rolyhudsontestbucket1/climateData/climateClusters2.jar";
+			this.sparkJAR = "s3://clustercolombia/sparkJAR/climateClusters2.jar";
 			break;
 		case "BI_K_MEANS":
 			break;
@@ -321,7 +338,7 @@ public class Workflow {
 			break;
 		}
 		this.debugName = this.name+" debug"; 
-		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 		//some how the space and time params need to be passed to args
 		this.commandArgs = Arrays.asList("spark-submit",
 				"--deploy-mode",
@@ -330,9 +347,10 @@ public class Workflow {
 				this.mainClassInJAR,
 				this.sparkJAR,
 				this.dataSource,
-				this.outputFolder);
+				this.outputFolder,
+				this.Guid);
 		
-		setStepConfig();
+		setSparkStepConfig();
 	}
 	private void mapReduceVariables()
 	{
@@ -340,9 +358,9 @@ public class Workflow {
 		this.name = "MapReduce Station Counter";
 		this.status = "INITIALISED";
 		this.setAwsID("undefined");
-		this.dataSource = "s3://rolyhudsontestbucket1/climateData/VV50.txt";
-		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "s3://rolyhudsontestbucket1/climateData/stationAnalysis.jar";
+		this.dataSource = "s3://clustercolombia/data/VV50.txt";
+		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		this.analysisJAR = "s3://clustercolombia/data/stationAnalysis.jar";
 		this.debugName = "Hadoop MR NOAA Counting"; 
 		this.mainClassInJAR = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
 		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
@@ -359,11 +377,11 @@ public class Workflow {
 	{
 		this.name = "Spark climate clustering with kmeans";
 		this.debugName = "Spark test debug"; 
-		this.dataSource = "s3://rolyhudsontestbucket1/climateData/flatClimateData.csv";
-		this.outputFolder = "s3://rolyhudsontestbucket1/climateData/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		this.dataSource = "s3://clustercolombia/data/flatdata.csv";
+		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 		this.analysisJAR = "command-runner.jar";
 		this.mainClassInJAR = "climateClusters.Clustering";
-		this.sparkJAR = "s3://rolyhudsontestbucket1/climateData/climateClusters2.jar";
+		this.sparkJAR = "s3://clustercolombia/sparkJAR/climateClusters2.jar";
 		this.commandArgs = Arrays.asList("spark-submit",
 				"--deploy-mode",
 				"cluster",

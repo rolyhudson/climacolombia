@@ -21,7 +21,7 @@ import com.amazonaws.services.s3.transfer.TransferManager;
 public class DataManager {
 	private AmazonS3 s3client;
 	private TransferManager xfm;
-	private String bucketName = "rolyhudsontestbucket1";
+	private String bucketName = "clustercolombia";
 	private String keyName = "climateData";
 	public DataManager()
 	{
