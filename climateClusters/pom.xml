@@ -26,5 +26,13 @@
     <artifactId>spark-mllib_2.11</artifactId>
     <version>2.3.1</version>
 </dependency>
+<!-- https://mvnrepository.com/artifact/org.json/json -->
+<dependency>
+<scope>provided</scope>
+    <groupId>org.json</groupId>
+    <artifactId>json</artifactId>
+    <version>20180813</version>
+</dependency>
+
   </dependencies>
 </project>

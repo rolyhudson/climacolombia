@@ -50,53 +50,7 @@ public class Workflow {
 		this.analysisParameters = new AnalysisParameters();
 		setWorkflowFromAnalysisParams();
 	}
-	public Workflow(StepSummary step)
-	{
-		//workflow from stepsummary
-		this.name = step.getName();
-		this.status = step.getStatus().getState();
-		switch(step.getActionOnFailure())
-		{
-			case "TERMINATE_CLUSTER":
-				this.actionOnFailure = ActionOnFailure.TERMINATE_CLUSTER;
-				break;
-			case "CANCEL_AND_WAIT":
-				this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
-				break;
-			case "CONTINUE":
-				this.actionOnFailure = ActionOnFailure.CONTINUE;
-				break;
-			case "TERMINATE_JOB_FLOW":
-				this.actionOnFailure = ActionOnFailure.TERMINATE_JOB_FLOW;
-				break;
-				
-		}
-		this.setAwsID(step.getId());
-		this.creationDate = new DateTime(step.getStatus().getTimeline().getCreationDateTime());
-		this.analysisJAR = step.getConfig().getJar();
-		this.mainClassInJAR = step.getConfig().getMainClass();
-		this.commandArgs = step.getConfig().getArgs();
-		if(this.commandArgs.size()==2)
-		{
-			//for previously defined hadoop map reduce jobs
-			this.outputFolder = this.commandArgs.get(1);
-			this.dataSource = this.commandArgs.get(0);
-			this.appType = new Application();
-			this.appType.setName("Hadoop Map Reduce");
-			setStepConfig();
-		}
-		else
-		{
-			//otherwise a spark job with more args
-			this.mainClassInJAR = this.commandArgs.get(4);
-			this.outputFolder = this.commandArgs.get(7);
-			this.dataSource = this.commandArgs.get(6);
-			this.sparkJAR = this.commandArgs.get(5);
-			this.appType = new Application();
-			this.appType.setName("Spark");
-			setSparkStepConfig();
-		}
-	}
+	
 	
 	public void copyWorkflow(Workflow toCopy)
 	{
@@ -110,26 +64,16 @@ public class Workflow {
 		this.analysisJAR = toCopy.getAnalysisJar();
 		this.mainClassInJAR = toCopy.getMainClass();
 		this.commandArgs = toCopy.getCommandArgs();
-		if(this.commandArgs.size()==2)
-		{
-			//for previously defined hadoop map reduce jobs
-			this.outputFolder = this.commandArgs.get(1);
-			this.dataSource = this.commandArgs.get(0);
-			this.appType = new Application();
-			this.appType.setName("Hadoop Map Reduce");
-			setStepConfig();
-		}
-		else
-		{
-			//otherwise a spark job with more args
-			this.mainClassInJAR = this.commandArgs.get(4);
-			this.outputFolder = this.commandArgs.get(7);
-			this.dataSource = this.commandArgs.get(6);
-			this.sparkJAR = this.commandArgs.get(5);
-			this.appType = new Application();
-			this.appType.setName("Spark");
-			setSparkStepConfig();
-		}
+		
+		//otherwise a spark job with more args
+		this.mainClassInJAR = this.commandArgs.get(4);
+		this.outputFolder = this.commandArgs.get(7);
+		this.dataSource = this.commandArgs.get(6);
+		this.sparkJAR = this.commandArgs.get(5);
+		this.appType = new Application();
+		this.appType.setName("Spark");
+		setSparkStepConfig();
+		
 	}
 	public void setWorkflowFromJSON(String jsontext)
 	{
@@ -180,14 +124,17 @@ public class Workflow {
 	public void generateNewGuid()
 	{
 		this.Guid = UUID.randomUUID().toString();
+		updateCommandArgs();
 	}
 	public String getAnalysisJar()
 	{
 		return this.analysisJAR;
+		
 	}
 	public String getMainClass()
 	{
 		return this.mainClassInJAR;
+		
 	}
 	public ActionOnFailure getActionOnFailure()
 	{
@@ -246,22 +193,27 @@ public class Workflow {
 	public void setDataSource(String source)
 	{
 		this.dataSource = source;
+		updateCommandArgs();
 	}
 	public void setOutputFolder(String folder)
 	{
 	this.outputFolder = folder;
+	updateCommandArgs();
 	}
 	public void setAnalysisJar (String jar)
 	{
 	this.analysisJAR = jar;
+	updateCommandArgs();
 	}
-	public void setSaprkJar(String jar)
+	public void setSparkJar(String jar)
 	{
 		this.sparkJAR = jar;
+		updateCommandArgs();
 	}
 	public void setMainClassInJar(String mainclass)
 	{
 		this.mainClassInJAR = mainclass;
+		updateCommandArgs();
 	}
 	public void setStepCongfig(StepConfig config)
 	{
@@ -316,19 +268,19 @@ public class Workflow {
 	{
 		if(this.analysisParameters.getDataSet().equals("MONTHLY_GRID"))
 		{
-			//source monthly not avaialble yet
-			this.dataSource = "s3://clustercolombia/data/monthly.csv";
+			//source monthly not available yet
+			this.dataSource = "s3://clustercolombia/data/flatdata.csv";
 		}
 		else
 		{
-			this.dataSource = "s3://clustercolombia/data/flatdata.csv";;
+			this.dataSource = "s3://clustercolombia/data/flatdata.csv";
 		}
 		this.analysisJAR = "command-runner.jar";
 		switch(this.analysisParameters.getAnalysisMethod())
 		{
 		case "K_MEANS":
 			this.mainClassInJAR = "climateClusters.Clustering";
-			this.sparkJAR = "s3://clustercolombia/sparkJAR/climateClusters2.jar";
+			this.sparkJAR = "s3://clustercolombia/sparkJAR/climateClustering.jar";
 			break;
 		case "BI_K_MEANS":
 			break;
@@ -340,60 +292,23 @@ public class Workflow {
 		this.debugName = this.name+" debug"; 
 		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
 		//some how the space and time params need to be passed to args
+		updateCommandArgs();
+		
+		setSparkStepConfig();
+	}
+	private void updateCommandArgs()
+	{
 		this.commandArgs = Arrays.asList("spark-submit",
 				"--deploy-mode",
 				"cluster",
+				"--jars",
+				"s3://clustercolombia/sparkJAR/java-json.jar",
 				"--class",
 				this.mainClassInJAR,
 				this.sparkJAR,
 				this.dataSource,
 				this.outputFolder,
-				this.Guid);
-		
-		setSparkStepConfig();
-	}
-	private void mapReduceVariables()
-	{
-		//setup for basic MapReduce job
-		this.name = "MapReduce Station Counter";
-		this.status = "INITIALISED";
-		this.setAwsID("undefined");
-		this.dataSource = "s3://clustercolombia/data/VV50.txt";
-		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "s3://clustercolombia/data/stationAnalysis.jar";
-		this.debugName = "Hadoop MR NOAA Counting"; 
-		this.mainClassInJAR = "org.rolson.mapreduce.mapreduce2.StationAnalysisDriver";
-		this.actionOnFailure = ActionOnFailure.CANCEL_AND_WAIT;
-		this.commandArgs = Arrays.asList(dataSource,outputFolder);
-		this.appType = new Application();
-		this.appType.setName("Map Reduce");
-		
-		this.creationDate = new DateTime();
-		this.analysisParameters = new AnalysisParameters();
-		setStepConfig();
-	}
-	
-	public void sparkClimateCluster()
-	{
-		this.name = "Spark climate clustering with kmeans";
-		this.debugName = "Spark test debug"; 
-		this.dataSource = "s3://clustercolombia/data/flatdata.csv";
-		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
-		this.analysisJAR = "command-runner.jar";
-		this.mainClassInJAR = "climateClusters.Clustering";
-		this.sparkJAR = "s3://clustercolombia/sparkJAR/climateClusters2.jar";
-		this.commandArgs = Arrays.asList("spark-submit",
-				"--deploy-mode",
-				"cluster",
-				"--class",
-				this.mainClassInJAR,
-				this.sparkJAR,
-				this.dataSource,
-				this.outputFolder);
-		this.appType = new Application();
-		this.appType.setName("Spark");
-		
-		setSparkStepConfig();
+				"s3://clustercolombia/workflowJSON/"+this.Guid);
 	}
 	private void setSparkStepConfig()
 	{
@@ -411,15 +326,6 @@ public class Workflow {
 				//timePoint.format(formatter);
 		return s;
 	}
-	private void setStepConfig()
-	{
-		this.stepConfig = new StepConfig()
-	       .withName(this.name)
-	       .withActionOnFailure(this.actionOnFailure)
-	       .withHadoopJarStep(new HadoopJarStepConfig()
-	           .withJar(this.analysisJAR)
-	           .withArgs(this.commandArgs)
-	           .withMainClass(this.mainClassInJAR));
-	}
+	
 	
 }

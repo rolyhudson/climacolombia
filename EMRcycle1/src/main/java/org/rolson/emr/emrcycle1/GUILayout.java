@@ -364,15 +364,6 @@ public class GUILayout {
 			coordinator.updateAll();
 			
 			break;
-		case "K-means clustering": 
-			
-			//make new workflow and push to coordinator
-			Workflow wf = new Workflow();
-			wf.sparkClimateCluster();
-			coordinator.addWorkflow(wf);
-
-		
-			break;
 		
 		case "Upload dataset":if(alertMessage(cmd))
 			{

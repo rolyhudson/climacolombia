@@ -139,7 +139,7 @@ public class ClusterCoordinator {
 		List<String> keys = this.dataManager.listBucketContents();
 		for(String k : keys)
 		{
-			if(k.contains("workflowJSON"))
+			if(k.contains("workflowJSON")&&!k.contains("deleted"))
 			{
 				//does the wf exsit?
 				String guid  = k.substring(k.lastIndexOf("/")+1);
@@ -235,6 +235,7 @@ public class ClusterCoordinator {
 		String wfString = wf.seraliseWorkflow();
 		
 		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid(),wfString);
+		
 		Cluster newclus = new Cluster();
 		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
 		newclus.setName("Cluster with workflow: "+wf.getName());
@@ -304,6 +305,11 @@ public class ClusterCoordinator {
 	public void addWorkflow(Workflow wf)
 	{
 		this.allWorkflows.add(wf);
+		monitorWorkflowData.setAll(allWorkflows);
+	}
+	public void removeWorkflow(Workflow wf)
+	{
+		this.allWorkflows.remove(wf);
 		monitorWorkflowData.setAll(allWorkflows);
 	}
 	public void addWorkflowToCluster(String jobflowid)

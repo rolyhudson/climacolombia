@@ -59,12 +59,17 @@ public class GUIWorkflowBuilder {
 	private ComboBox<String> variableCB1;
 	private ComboBox<String> variableCB2;
 	private ComboBox<String> variableCB3;
+	private ComboBox<String> variableCB4;
+	private ComboBox<String> variableCB5;
+	private ComboBox<String> variableCB6;
 	private ComboBox<String> analysisMethodCB;
+	private ComboBox<String> nClustersCB;
 	private ComboBox<String> dayStartHour;
 	private ComboBox<String> dayEndHour;
 	private boolean newWorkflow;
 	private Label statusLbl;
 	private Button copyBtn;
+	private Button deleteBtn;
 	private Button saveBtn;
 	private Button runBtn;
 	private Button stopBtn;
@@ -111,7 +116,7 @@ public class GUIWorkflowBuilder {
 	{
 		mainBox = new HBox();
 		wfSelectorBox = new VBox();
-		wfSelectorBox.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+		wfSelectorBox.setStyle("-fx-padding: 6;" + "-fx-border-style: solid inside;"
 		        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 		        + "-fx-border-color: grey;");
 		mainBox.setSpacing(5);
@@ -119,7 +124,7 @@ public class GUIWorkflowBuilder {
 		addWorkflowList(this.workflowtable);
 		
 		wfEditorBox = new VBox();
-		wfEditorBox.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+		wfEditorBox.setStyle("-fx-padding: 6;" + "-fx-border-style: solid inside;"
 		        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 		        + "-fx-border-color: grey;");
 		addCurrentWorkflowStatus();
@@ -132,13 +137,11 @@ public class GUIWorkflowBuilder {
 		HBox def = new HBox();
 		
 		BorderPane bp = new BorderPane();
-		
-		
 		this.configTools = configTools();
-		bp.setLeft(this.configTools);
-		def.getChildren().setAll(bp);
+
 		mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
-		bp.setRight(mappingBox);
+		def.getChildren().setAll(this.configTools,mappingBox);
+		
 		wfEditorBox.getChildren().add(def);
 		
 	}
@@ -147,7 +150,7 @@ public class GUIWorkflowBuilder {
 	{
 		HBox box = new HBox();
 		box.setAlignment(Pos.CENTER_LEFT);
-		box.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+		box.setStyle("-fx-padding: 6;" + "-fx-border-style: solid inside;"
 		        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 		        + "-fx-border-color: rgb(220,220,220);");
 		box.setSpacing(5);
@@ -186,6 +189,7 @@ public class GUIWorkflowBuilder {
 			}
 		});
 		tools.add(copyBtn,2,0);
+		
 		//save button
 		this.saveBtn = new Button("Save");
 		saveBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -193,17 +197,58 @@ public class GUIWorkflowBuilder {
 
 			if(forAction!=null)
 			{
-				if(this.datamanager.uploadTextToFile("jsontest/"+forAction.getName()+"_"+forAction.getCreationDate()+".txt", forAction.seraliseWorkflow()))
+				if(this.datamanager.uploadTextToFile("workflowJSON/"+forAction.getGuid(), forAction.seraliseWorkflow()))
 				{
 					System.out.println(forAction.getName()+" uploaded with success");
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Success");
+					alert.setHeaderText("Workflow saved");
+					alert.showAndWait();
+					
 				}
 				else
 				{
 					System.out.println(forAction.getName()+" upload failed");
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("Failure");
+					alert.setHeaderText("Workflow not saved");
+					alert.showAndWait();
 				}
 			}
 		});
 		tools.add(saveBtn,3,0);
+		//delete button
+		
+		this.deleteBtn = new Button("Delete");
+		deleteBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		deleteBtn.setOnAction((event) -> {
+		    
+			if(forAction!=null)
+			{
+				//remove from list
+				this.coordinator.removeWorkflow(forAction);
+			//keep a copy if its on AWS
+				if(this.datamanager.copyMove("clustercolombia", "clustercolombia", "workflowJSON/"+forAction.getGuid(), "workflowJSON/deleted/"+forAction.getGuid()))
+				{
+					this.datamanager.delete("workflowJSON/"+forAction.getGuid());
+					System.out.println(forAction.getName()+" deleted with success");
+					
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Success");
+					alert.setHeaderText("Workflow deleted");
+					alert.showAndWait();
+					
+				}
+				else {
+					System.out.println(forAction.getName()+" delete failed");
+					Alert alert = new Alert(AlertType.ERROR);
+					alert.setTitle("Failure");
+					alert.setHeaderText("Workflow not deleted");
+					alert.showAndWait();
+				}
+			}
+		});
+		tools.add(deleteBtn,4,0);
 		//run button
 		this.runBtn = new Button("Run");
 		runBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -214,7 +259,7 @@ public class GUIWorkflowBuilder {
 				this.coordinator.runWorkflow(forAction);
 			}
 		});
-		tools.add(runBtn,4,0);
+		tools.add(runBtn,5,0);
 		//stop button
 		this.stopBtn = new Button("Stop");
 		stopBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -225,7 +270,7 @@ public class GUIWorkflowBuilder {
 			
 			}
 		});
-		tools.add(stopBtn,5,0);
+		tools.add(stopBtn,6,0);
 		//2d map
 		this.map2dBtn = new Button("2d map");
 		map2dBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -273,12 +318,12 @@ public class GUIWorkflowBuilder {
 	private VBox configTools()
 	{
 		VBox tools = new VBox();
-		List<String> panels = Arrays.asList("Dataset","Variables", "Analysis method","Date range","Season range","Daily range","Map refresh");
+		List<String> panels = Arrays.asList("Dataset","Variables", "Clustering method", "N clusters","Date range","Season range","Daily range","Map refresh");
 
 		for(String p : panels)
 		{
 			VBox toolpanel = new VBox();
-			toolpanel.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+			toolpanel.setStyle("-fx-padding: 6;" + "-fx-border-style: solid inside;"
 			        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 			        + "-fx-border-color: rgb(220,220,220);");
 			if(!p.equals("Map refresh")) {
@@ -311,13 +356,11 @@ public class GUIWorkflowBuilder {
 				    else this.selectionMap.drawCityMarkers();
 					if(forAction!=null&&!this.newWorkflow)
 					{
-				    
+				    //data set should determine variables available
 				    AnalysisParameters ap = forAction.getAnalysisParameters();
-				    
 				    System.out.println("dataset is "+ap.getDataSet());
 				    ap.setDataSet(data);
 				    System.out.println("dataset changed to "+ap.getDataSet());
-				    
 					}
 				    
 				});
@@ -328,12 +371,18 @@ public class GUIWorkflowBuilder {
 				this.variableCB1 = createCombo(AnalysisParameters.enumToStringVariables(),0);
 				this.variableCB2 = createCombo(AnalysisParameters.enumToStringVariables(),1);
 				this.variableCB3 = createCombo(AnalysisParameters.enumToStringVariables(),2);
+				this.variableCB4 = createCombo(AnalysisParameters.enumToStringVariables(),3);
+				this.variableCB5 = createCombo(AnalysisParameters.enumToStringVariables(),4);
+				this.variableCB6 = createCombo(AnalysisParameters.enumToStringVariables(),5);
 				variableCB1.setOnAction((event) -> {updateVariables(0,(String)variableCB1.getSelectionModel().getSelectedItem());});
 				variableCB2.setOnAction((event) -> {updateVariables(1,(String)variableCB2.getSelectionModel().getSelectedItem());});
 				variableCB3.setOnAction((event) -> {updateVariables(2,(String)variableCB3.getSelectionModel().getSelectedItem());});
-				toolpanel.getChildren().addAll(variableCB1,variableCB2,variableCB3);		
+				variableCB4.setOnAction((event) -> {updateVariables(3,(String)variableCB4.getSelectionModel().getSelectedItem());});
+				variableCB5.setOnAction((event) -> {updateVariables(4,(String)variableCB5.getSelectionModel().getSelectedItem());});
+				variableCB6.setOnAction((event) -> {updateVariables(5,(String)variableCB6.getSelectionModel().getSelectedItem());});
+				toolpanel.getChildren().addAll(variableCB1,variableCB2,variableCB3,variableCB4,variableCB5,variableCB6);		
 				break;
-			case "Analysis method":
+			case "Clustering method":
 				this.analysisMethodCB = createCombo(AnalysisParameters.enumToStringAnalysisMethod(),0);
 				toolpanel.getChildren().add(analysisMethodCB);
 				analysisMethodCB.setOnAction((event) -> {
@@ -344,6 +393,25 @@ public class GUIWorkflowBuilder {
 				    System.out.println("analysis method is "+ap.getAnalysisMethod());
 				    ap.setAnalysisMethod(aMethod);
 				    System.out.println("analysis method changed to "+ap.getAnalysisMethod());
+					}
+				    
+				});
+				break;
+			case "N clusters":
+				List<String> kclusters =  Arrays.asList("Optimise", "2", "3","4", "5", "6", "7","8", "9", "10", "11","12", "13", "14", "15","16", "17", "18", "19","20");
+					    
+				this.nClustersCB = createCombo(kclusters,0);
+				toolpanel.getChildren().add(nClustersCB);
+				nClustersCB.setOnAction((event) -> {
+					if(forAction!=null&&!this.newWorkflow)
+					{
+					
+				    String k = (String)nClustersCB.getSelectionModel().getSelectedItem();
+				    AnalysisParameters ap = forAction.getAnalysisParameters();
+				    System.out.println("nclusters is "+ap.getNClusters());
+				    if(k.equals("Optimise")) ap.setNClusters(0);
+				    else ap.setNClusters(Integer.parseInt(k));
+				    System.out.println("nclusters changed to "+ap.getNClusters());
 					}
 				    
 				});
@@ -601,11 +669,17 @@ public class GUIWorkflowBuilder {
 		enableDisableNodes();
 		AnalysisParameters ap = forAction.getAnalysisParameters();
 		this.datasetCB.getSelectionModel().select(ap.enumToStringDataset().indexOf(ap.getDataSet()));
+		//data set should determine possible variables
 		this.variableCB1.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(0)));
 		this.variableCB2.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(1)));
 		this.variableCB3.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(2)));
+		this.variableCB4.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(3)));
+		this.variableCB5.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(4)));
+		this.variableCB6.getSelectionModel().select(ap.enumToStringVariables().indexOf(ap.getVariablesAsString().get(5)));
 		this.analysisMethodCB.getSelectionModel().select(ap.enumToStringAnalysisMethod().lastIndexOf(ap.getAnalysisMethod()));
-		
+		int kIndex = ap.getNClusters();
+		if(kIndex>0) kIndex -=1;
+		this.nClustersCB.getSelectionModel().select(kIndex);
 		
 		startdatePicker.setValue(ap.getStartDate());
 		enddatePicker.setValue(ap.getEndDate());

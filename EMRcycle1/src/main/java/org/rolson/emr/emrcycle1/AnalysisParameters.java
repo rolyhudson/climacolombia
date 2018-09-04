@@ -34,17 +34,24 @@ public class AnalysisParameters {
 		BI_K_MEANS;
 	}
 	public enum Variables{
-		TEMPERATURE,
-		RELATIVE_HUMIDITY,
-		WIND_SPEED,
-		WIND_DIRECTION,
-		RADIATION_SOLAR,
-		CLOUD_COVER,
-		PRECIPITATION,
-		NONE;
+	RADIATION_SOLAR,
+		  WIND_DIRECTION,
+		  CLOUD_COVER,
+		  TEMPERATURE,
+		  VAPOUR_PRESSURE,
+		  RELATIVE_HUMIDITY,
+		  TEMP_MIN,
+		  TEMP_MAX,
+		  TEMP_RANGE,
+		  PRECIPITATION,
+		  WIND_SPEED,
+		  ALTITUDE,
+		  LATITUDE,
+		  LONGITUDE,
+		  NONE,
 	}
 	private Dataset dataset;
-	private AnalysisMethod analysisMethod;;
+	private AnalysisMethod analysisMethod;
 	private List<Variables> variables; 
 	private LocalDate start;
 	private LocalDate end;
@@ -56,16 +63,17 @@ public class AnalysisParameters {
 	private int dayEndHour;
 	private List<double[]> selectionCoords;
 	private String selectionShape;
+	private int nClusters;
 	public AnalysisParameters()
 	{
 		setDefaults();
 	}
-	
 	private void setDefaults()
 	{
 		dataset = Dataset.HOURLY_CITIES;
 		analysisMethod = AnalysisMethod.K_MEANS;
-		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED);	
+		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED,
+				Variables.NONE,Variables.NONE,Variables.NONE);	
 		
 		this.start = LocalDate.of(2010,3,12);
 		this.end = LocalDate.of(2012,2,13);
@@ -84,6 +92,7 @@ public class AnalysisParameters {
 		this.selectionCoords.add(new double[] {1.114824, -66.675034});
 		this.selectionCoords.add(new double[] {6.280859, -67.190206});
 		this.selectionCoords.add(new double[] {13.615007, -71.219707});
+		this.nClusters=10;
 	}
 	public void setDataSet(String data)
 	{
@@ -238,6 +247,13 @@ public class AnalysisParameters {
                 .map(Enum::name)
                 .collect(Collectors.toList());
 		return enumNames;
+	}
+	public void setNClusters(int k)
+	{
+		this.nClusters =k;
+	}
+	public int getNClusters() {
+		return this.nClusters;
 	}
 	public String seraliseWorkflow()
 	{

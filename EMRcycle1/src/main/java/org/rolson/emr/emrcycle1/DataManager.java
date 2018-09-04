@@ -8,6 +8,7 @@ import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectResult;
+import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
@@ -74,7 +75,25 @@ public class DataManager {
 		//S3ObjectInputStream inputStream = s3object.getObjectContent();
 		return exists;
 	}
-	
+	public boolean delete(String keyName)
+	{
+		boolean result = false;
+		try {
+             s3client.deleteObject(new DeleteObjectRequest(this.bucketName, keyName));
+        }
+        catch(AmazonServiceException e) {
+            // The call was transmitted successfully, but Amazon S3 couldn't process 
+            // it, so it returned an error response.
+            e.printStackTrace();
+            result = true;
+        }
+        catch(SdkClientException e) {
+            // Amazon S3 couldn't be contacted for a response, or the client
+            // couldn't parse the response from Amazon S3.
+            e.printStackTrace();
+        }
+		return result;
+	}
 	public boolean copyMove(String originBucket,String destinationBucket,String originKey, String destinationKey) throws AmazonServiceException
 	{
 		boolean result = false;

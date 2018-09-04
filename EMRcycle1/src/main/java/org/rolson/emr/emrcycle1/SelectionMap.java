@@ -64,13 +64,13 @@ public class SelectionMap implements MapComponentInitializedListener{
 	public SelectionMap()
 	{
 		
-		mapView = new GoogleMapView("en","AIzaSyAj9C3s1dVtL3WA8BRsSWKoutIFYdJlfBc");
+		mapView = new GoogleMapView("en","AIzaSyCWPUomKhJYIinXiTWXeZ-oAwUTdWDne-U");
 		mapView.addMapInializedListener(this);
 	}
 	
 	public GoogleMapView getMapView()
 	{
-		
+		mapView.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
 		return mapView;
 	}
 	public void setDraw(boolean drawOnOff)
@@ -168,7 +168,7 @@ public class SelectionMap implements MapComponentInitializedListener{
 		Label nameLbl = new Label("Selection");
 		nameLbl.setFont(Font.font (15));
 		box.getChildren().add(nameLbl);
-		box.setStyle("-fx-padding: 10;" + "-fx-border-style: solid inside;"
+		box.setStyle("-fx-padding: 6;" + "-fx-border-style: solid inside;"
 		        + "-fx-border-width: 1;" + "-fx-border-insets: 2;"
 		        + "-fx-border-color: rgb(220,220,220);");
 		HBox mapControl = new HBox();
@@ -272,23 +272,7 @@ public class SelectionMap implements MapComponentInitializedListener{
         this.selectionLatLongs.add(bottomright);
         this.selectionLatLongs.add(bottomleft);
         this.selectionLatLongs.add(topleft);
-        //test the rectangle as a polygon
-//        this.selectionPointObs.clear();
-//        this.selectionPointObs.push(topleft);
-//        this.selectionPointObs.push(topright);
-//        this.selectionPointObs.push(bottomright);
-//        this.selectionPointObs.push(bottomleft);
-//        this.selectionPointObs.push(topleft);
-//        //test as polygon
-//        PolygonOptions options = new PolygonOptions()
-//				   .paths(this.selectionPointObs)
-//				   .strokeColor("black")
-//	                .strokeWeight(2)
-//	                .fillColor("null")
-//	                .editable(true).draggable(true);
-//        this.selectionPolygon =new Polygon(options);
-//		   map.addMapShape(this.selectionPolygon);
-//        updateSelection();
+
 	}
 	private void setupMaxPolygonPoints()
 	{

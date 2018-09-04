@@ -114,28 +114,7 @@ public class Cluster {
 		this.releaseLabel = "emr-5.14.0";
 		
 	}
-	public void addPredfined(String testtype)
-	{
-		Workflow wf;
-		switch(testtype)
-		{
-		
-		case "K-means clustering":
-			wf = new Workflow();
-			wf.sparkClimateCluster();
-			break;
-		case "Linear Regression":
-			wf = new Workflow();
-			//configure for linear classification
-			break;
-		
-			default:
-				wf = new Workflow();
-				break;
-		}
-		addWorkflow(wf);
-		
-	}
+	
 	public void addWorkflow(Workflow wf)
 	{
 		this.stepConfig = wf.getStepConfig();
