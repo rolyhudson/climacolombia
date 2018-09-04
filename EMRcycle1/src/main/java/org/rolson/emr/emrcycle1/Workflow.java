@@ -173,6 +173,7 @@ public class Workflow {
 		name =n;
 		this.debugName = this.name+" debug"; 
 		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		updateCommandArgs();
 	}
 	public void setStatus(String s)
 	{
@@ -199,6 +200,10 @@ public class Workflow {
 	{
 	this.outputFolder = folder;
 	updateCommandArgs();
+	}
+	public void generateNewOutputFolder() {
+		this.outputFolder = "s3://clustercolombia/results/"+generateUniqueOutputName(this.name+"_output_", new DateTime());
+		updateCommandArgs();
 	}
 	public void setAnalysisJar (String jar)
 	{
@@ -308,7 +313,9 @@ public class Workflow {
 				this.sparkJAR,
 				this.dataSource,
 				this.outputFolder,
-				"s3://clustercolombia/workflowJSON/"+this.Guid);
+				"s3://clustercolombia/workflowJSON/"+this.Guid+".txt");
+		
+		setSparkStepConfig();
 	}
 	private void setSparkStepConfig()
 	{

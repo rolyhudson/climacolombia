@@ -105,7 +105,7 @@ public class Cluster {
 	{
 		this.masterInstance = "m4.large";
 		this.slaveInstance = "m4.large";
-		this.logUri = "s3://rolyhudsontestbucket1/climateData";
+		this.logUri = "s3://clustercolombia/logs";
 		this.ec2KeyName = "monday";
 		this.serviceRole = "EMR_DefaultRole";
 		this.jobFlowRole = "EMR_EC2_DefaultRole";
@@ -121,7 +121,7 @@ public class Cluster {
 		this.applications.add(wf.getApplication());
 		this.workflows.add(wf);
 		setRequest();
-		//workflowUpdate();
+		
 	}
 	public Workflow getWorkflow(String name)
 	{

@@ -100,6 +100,18 @@ public class ClusterCoordinator {
 		    c.getWorkflows().get(0).setStatus(stepstatus);
 		}
 	}
+	public List<Cluster> clusterActive()
+	{
+		List<Cluster> activeClusters=new ArrayList<Cluster>();
+		for(Cluster c : this.clusters)
+		{
+			if(c.getStatus().equals("WAITING")||c.getStatus().equals("STARTING")||c.getStatus().equals("RUNNING"))
+			{
+				activeClusters.add(c);
+			}
+		}
+		return activeClusters;
+	}
 	private void updateWorkflowStatus()
 	{
 		for(Cluster c: clusters)
@@ -108,21 +120,24 @@ public class ClusterCoordinator {
 			    
 			    for(StepSummary step:steps.getSteps())
 			    {
-			    	//"PENDING,CANCEL_PENDING, RUNNING,COMPLETED,CANCELLED,FAILED,INTERRUPTED"
-				    String stepstatus = step.getStatus().getState();
+			    	
 				    
 				    //get the guid from the command args
 				    List<String> args = step.getConfig().getArgs();
 				    try {
-					    String guid =args.get(8);
+					    String wfJSONfile =args.get(args.size()-1);
+					    String guid = wfJSONfile.substring(wfJSONfile.lastIndexOf("/")+1, wfJSONfile.lastIndexOf("."));
 					   
 						Optional<Workflow> wf = allWorkflows.stream().filter(x->guid.equals(x.getGuid())).findFirst();
 						Workflow wflow;
 							if(wf.isPresent())
 							{
+								//"PENDING,CANCEL_PENDING, RUNNING,COMPLETED,CANCELLED,FAILED,INTERRUPTED"
+							    
 								//when the cluster was started in or found running by the current session
 								wflow = wf.get();
-								wflow.setStatus(stepstatus);
+								wflow.setStatus(step.getStatus().getState());
+								wflow.setAwsID(step.getId());
 							}
 					    }
 				    catch(Exception e)
@@ -139,10 +154,10 @@ public class ClusterCoordinator {
 		List<String> keys = this.dataManager.listBucketContents();
 		for(String k : keys)
 		{
-			if(k.contains("workflowJSON")&&!k.contains("deleted"))
+			if(k.contains("workflowJSON")&&k.contains("txt"))
 			{
 				//does the wf exsit?
-				String guid  = k.substring(k.lastIndexOf("/")+1);
+				String guid  = k.substring(k.lastIndexOf("/")+1,k.lastIndexOf("."));
 				//check if the wf is already loaded
 				Optional<Workflow> owf = allWorkflows.stream().filter(x->guid.equals(x.getGuid())).findFirst();
 				if(!owf.isPresent())
@@ -234,13 +249,32 @@ public class ClusterCoordinator {
 		//check for running cluster and give option to add to exsiting
 		String wfString = wf.seraliseWorkflow();
 		
-		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid(),wfString);
+		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid()+".txt",wfString);
 		
 		Cluster newclus = new Cluster();
 		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
 		newclus.setName("Cluster with workflow: "+wf.getName());
 		addCluster(newclus);
 		runCluster(newclus);
+	}
+	public void addWorkflowToCluster(Workflow wf)
+	{
+		AddJobFlowStepsRequest req = new AddJobFlowStepsRequest();
+		List<Cluster> active = clusterActive();
+		String id = active.get(0).getAwsID();
+		for(Cluster c : active) {
+			if(c.getStatus().equals("WAITING"))
+			{
+				id = c.getAwsID();
+			}
+		}
+		req.withJobFlowId(id);
+		List<StepConfig> stepConfigs = new ArrayList<StepConfig>();
+		//need to change output if wf guid matches
+		wf.generateNewOutputFolder();
+		stepConfigs.add(wf.getStepConfig());
+		req.withSteps(stepConfigs);
+		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);
 	}
 	public void runCluster(Cluster clus)
 	{

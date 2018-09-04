@@ -75,7 +75,7 @@ public class AnalysisParameters {
 		variables = Arrays.asList(Variables.TEMPERATURE,Variables.RELATIVE_HUMIDITY,Variables.WIND_SPEED,
 				Variables.NONE,Variables.NONE,Variables.NONE);	
 		
-		this.start = LocalDate.of(2010,3,12);
+		this.start = LocalDate.of(2004,3,12);
 		this.end = LocalDate.of(2012,2,13);
 		this.seasonStartMonth = 1;
 		this.seasonStartDay = 1;

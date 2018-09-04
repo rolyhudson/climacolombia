@@ -197,7 +197,7 @@ public class GUIWorkflowBuilder {
 
 			if(forAction!=null)
 			{
-				if(this.datamanager.uploadTextToFile("workflowJSON/"+forAction.getGuid(), forAction.seraliseWorkflow()))
+				if(this.datamanager.uploadTextToFile("workflowJSON/"+forAction.getGuid()+".txt", forAction.seraliseWorkflow()))
 				{
 					System.out.println(forAction.getName()+" uploaded with success");
 					Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -256,7 +256,28 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
+				boolean newcluster =true;
+				if(this.coordinator.clusterActive().size()>0)
+				{
+					Alert alert = new Alert(AlertType.CONFIRMATION);
+					alert.setTitle("Confirmation Dialog");
+					alert.setHeaderText("Active clusters exisit");
+					alert.setContentText("Add to active cluster?");
+
+					Optional<ButtonType> result = alert.showAndWait();
+					if (result.get() == ButtonType.OK){
+						newcluster =false;
+					} else {
+						newcluster =true;
+					}
+				}
+				if(newcluster) {
+					//run if new cluster
 				this.coordinator.runWorkflow(forAction);
+				}
+				else{
+				this.coordinator.addWorkflowToCluster(forAction);	
+				}
 			}
 		});
 		tools.add(runBtn,5,0);

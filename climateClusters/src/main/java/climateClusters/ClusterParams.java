@@ -1,12 +1,15 @@
 package climateClusters;
 
-import java.io.File;
+
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.apache.commons.io.FileUtils;
-import org.apache.spark.api.java.JavaRDD;
+
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 import org.joda.time.LocalDate;
 import org.json.JSONArray;
 import org.json.JSONObject;
@@ -27,16 +30,14 @@ public class ClusterParams {
 	private String jsontext;
 	private String clusteringMethod;
 	private int nclusters;
-	public ClusterParams(String path) {
-		try {
-			
-			this.jsontext = FileUtils.readFileToString(new File(path), "utf-8");
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+	public ClusterParams(String path,SparkSession spark) {
 		
-		getParamsFromJSON();
+		Dataset<Row> jsondata = spark.read().json(path);
+		Dataset<String> ap = jsondata.selectExpr("analysisParameters").toJSON();
+		List<String> allap = ap.collectAsList();
+		this.jsontext = allap.get(0);
+		
+		//getParamsFromJSON();
 	}
 	private void getParamsFromJSON() {
 		JSONObject obj = new JSONObject(jsontext);
@@ -55,9 +56,9 @@ public class ClusterParams {
 		this.end = new LocalDate(endObj.getInt("year"),endObj.getInt("monthValue"),endObj.getInt("dayOfMonth"));
 		
 		JSONArray varObj = apObj.getJSONArray("variablesAsString");
-		for(Object o : varObj)
+		for(int i=0;i<varObj.length();i++)
 		{
-			this.variables.add(o.toString());
+			this.variables.add(varObj.getString(i));
 		}
 		
 		JSONArray coordObj = apObj.getJSONArray("selectionCoords");
