@@ -272,6 +272,7 @@ public class ClusterCoordinator {
 		List<StepConfig> stepConfigs = new ArrayList<StepConfig>();
 		//need to change output if wf guid matches
 		wf.generateNewOutputFolder();
+		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid()+".txt",wf.seraliseWorkflow());
 		stepConfigs.add(wf.getStepConfig());
 		req.withSteps(stepConfigs);
 		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);

@@ -91,6 +91,13 @@ public class ClusterUtils {
 	{
 		return line.contains("latitude");
 	}
+	public static boolean requiredPoint(String line,List<double[]> bound) {
+		String[] sarray = line.split(",");
+		double lat = Double.parseDouble(sarray[0]);
+		double lon = Double.parseDouble(sarray[1]);
+		double[] pt = {lat,lon};
+		return isPointInPolygon(pt, bound);
+	}
 	public static List<String> convertParams(List<String> reqVariables)
 	{
 		List<String> varShort = new ArrayList<String>();
@@ -149,6 +156,27 @@ public class ClusterUtils {
 		
 		return varShort;
 	}
+	
+	private static boolean isPointInPolygon(double[] point, List<double[]> vs)
+    {
+        // ray-casting algorithm based on
+        // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
+
+        double x = point[0], y = point[1];
+
+        boolean inside = false;
+        for (int i = 0, j = vs.size() - 1; i < vs.size(); j = i++)
+        {
+            double xi = vs.get(i)[0], yi = vs.get(i)[1];
+            double xj = vs.get(j)[0], yj = vs.get(j)[1];
+
+            boolean intersect = ((yi > y) != (yj > y))
+                && (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+            if (intersect) inside = !inside;
+        }
+
+        return inside;
+    }
 	public static Vector getValues(String line,List<String> reqVariables)
 	{
 	      String[] sarray = line.split(",");

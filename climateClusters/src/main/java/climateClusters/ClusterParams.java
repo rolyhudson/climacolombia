@@ -27,47 +27,98 @@ public class ClusterParams {
 	private int dayStartHour;
 	private int dayEndHour;
 	private List<double[]> selectionCoords = new ArrayList<double[]>();
-	private String jsontext;
+	private Dataset<Row> jsontext;
 	private String clusteringMethod;
 	private int nclusters;
 	public ClusterParams(String path,SparkSession spark) {
 		
-		Dataset<Row> jsondata = spark.read().json(path);
-		Dataset<String> ap = jsondata.selectExpr("analysisParameters").toJSON();
-		List<String> allap = ap.collectAsList();
-		this.jsontext = allap.get(0);
+		Dataset<Row> jsondata = spark.read().format("json").load(path);
 		
-		//getParamsFromJSON();
+		this.jsontext = jsondata.selectExpr("analysisParameters");
+		
+		//List<String> allap = apObj.collectAsList();
+		//this.jsontext = allap.get(0);
+		
+		getParamsFromJSON();
+	}
+	private String getValue(String key)
+	{
+		List<String> keyvalue = jsontext.selectExpr("analysisParameters."+key).toJSON().collectAsList();
+		
+		return getValue2(keyvalue);
+	}
+	private String getValue2(List<String> keyvalue)
+	{
+		String pair = keyvalue.get(0);
+		pair = pair.substring(1, pair.length()-1);
+		String thekey = pair.substring(0,pair.indexOf(":"));
+		String thevalue = pair.substring(pair.indexOf(":")+1).replace("\"", "");
+		return thevalue;
+	}
+	private LocalDate getDate(String key)
+	{
+		Dataset<Row> dateObj = jsontext.selectExpr("analysisParameters."+key);
+		List<String> yearvalue = dateObj.selectExpr(key+".year").toJSON().collectAsList();
+		List<String> monthvalue = dateObj.selectExpr(key+".monthValue").toJSON().collectAsList();
+		List<String> dayvalue = dateObj.selectExpr(key+".dayOfMonth").toJSON().collectAsList();
+		int y = Integer.parseInt(getValue2(yearvalue));
+		int m = Integer.parseInt(getValue2(monthvalue));
+		int d = Integer.parseInt(getValue2(dayvalue));
+		return new LocalDate(y,m,d);
+	}
+	private String[] getArray(String key) {
+		String asArray = getValue(key);
+		asArray = asArray.substring(1, asArray.length()-1);
+		String[] parts = asArray.split(",");
+		return parts;
+	}
+	private List<double[]> getCoordArray(String key) {
+		String asArray2d = getValue(key);
+		StringBuilder sb = new StringBuilder();
+		List<double[]> coords = new ArrayList<double[]>();
+		for(int i=0;i<asArray2d.length();i++)
+		{
+			if(asArray2d.charAt(i)=='[')
+			{
+				sb = new StringBuilder();
+			}
+			else
+			{
+				if(asArray2d.charAt(i)==']')
+				{
+					String pair = sb.toString();
+					String[] parts = pair.split(",");
+					double[] coord =  { Double.parseDouble(parts[0]),Double.parseDouble(parts[1]) };
+					coords.add(coord);
+				}
+				else
+				{
+					sb.append(asArray2d.charAt(i));
+				}
+			}
+		}
+		return coords;
 	}
 	private void getParamsFromJSON() {
-		JSONObject obj = new JSONObject(jsontext);
-		JSONObject apObj = obj.getJSONObject("analysisParameters");
-		this.seasonStartMonth = apObj.getInt("seasonStartMonth");
-		this.seasonEndMonth = apObj.getInt("seasonEndMonth");
-		this.seasonStartDay = apObj.getInt("seasonStartDay");
-		this.seasonEndDay = apObj.getInt("seasonEndDay");
-		this.dayStartHour = apObj.getInt("dayStartHour");
-		this.dayEndHour = apObj.getInt("dayEndHour");
-		this.clusteringMethod =apObj.getString("analysisMethod");
-		this.nclusters = apObj.getInt("nclusters");
-		JSONObject startObj = apObj.getJSONObject("startDate");
-		this.start = new LocalDate(startObj.getInt("year"),startObj.getInt("monthValue"),startObj.getInt("dayOfMonth"));
-		JSONObject endObj = apObj.getJSONObject("endDate");
-		this.end = new LocalDate(endObj.getInt("year"),endObj.getInt("monthValue"),endObj.getInt("dayOfMonth"));
 		
-		JSONArray varObj = apObj.getJSONArray("variablesAsString");
-		for(int i=0;i<varObj.length();i++)
+		this.seasonStartMonth = Integer.parseInt(getValue("seasonStartMonth"));
+		this.seasonEndMonth = Integer.parseInt(getValue("seasonEndMonth"));
+		this.seasonStartDay = Integer.parseInt(getValue("seasonStartDay"));
+		this.seasonEndDay = Integer.parseInt(getValue("seasonEndDay"));
+		this.dayStartHour = Integer.parseInt(getValue("dayStartHour"));
+		this.dayEndHour = Integer.parseInt(getValue("dayEndHour"));
+		this.clusteringMethod =(getValue("analysisMethod"));
+		this.nclusters = Integer.parseInt(getValue("nclusters"));
+		this.start = getDate("startDate");
+		this.end = getDate("endDate");
+
+		String[] varObj = getArray("variablesAsString");
+		for(int i=0;i<varObj.length;i++)
 		{
-			this.variables.add(varObj.getString(i));
+			this.variables.add(varObj[i]);
 		}
-		
-		JSONArray coordObj = apObj.getJSONArray("selectionCoords");
-		for(int i =0;i<coordObj.length();i++)
-		{
-			JSONArray c = coordObj.getJSONArray(i);
-			double[] coord = {c.getDouble(0),c.getDouble(1)};
-			this.selectionCoords.add(coord);
-		}
+		this.selectionCoords = getCoordArray("selectionCoords");
+
 	}
 	public String getClusteringMethod() {
 		return this.clusteringMethod;

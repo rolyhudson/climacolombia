@@ -306,8 +306,6 @@ public class Workflow {
 		this.commandArgs = Arrays.asList("spark-submit",
 				"--deploy-mode",
 				"cluster",
-				"--jars",
-				"s3://clustercolombia/sparkJAR/java-json.jar",
 				"--class",
 				this.mainClassInJAR,
 				this.sparkJAR,
