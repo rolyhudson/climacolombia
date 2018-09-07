@@ -35,10 +35,6 @@ public class ClusterParams {
 		Dataset<Row> jsondata = spark.read().format("json").load(path);
 		
 		this.jsontext = jsondata.selectExpr("analysisParameters");
-		
-		//List<String> allap = apObj.collectAsList();
-		//this.jsontext = allap.get(0);
-		
 		getParamsFromJSON();
 	}
 	private String getValue(String key)

@@ -1,6 +1,7 @@
 package climateClusters;
 
 import java.io.IOException;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,21 +28,25 @@ public class SimpleKMeans {
 		int seasonEnd = clusterParams.getSeasonEndMonth();
 		List<String> reqVars = ClusterUtils.convertParams(clusterParams.getVariables());
 		List<double[]> bound = clusterParams.getSelectionCoords();
-
+		int numClusters = clusterParams.getNClusters();
+		
 	    JavaRDD<String> data = spark.read().textFile(input).toJavaRDD();
-		    JavaPairRDD<String,Vector> labeldata = data
+	    
+		    JavaRDD<Record> recorddata = data
 	    		.filter(line -> !ClusterUtils.isHeader(line))
 	    		.filter(line -> ClusterUtils.inDateRange(line,start,end))
 	            .filter(line -> ClusterUtils.inSeasonRange(line,seasonStart,seasonEnd))
 	            .filter(line -> ClusterUtils.requiredPoint(line, bound))
-	    		.mapToPair(x -> ClusterUtils.getLabeledData(x,reqVars));
+	            .map(line -> ClusterUtils.createRecord(line, reqVars));
+	    		//.mapToPair(x -> ClusterUtils.getLabeledData(x,reqVars));
 		    //need to throw an error if samples are not found
-	    for (Tuple2<String,Vector> line: labeldata.take(10)) {
-	    	System.out.println("label:"+line._1+" data:"+line._2);
+	    for (Record r: recorddata.take(10)) {
+	    	System.out.println("loc:"+r.getLocation()+" data:"+r.getVector());
 	    	
 	    	}
-	    JavaRDD<Vector> dataPoints = labeldata.values();
-	    int numClusters = 10;
+	    //get the vector attribute
+	    JavaRDD<Vector> dataPoints = recorddata.map(f->f.getVector());
+	    
 	    int numIterations = 20;
 	    
 	    List<Double> scores = new ArrayList<Double>();
@@ -57,31 +62,50 @@ public class SimpleKMeans {
 	    }
 	    
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
-	    	    
-	    JavaRDD<String> outputclusters = labeldata.map(f->ClusterUtils.classPoint2(f,clusters));
+	    
+	    //simple string with cluster # and description
+	    JavaRDD<String> outputclusters = recorddata.map(f->ClusterUtils.classifyAsString(f,clusters));
 	    outputclusters.saveAsTextFile(output);
 	    
-	    JavaPairRDD<Integer,String> count = labeldata.mapToPair(f->ClusterUtils.classPoint(f,clusters));
+	    JavaRDD<Record> records = recorddata.map(f->ClusterUtils.classify(f,clusters))
+	    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 	    
-	    JavaPairRDD<Integer, Iterable<String>> sum = count.groupByKey();
-	    sum.saveAsTextFile(output+"/clusterGroups");
-//	    try {
-//			ClusterUtils.writeMapToTextFile(sum,output+"/clusterCount.txt");
-//		} catch (IOException e) {
-//			// TODO Auto-generated catch block
-//			e.printStackTrace();
-//		}
-//	    for (Map.Entry<Integer,Long> entry : sum.entrySet())
-//		    {
-//		        System.out.println(entry.getKey() + "/" + entry.getValue());
-//		    }
-
+	    int maxyear = records.max(new YearComparator()).getDatetime().getYear();
+	    int minyear = records.min(new YearComparator()).getDatetime().getYear();
+	    for(int y = minyear;y<=maxyear;y++)
+	    {
+	    	for(int m=1;m<=12;m++)
+	    	{
+	    		final int yr = y;
+	    		final int mon = m;
+	    		JavaRDD<String> ymrecords = recorddata.filter(f->ClusterUtils.matchYearMonth(f, yr, mon)).map(f->ClusterUtils.classifyAsString(f,clusters));
+	    		ymrecords.saveAsTextFile(output+"/"+y+"/"+m);
+	    	}
+	    	
+	    }
 	    spark.stop();
 	}
-	// Reduce function adding two integers, will be used to reduce
-    Function2<Integer, Integer, Integer> reduceFunc = new Function2<Integer, Integer, Integer>() {
-        @Override public Integer call(Integer i1, Integer i2) {
-            return i1 + i2;
-        }
-    };
+
 }
+//// Reduce function adding two integers, will be used to reduce
+//Function2<Integer, Integer, Integer> reduceFunc = new Function2<Integer, Integer, Integer>() {
+//  @Override public Integer call(Integer i1, Integer i2) {
+//      return i1 + i2;
+//  }
+//};
+////spark.createDataset(outputclusters.rdd(), evidence$5)
+////simple pair with cluster # as int and string with cluster description
+//JavaPairRDD<Integer,String> count = labeldata.mapToPair(f->ClusterUtils.classPoint(f,clusters));
+//
+//JavaPairRDD<Integer, Iterable<String>> sum = count.groupByKey();
+//sum.saveAsTextFile(output+"/clusterGroups");
+//try {
+//	ClusterUtils.writeMapToTextFile(sum,output+"/clusterCount.txt");
+//} catch (IOException e) {
+//	// TODO Auto-generated catch block
+//	e.printStackTrace();
+//}
+//for (Map.Entry<Integer,Long> entry : sum.entrySet())
+//    {
+//        System.out.println(entry.getKey() + "/" + entry.getValue());
+//    }

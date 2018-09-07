@@ -50,6 +50,25 @@ public class ClusterUtils {
 	    }
 	    out.close();
 	}
+	public static Record classify(Record r,KMeansModel clusters)
+	{
+		r.setClusternum(clusters.predict(r.getVector()));
+		return r;
+	}
+	public static boolean matchYearMonth(Record r,int yr, int m)
+	{
+		if(r.getDatetime().getYear()==yr && r.getDatetime().getMonthOfYear()==m)
+		{
+			return true;
+		}
+		else return false;
+	}
+	public static String classifyAsString(Record r,KMeansModel clusters)
+	{
+		r.setClusternum(clusters.predict(r.getVector()));
+		return r.getDatetime()+","+r.getClusternum()+","+r.getElevation()
+		+","+r.getLocation()[0]+","+r.getLocation()[1]+","+r.getVector();
+	}
 	public static String classPoint2(Tuple2<String,Vector> dl,KMeansModel clusters)
 	{
 		int clusNum = clusters.predict(dl._2);
@@ -71,16 +90,28 @@ public class ClusterUtils {
 	public static boolean inSeasonRange(String line,int startmonth,int endmonth)
 	{
 		String[] sarray = line.split(",");
-		int currentMonth = Integer.parseInt(sarray[3])+1;
+		LocalDate currentDate =  new LocalDate(sarray[3]);
+		int currentMonth = currentDate.getMonthOfYear();
 		if(currentMonth>=startmonth&&currentMonth<=endmonth)return true;
 		else return false;
+	}
+	public static Record createRecord(String line,List<String> reqVariables) {
+		Record r = new Record();
+		String[] sarray = line.split(",");
+		double[] p = {Double.parseDouble(sarray[0]),Double.parseDouble(sarray[1])};
+		r.setLocation(p);
+		r.setElevation(Double.parseDouble(sarray[2]));
+		Vector data = getValues(line,reqVariables);
+		LocalDate currentDate =  new LocalDate(sarray[3]);
+		r.setDatetime(currentDate.toDateTimeAtStartOfDay());
+		r.setVector(data);
+		return r;
 	}
 	public static boolean inDateRange(String line,LocalDate startdate,LocalDate enddate)
 	{
 		String[] sarray = line.split(",");
-		int currentYr = Integer.parseInt(sarray[2]);
-		int currentMonth = Integer.parseInt(sarray[3])+1;
-		LocalDate currentDate = new LocalDate(currentYr, currentMonth, 1); 
+		
+		LocalDate currentDate =  new LocalDate(sarray[3]);
 		if(currentDate.isAfter(startdate)&&currentDate.isBefore(enddate))
 		{
 			return true;
@@ -157,7 +188,7 @@ public class ClusterUtils {
 		return varShort;
 	}
 	
-	private static boolean isPointInPolygon(double[] point, List<double[]> vs)
+	public static boolean isPointInPolygon(double[] point, List<double[]> vs)
     {
         // ray-casting algorithm based on
         // http://www.ecse.rpi.edu/Homepages/wrf/Research/Short_Notes/pnpoly.html
