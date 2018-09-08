@@ -1,25 +1,19 @@
 package climateClusters;
 
-
-
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-
-
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.joda.time.LocalDate;
-import org.json.JSONArray;
-import org.json.JSONObject;
+import org.joda.time.DateTime;
+
 
 public class ClusterParams {
 	
 	//this is all incoming with args
 	private List<String> variables = new ArrayList<String>(); 
-	private LocalDate start;
-	private LocalDate end;
+	private DateTime start;
+	private DateTime end;
 	private int seasonStartMonth;
 	private int seasonStartDay;
 	private int seasonEndMonth;
@@ -29,6 +23,7 @@ public class ClusterParams {
 	private List<double[]> selectionCoords = new ArrayList<double[]>();
 	private Dataset<Row> jsontext;
 	private String clusteringMethod;
+	private String dataset;
 	private int nclusters;
 	public ClusterParams(String path,SparkSession spark) {
 		
@@ -51,7 +46,7 @@ public class ClusterParams {
 		String thevalue = pair.substring(pair.indexOf(":")+1).replace("\"", "");
 		return thevalue;
 	}
-	private LocalDate getDate(String key)
+	private DateTime getDate(String key)
 	{
 		Dataset<Row> dateObj = jsontext.selectExpr("analysisParameters."+key);
 		List<String> yearvalue = dateObj.selectExpr(key+".year").toJSON().collectAsList();
@@ -60,7 +55,7 @@ public class ClusterParams {
 		int y = Integer.parseInt(getValue2(yearvalue));
 		int m = Integer.parseInt(getValue2(monthvalue));
 		int d = Integer.parseInt(getValue2(dayvalue));
-		return new LocalDate(y,m,d);
+		return new DateTime(y,m,d,0,0,0);
 	}
 	private String[] getArray(String key) {
 		String asArray = getValue(key);
@@ -104,6 +99,7 @@ public class ClusterParams {
 		this.dayStartHour = Integer.parseInt(getValue("dayStartHour"));
 		this.dayEndHour = Integer.parseInt(getValue("dayEndHour"));
 		this.clusteringMethod =(getValue("analysisMethod"));
+		this.dataset = getValue("dataSet");
 		this.nclusters = Integer.parseInt(getValue("nclusters"));
 		this.start = getDate("startDate");
 		this.end = getDate("endDate");
@@ -116,13 +112,16 @@ public class ClusterParams {
 		this.selectionCoords = getCoordArray("selectionCoords");
 
 	}
+	public String getDataset() {
+		return this.dataset;
+	}
 	public String getClusteringMethod() {
 		return this.clusteringMethod;
 	}
-	public LocalDate getStartDate() {
+	public DateTime getStartDate() {
 		return this.start;
 	}
-	public LocalDate getEndDate() {
+	public DateTime getEndDate() {
 		return this.end;
 	}
 	public int getSeasonStartMonth() {

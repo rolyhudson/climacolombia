@@ -2,6 +2,7 @@ package climateClusters;
 
 import java.io.IOException;
 
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -14,43 +15,25 @@ import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Encoders;
 import org.apache.spark.sql.SparkSession;
+import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
 
 import scala.Tuple2;
 
 public class SimpleKMeans {
 	
-	public SimpleKMeans(String input,String output,SparkSession spark,ClusterParams clusterParams) {
-		LocalDate start = clusterParams.getStartDate();
-		LocalDate end = clusterParams.getEndDate();
-		int seasonStart = clusterParams.getSeasonStartMonth();
-		int seasonEnd = clusterParams.getSeasonEndMonth();
-		List<String> reqVars = ClusterUtils.convertParams(clusterParams.getVariables());
-		List<double[]> bound = clusterParams.getSelectionCoords();
-		int numClusters = clusterParams.getNClusters();
-		
-	    JavaRDD<String> data = spark.read().textFile(input).toJavaRDD();
-	    
-		    JavaRDD<Record> recorddata = data
-	    		.filter(line -> !ClusterUtils.isHeader(line))
-	    		.filter(line -> ClusterUtils.inDateRange(line,start,end))
-	            .filter(line -> ClusterUtils.inSeasonRange(line,seasonStart,seasonEnd))
-	            .filter(line -> ClusterUtils.requiredPoint(line, bound))
-	            .map(line -> ClusterUtils.createRecord(line, reqVars));
-	    		//.mapToPair(x -> ClusterUtils.getLabeledData(x,reqVars));
-		    //need to throw an error if samples are not found
-	    for (Record r: recorddata.take(10)) {
-	    	System.out.println("loc:"+r.getLocation()+" data:"+r.getVector());
-	    	
-	    	}
-	    //get the vector attribute
+	public SimpleKMeans(String output,SparkSession spark,ClusterParams clusterParams,JavaRDD<Record> recorddata) {
+
+//	    //get the vector attribute
 	    JavaRDD<Vector> dataPoints = recorddata.map(f->f.getVector());
 	    
 	    int numIterations = 20;
 	    
 	    List<Double> scores = new ArrayList<Double>();
-	    
+	    int numClusters = 0;//clusterParams.getNClusters();
 	    if(numClusters==0)
 	    {
 	    	for(int i=2;i<=100;i+=2)
@@ -59,13 +42,15 @@ public class SimpleKMeans {
 	    		scores.add(clusterEp.computeCost(dataPoints.rdd()));
 	    	}
 	    	numClusters = scores.indexOf(Collections.min(scores));
+	    	Dataset<Double> dataDs = spark.createDataset(scores, Encoders.DOUBLE());
+		    dataDs.show();
 	    }
 	    
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
-	    
+	    Vector[] clusterCenters = clusters.clusterCenters();
 	    //simple string with cluster # and description
-	    JavaRDD<String> outputclusters = recorddata.map(f->ClusterUtils.classifyAsString(f,clusters));
-	    outputclusters.saveAsTextFile(output);
+//	    JavaRDD<String> outputclusters = recorddata.map(f->ClusterUtils.classifyAsString(f,clusters));
+//	    outputclusters.saveAsTextFile(output);
 	    
 	    JavaRDD<Record> records = recorddata.map(f->ClusterUtils.classify(f,clusters))
 	    		.sortBy(f-> f.getDatetime().getYear(), true, 20);

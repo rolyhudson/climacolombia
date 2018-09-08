@@ -1,6 +1,7 @@
 package climateClusters;
 
 import java.io.BufferedWriter;
+
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,7 +15,10 @@ import java.util.Map.Entry;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
-import org.joda.time.LocalDate;
+import org.apache.spark.sql.types.DataTypes;
+import org.apache.spark.sql.types.StructField;
+import org.joda.time.DateTime;
+
 
 import scala.Tuple2;
 
@@ -35,6 +39,14 @@ public class ClusterUtils {
          {
                ioe.printStackTrace();
          }
+	}
+	public static void datasetFromList(String schemaString)
+	{
+		List<StructField> fields = new ArrayList<>();
+		for (String fieldName : schemaString.split(" ")) {
+			  StructField field = DataTypes.createStructField(fieldName, DataTypes.StringType, true);
+			  fields.add(field);
+			}
 	}
 	public static void writeMapToTextFile(Map<Integer, Long> map,String outpath) throws IOException
 	{
@@ -90,9 +102,17 @@ public class ClusterUtils {
 	public static boolean inSeasonRange(String line,int startmonth,int endmonth)
 	{
 		String[] sarray = line.split(",");
-		LocalDate currentDate =  new LocalDate(sarray[3]);
+		DateTime currentDate =  DateTime.parse(sarray[3]);
 		int currentMonth = currentDate.getMonthOfYear();
 		if(currentMonth>=startmonth&&currentMonth<=endmonth)return true;
+		else return false;
+	}
+	public static boolean inHourlyRange(String line,int starthour,int endhour)
+	{
+		String[] sarray = line.split(",");
+		DateTime currentDate =  DateTime.parse(sarray[3]);
+		int currentHour = currentDate.getHourOfDay();
+		if(currentHour>=starthour&&currentHour<=endhour)return true;
 		else return false;
 	}
 	public static Record createRecord(String line,List<String> reqVariables) {
@@ -102,16 +122,16 @@ public class ClusterUtils {
 		r.setLocation(p);
 		r.setElevation(Double.parseDouble(sarray[2]));
 		Vector data = getValues(line,reqVariables);
-		LocalDate currentDate =  new LocalDate(sarray[3]);
-		r.setDatetime(currentDate.toDateTimeAtStartOfDay());
+		DateTime currentDate =  DateTime.parse(sarray[3]);
+		r.setDatetime(currentDate);
 		r.setVector(data);
 		return r;
 	}
-	public static boolean inDateRange(String line,LocalDate startdate,LocalDate enddate)
+	public static boolean inDateRange(String line,DateTime startdate,DateTime enddate)
 	{
 		String[] sarray = line.split(",");
 		
-		LocalDate currentDate =  new LocalDate(sarray[3]);
+		DateTime currentDate =  DateTime.parse(sarray[3]);
 		if(currentDate.isAfter(startdate)&&currentDate.isBefore(enddate))
 		{
 			return true;
