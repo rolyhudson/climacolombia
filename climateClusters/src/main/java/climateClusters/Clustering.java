@@ -29,6 +29,7 @@ public class Clustering {
 		
 			ClusterParams clusterParams = new ClusterParams(args[2],spark);
 			FilterData filterData = new FilterData(clusterParams,spark,args[0]);
+			ThermalZones thermalzones = new ThermalZones(spark,args[3]);
 			switch(clusterParams.getClusteringMethod()) {
 			case "K_MEANS":
 				SimpleKMeans simpleKM = new SimpleKMeans(args[1],spark,clusterParams,filterData.getRecords());

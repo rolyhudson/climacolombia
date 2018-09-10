@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -13,6 +14,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.apache.spark.mllib.feature.Normalizer;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.mllib.linalg.Vectors;
 import org.apache.spark.sql.types.DataTypes;
@@ -22,7 +24,7 @@ import org.joda.time.DateTime;
 
 import scala.Tuple2;
 
-public class ClusterUtils {
+public class ClusterUtils implements Serializable {
 	public static void writeMapToFile(Map map,String out)
 	{
 		//binary output
@@ -64,7 +66,13 @@ public class ClusterUtils {
 	}
 	public static Record classify(Record r,KMeansModel clusters)
 	{
-		r.setClusternum(clusters.predict(r.getVector()));
+		r.setClusternum(clusters.predict(r.getVectorNorm()));
+		return r;
+	}
+	public static Record normaliseVector(Record r)
+	{
+		Normalizer n = new Normalizer();
+		r.setVectorNorm(n.transform(r.getVector()));
 		return r;
 	}
 	public static boolean matchYearMonth(Record r,int yr, int m)
@@ -75,11 +83,15 @@ public class ClusterUtils {
 		}
 		else return false;
 	}
+	public static boolean matchClusterNum(Record r,int cnum)
+	{
+		if(r.getClusternum()==cnum) return true;
+		else return false;
+	}
 	public static String classifyAsString(Record r,KMeansModel clusters)
 	{
-		r.setClusternum(clusters.predict(r.getVector()));
-		return r.getDatetime()+","+r.getClusternum()+","+r.getElevation()
-		+","+r.getLocation()[0]+","+r.getLocation()[1]+","+r.getVector();
+		r.setClusternum(clusters.predict(r.getVectorNorm()));
+		return r.toString();
 	}
 	public static String classPoint2(Tuple2<String,Vector> dl,KMeansModel clusters)
 	{
@@ -91,6 +103,9 @@ public class ClusterUtils {
 	{
 		int clus = clusters.predict(dl._2);
 		return new Tuple2<Integer,String>(clus,dl._1);
+	}
+	public static Tuple2<Integer,Record> classRecord(Record r){
+		return new Tuple2<Integer,Record>(r.getClusternum(),r);
 	}
 	public static Tuple2<String,Vector> getLabeledData(String line,List<String> reqVariables)
 	{
@@ -125,6 +140,14 @@ public class ClusterUtils {
 		DateTime currentDate =  DateTime.parse(sarray[3]);
 		r.setDatetime(currentDate);
 		r.setVector(data);
+		//get all other vars
+		List<Double> v = new ArrayList<Double>();
+		for(int i=4;i<sarray.length;i++)
+		{
+			v.add(Double.parseDouble(sarray[0]));
+		}
+		Vector allVar = Vectors.dense(v.stream().mapToDouble(Double::doubleValue).toArray());
+		r.setVectorAllVar(allVar);
 		return r;
 	}
 	public static boolean inDateRange(String line,DateTime startdate,DateTime enddate)
@@ -265,7 +288,10 @@ public class ClusterUtils {
 	    		  values[i] = Double.parseDouble(sarray[1]);
 	    		  break;
 	    	  case "alt":
-	    		  values[i] = Double.parseDouble(sarray[1]);
+	    		  values[i] = Double.parseDouble(sarray[2]);
+	    		  break; 
+	    	  case "windSpd":
+	    		  values[i] = Double.parseDouble(sarray[11]);
 	    		  break;
 	    	  }
 	      }

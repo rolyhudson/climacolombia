@@ -1,60 +1,79 @@
 package climateClusters;
 
-import java.io.IOException;
-
-
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.api.java.function.Function2;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
-import org.joda.time.DateTime;
-import org.joda.time.LocalDate;
 
-import scala.Tuple2;
 
 public class SimpleKMeans {
 	
 	public SimpleKMeans(String output,SparkSession spark,ClusterParams clusterParams,JavaRDD<Record> recorddata) {
 
 //	    //get the vector attribute
-	    JavaRDD<Vector> dataPoints = recorddata.map(f->f.getVector());
-	    
+	    JavaRDD<Vector> dataPoints = recorddata.map(f->f.getVectorNorm());
+
 	    int numIterations = 20;
 	    
-	    List<Double> scores = new ArrayList<Double>();
-	    int numClusters = 0;//clusterParams.getNClusters();
+	    int numClusters = clusterParams.getNClusters();
+	    List<ClusterPerformance> performance = new ArrayList<ClusterPerformance>();
+	   
+	    ClusterPerformance cp;
 	    if(numClusters==0)
 	    {
-	    	for(int i=2;i<=100;i+=2)
+	    	for(int i=2;i<=10;i+=2)
 	    	{
 	    		KMeansModel clusterEp = KMeans.train(dataPoints.rdd(), i, numIterations);
-	    		scores.add(clusterEp.computeCost(dataPoints.rdd()));
+	    		cp = new ClusterPerformance();
+	    		cp.setCost(clusterEp.computeCost(dataPoints.rdd()));
+	    		cp.setNClustsers(i);
+	    		performance.add(cp);
 	    	}
-	    	numClusters = scores.indexOf(Collections.min(scores));
-	    	Dataset<Double> dataDs = spark.createDataset(scores, Encoders.DOUBLE());
-		    dataDs.show();
+	    	ClusterPerformance mincp = performance.stream()
+	    			.min(Comparator.comparing(ClusterPerformance::getCost))
+	    			.orElseThrow(NoSuchElementException::new);
+	    	mincp.setSelected(true);
+	    	numClusters = mincp.getNClusters();
 	    }
-	    
+	    //re-cluster with auto selected k or with preselected k
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
-	    Vector[] clusterCenters = clusters.clusterCenters();
-	    //simple string with cluster # and description
-//	    JavaRDD<String> outputclusters = recorddata.map(f->ClusterUtils.classifyAsString(f,clusters));
-//	    outputclusters.saveAsTextFile(output);
-	    
+	    cp = new ClusterPerformance();
+    	cp.setCost(clusters.computeCost(dataPoints.rdd()));
+		cp.setNClustsers(numClusters);
+		performance.add(cp);
+
+    	Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusterPerformance.class);
+    	performanceDs.toDF().write().json(output+"/performanceDF");
+
+    	//sorted by year and with cluster id
 	    JavaRDD<Record> records = recorddata.map(f->ClusterUtils.classify(f,clusters))
 	    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 	    
+	    //generate the clustering summary
+	    List<ClusterSummary> summary = new ArrayList<ClusterSummary>();
+	    Map<Integer,Long> clusterStats = records.map(f->f.getClusternum()).countByValue();
+	    Vector[] clusterCenters = clusters.clusterCenters();
+	    for(int i=0;i<clusterCenters.length;i++) {
+	    	ClusterSummary cs = new ClusterSummary();
+	    	cs.setCentroid(clusterCenters[i]);
+	    	cs.setClusterId(i);
+	    	cs.setCount(clusterStats.get(i));
+	    	summary.add(cs);
+	    }
+	    Dataset<Row> clusteringDs = spark.createDataFrame(summary, ClusterSummary.class);
+	    clusteringDs.toDF().write().json(output+"/summaryDF");
+	    
+	    //split results by year month
 	    int maxyear = records.max(new YearComparator()).getDatetime().getYear();
 	    int minyear = records.min(new YearComparator()).getDatetime().getYear();
 	    for(int y = minyear;y<=maxyear;y++)
@@ -68,6 +87,13 @@ public class SimpleKMeans {
 	    	}
 	    	
 	    }
+	    for(int i=0;i<numClusters;i++)
+	    {
+	    	int cnum =i;
+	    	JavaRDD<Record> inClusterRecords = records.filter(f->ClusterUtils.matchClusterNum(f,cnum));
+	    	//test cluster datapoints against strategies
+	    }
+	    
 	    spark.stop();
 	}
 

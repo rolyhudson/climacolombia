@@ -3,6 +3,7 @@ package climateClusters;
 import java.util.List;
 
 import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.feature.Normalizer;
 import org.apache.spark.sql.SparkSession;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
@@ -33,7 +34,8 @@ public class FilterData {
 	            .filter(line -> ClusterUtils.inSeasonRange(line,seasonStartMonth,seasonEndMonth))
 	            .filter(line -> ClusterUtils.requiredPoint(line, bound));
 			
-	    
+	  //normalisation
+	  		Normalizer n = new Normalizer();
 		if(clusterParams.getDataset().equals("MONTHLY_GRID"))
 		{
 			filteredRecords = data.map(line -> ClusterUtils.createRecord(line, reqVars));
@@ -46,8 +48,8 @@ public class FilterData {
 		}
 	    
 	}
-	public JavaRDD getRecords()
+	public JavaRDD<Record> getRecords()
 	{
-		return filteredRecords;
+		return filteredRecords.map(f->ClusterUtils.normaliseVector(f));
 	}
 }
