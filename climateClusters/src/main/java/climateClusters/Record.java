@@ -7,6 +7,7 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.joda.time.DateTime;
 public class Record implements Serializable {
 	private double[] location;
+	private double[] psychrometricPoint;
 	private double elevation;
 	private int clusternum;
 	private Vector vectorAllVar;
@@ -18,6 +19,12 @@ public class Record implements Serializable {
 	}
 	public void setLocation(double[] coords) {
 		location = coords;
+	}
+	public double[] getPsychrometricPoint() {
+		return psychrometricPoint;
+	}
+	public void setPsychrometricPoint(double[] ppoint) {
+		psychrometricPoint = ppoint;
 	}
 	public double getElevation() {
 		return elevation;

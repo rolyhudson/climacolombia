@@ -142,12 +142,16 @@ public class ClusterUtils implements Serializable {
 		r.setVector(data);
 		//get all other vars
 		List<Double> v = new ArrayList<Double>();
+		double[] psychrometricPoint = new double[2];
 		for(int i=4;i<sarray.length;i++)
 		{
-			v.add(Double.parseDouble(sarray[0]));
+			if(i==4) psychrometricPoint[0] = Double.parseDouble(sarray[i]);
+			if(i==6) psychrometricPoint[1] = Double.parseDouble(sarray[i]);
+			v.add(Double.parseDouble(sarray[i]));
 		}
 		Vector allVar = Vectors.dense(v.stream().mapToDouble(Double::doubleValue).toArray());
 		r.setVectorAllVar(allVar);
+		r.setPsychrometricPoint(psychrometricPoint);
 		return r;
 	}
 	public static boolean inDateRange(String line,DateTime startdate,DateTime enddate)
@@ -290,7 +294,7 @@ public class ClusterUtils implements Serializable {
 	    	  case "alt":
 	    		  values[i] = Double.parseDouble(sarray[2]);
 	    		  break; 
-	    	  case "windSpd":
+	    	  case "ws":
 	    		  values[i] = Double.parseDouble(sarray[11]);
 	    		  break;
 	    	  }

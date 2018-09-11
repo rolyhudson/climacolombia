@@ -2,9 +2,19 @@ package climateClusters;
 
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.commons.lang.mutable.MutableInt;
+import org.apache.spark.api.java.JavaPairRDD;
+import org.apache.spark.api.java.JavaRDD;
+import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+
+import scala.Tuple2;
 
 public class ThermalZones implements Serializable{
 	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
@@ -28,11 +38,37 @@ public class ThermalZones implements Serializable{
 				}
 			}
 			ds.setPoints(pts);
+			strategies.add(ds);
 		}
 	}
-	public int[] testInclusion(Record r) {
-		int[] inStrategies = {1,6,7};
-		
-		return inStrategies;
+	public void reportInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
+		long countR = records.count();
+				
+		JavaPairRDD<String, Integer> strategyFreq = records.mapToPair(f->{
+			
+			for(DesignStrategy ds : strategies) {
+				if(ClusterUtils.isPointInPolygon(f.getPsychrometricPoint(), ds.getPoints()))
+				{
+					return new Tuple2<String,Integer>( ds.getName(), 1);		
+				}
+				
+			}
+			return new Tuple2<String,Integer>("No strategy found", 1);
+		}
+		);
+		Map<String, Long> strategyCount = strategyFreq.countByKey();
+		List<StrategySummary> summary = new ArrayList<StrategySummary>();
+		//set the percentages
+		for (Map.Entry<String, Long> entry : strategyCount.entrySet()) {
+			System.out.println("Item : " + entry.getKey() + " Count : " + entry.getValue().intValue());
+			StrategySummary ss = new StrategySummary();
+			ss.setName(entry.getKey());
+			ss.setCount(entry.getValue().intValue());
+			ss.setPercent(entry.getValue().doubleValue()/countR*100.0);
+			summary.add(ss);
+		}
+		Dataset<Row> strategyDF = spark.createDataFrame(summary, StrategySummary.class);
+		strategyDF.toDF().write().json(output);
 	}
+	
 }

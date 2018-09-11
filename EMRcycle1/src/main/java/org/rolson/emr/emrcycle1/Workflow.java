@@ -311,7 +311,8 @@ public class Workflow {
 				this.sparkJAR,
 				this.dataSource,
 				this.outputFolder,
-				"s3://clustercolombia/workflowJSON/"+this.Guid+".txt");
+				"s3://clustercolombia/workflowJSON/"+this.Guid+".txt",
+				"s3://clustercolombia/data/zones.txt");
 		
 		setSparkStepConfig();
 	}
