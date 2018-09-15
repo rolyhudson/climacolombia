@@ -2,6 +2,7 @@ package climateClusters;
 
 import java.io.BufferedWriter;
 
+
 import java.io.FileOutputStream;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -21,7 +22,7 @@ import org.apache.spark.sql.types.DataTypes;
 import org.apache.spark.sql.types.StructField;
 import org.joda.time.DateTime;
 
-
+import climateClusters.Record;
 import scala.Tuple2;
 
 public class ClusterUtils implements Serializable {

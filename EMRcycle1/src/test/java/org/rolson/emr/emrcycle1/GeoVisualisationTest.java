@@ -10,7 +10,7 @@ DataManager datamanager = new DataManager();
 	@Test
 	public void testBucketKeyExtraction() {
 		datamanager = new DataManager();
-		datamanager.setupClient();
+		
 		String datasource = "s3://rolyhudsontestbucket1/climateData/other/K-means clustering_output_2018_07_24_13_29_48";
 		String bits[] = datasource.split("/");
 		String bucket = bits[2];

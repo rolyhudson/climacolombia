@@ -1,8 +1,10 @@
 package climateClusters;
 
 import java.io.Serializable;
+
 import java.util.ArrayList;
-import java.util.Arrays;
+
+import java.util.Collections;
 import java.util.List;
 
 import org.apache.commons.math3.geometry.euclidean.twod.Vector2D;
@@ -39,7 +41,7 @@ public class ClusteringPerformance implements Serializable {
 		ClusteringPerformance p2 = points.get(points.size()-1);
 		Vector2D v = new Vector2D(p2.getNClusters()-p1.getNClusters(),p2.getCost()-p1.getCost());
 		Vector2D w;
-		
+		//first and last have dist of 0
 		for(int i=0;i<points.size();i++)
 		{
 			ClusteringPerformance p = points.get(i);
@@ -50,6 +52,8 @@ public class ClusteringPerformance implements Serializable {
 			double dsq = wsq - proj*proj/vsq;
 			distSq.add(dsq);
 		}
-		return 2;
+		int minIndex = distSq.indexOf(Collections.max(distSq));
+		int optClusterN = points.get(minIndex).getNClusters();
+		return optClusterN;
 	}
 }

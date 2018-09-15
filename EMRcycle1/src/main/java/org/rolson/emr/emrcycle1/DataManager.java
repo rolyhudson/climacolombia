@@ -1,6 +1,9 @@
 package org.rolson.emr.emrcycle1;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,6 +12,9 @@ import com.amazonaws.services.s3.AmazonS3;
 import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectResult;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
+import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsV2Request;
+import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectListing;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
@@ -28,7 +34,7 @@ public class DataManager {
 	{
 		setupClient();
 	}
-	public void setupClient(){
+	private void setupClient(){
 		s3client = AmazonS3ClientBuilder.standard()
                 .withRegion("us-east-1")
                 .build();
@@ -47,6 +53,36 @@ public class DataManager {
 		}
 		return keys;
 	}
+	public List<String> listBucketContentsPrefixed(String prefix){
+		List<String> keys = new ArrayList<String>();
+		ListObjectsV2Request req = new ListObjectsV2Request()
+				.withBucketName(bucketName)
+				.withPrefix(prefix);
+				//.withDelimiter(DELIMITER);
+		ListObjectsV2Result listing = s3client.listObjectsV2(req);
+		for (String commonPrefix : listing.getCommonPrefixes()) {
+		        System.out.println(commonPrefix);
+		}
+		for (S3ObjectSummary summary: listing.getObjectSummaries()) {
+		    System.out.println(summary.getKey());
+		    keys.add(summary.getKey());
+		}
+		return keys;
+	}
+	public void readFromS3(String bucketName, String key) throws IOException {
+	    S3Object s3object = s3client.getObject(new GetObjectRequest(
+	            bucketName, key));
+	    System.out.println(s3object.getObjectMetadata().getContentType());
+	    System.out.println(s3object.getObjectMetadata().getContentLength());
+
+	    BufferedReader reader = new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
+	    String line;
+	    while((line = reader.readLine()) != null) {
+	      // can copy the content locally as well
+	      // using a buffered writer
+	      System.out.println(line);
+	    }
+	  }
 	public String getString(String key) throws AmazonServiceException
 	{
 		String contents = "";

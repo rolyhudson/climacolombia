@@ -1,5 +1,8 @@
 package org.rolson.emr.emrcycle1;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.joda.time.DateTime;
 
 public class GeoVisualisation {
@@ -14,20 +17,61 @@ public class GeoVisualisation {
 	{
 		workflow= wf;
 		this.dataSourceUri = wf.getOutputFolder();
+		int startYear=wf.getAnalysisParameters().getStartDate().getYear();
+		int endYear=wf.getAnalysisParameters().getEndDate().getYear();
+		int startMonth=wf.getAnalysisParameters().getSeasonStartMonth();
+		int endMonth=wf.getAnalysisParameters().getSeasonEndMonth();
+		int startHour =wf.getAnalysisParameters().getDayStartHour();
+		int endHour =wf.getAnalysisParameters().getDayEndHour();
 		datamanager = new DataManager();
-		datamanager.setupClient();
-		extractBucketAndKey();
-		if(datamanager.accessObject(this.dataBucket, this.datakey+"/part-00000"))
-		{
-		//file exists move it to public folder
 		outputfolder = Workflow.generateUniqueOutputName("geovis",new DateTime());
-		datamanager.copyMove(this.dataBucket, "lacunae.io", this.datakey+"/part-00000", outputfolder+"/results");
-		movecopyVisTemplates();
-		this.visResultUri = "www.lacunae.io/"+outputfolder;
-		}
+		listResultObjects();
+//		extractBucketAndKey();
+//		if(datamanager.accessObject(this.dataBucket, this.datakey+"/part-00000"))
+//		{
+//		//file exists move it to public folder
+//		
+//		datamanager.copyMove(this.dataBucket, "lacunae.io", this.datakey+"/part-00000", outputfolder+"/results");
+//		movecopyVisTemplates();
+//		this.visResultUri = "www.lacunae.io/"+outputfolder;
+//		}
 		//get bucketname from uri
 		//https://s3.amazonaws.com/rolyhudsontestbucket1/climateData/K-means+clustering_output_2018_07_24_13_29_48/part-00000
 		//datamanager.accessObject();
+	}
+	private void listResultObjects() {
+		String prefixOutput = "results"+workflow.getOutputFolder().substring(workflow.getOutputFolder().lastIndexOf('/'));
+		List<String> resultsObjects = datamanager.listBucketContentsPrefixed(prefixOutput);
+		List<String> jsonToCombine = new ArrayList<String>();
+		
+		String rootKey="";
+		String rootKeyPrev="";
+		String filename ="";
+		for(String line:resultsObjects) {
+			filename = line.substring(line.lastIndexOf('/')+1);
+			rootKey = line.substring(0,line.lastIndexOf('/')+1);
+			if(filename.equals("_SUCCESS")) continue;
+			if(filename.equals("part-00000"))
+			{
+				//move file and continue
+			}
+			else
+			{
+				if(filename.contains(".json")){
+					if(rootKey.equals(rootKeyPrev))
+					{
+						jsonToCombine.add(line);
+					}
+					else {
+						//process the previous json set
+						jsonToCombine = new ArrayList<String>();
+						jsonToCombine.add(line);
+					}
+				}
+				
+			}
+			rootKeyPrev=rootKey;
+		}
 	}
 	public String getVisResultUri()
 	{

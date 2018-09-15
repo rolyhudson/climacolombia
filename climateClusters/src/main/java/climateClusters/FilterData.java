@@ -2,12 +2,13 @@ package climateClusters;
 
 import java.util.List;
 
+
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.feature.Normalizer;
 import org.apache.spark.sql.SparkSession;
 import org.joda.time.DateTime;
 import org.joda.time.LocalDate;
-
+import climateClusters.Record;
 public class FilterData {
 	
 	

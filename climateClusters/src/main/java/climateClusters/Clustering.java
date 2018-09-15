@@ -4,10 +4,13 @@ package climateClusters;
 import java.io.IOException;
 
 
+
 import org.apache.spark.sql.SparkSession;
 import org.joda.time.DateTime;
 import climateClusters.ClusterParams;
 import climateClusters.FilterData;
+import climateClusters.ThermalZones;
+import climateClusters.SimpleKMeans;
 public class Clustering {
 
 	public static void main(String[] args) {
@@ -32,7 +35,7 @@ public class Clustering {
 			ThermalZones thermalzones = new ThermalZones(spark,args[3]);
 			switch(clusterParams.getClusteringMethod()) {
 			case "K_MEANS":
-				SimpleKMeans simpleKM = new SimpleKMeans(args[1],spark,clusterParams,filterData.getRecords(),thermalzones);
+				SimpleKMeans simpleKM = new SimpleKMeans(args[1],spark,clusterParams.getNClusters(),thermalzones,filterData.getRecords());
 				break;
 			}
 		

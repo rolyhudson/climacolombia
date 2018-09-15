@@ -1,6 +1,7 @@
 package climateClusters;
 
 import java.util.ArrayList;
+
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -14,20 +15,25 @@ import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
+import org.joda.time.DateTime;
 
-
+import climateClusters.Record;
+import climateClusters.ThermalZones;
+import climateClusters.ClusteringPerformance;
+import climateClusters.ClusterUtils;
+import climateClusters.ClusterSummary;
 public class SimpleKMeans {
 	private SparkSession spark;
 	private JavaRDD<Vector> dataPoints;
 	private Vector[] clusterCenters;
-	public SimpleKMeans(String output,SparkSession spk,ClusterParams clusterParams,JavaRDD<Record> recorddata,ThermalZones thermalzones) {
+	public SimpleKMeans(String output,SparkSession spk,int numClusters,ThermalZones thermalzones,JavaRDD<Record> recorddata) {
 		spark =spk;
 //	    //get the vector attribute
-	    dataPoints = recorddata.map(f->f.getVectorNorm());
-	    
+		
+		JavaRDD<Vector> dataPoints = recorddata.map(f->f.getVectorNorm());
 	    //KMEANS specific
 	    int numIterations = 20;
-	    int numClusters = clusterParams.getNClusters();
+	    
 	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
 	    if(numClusters==0)

@@ -225,27 +225,29 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-				//remove from list
-				this.coordinator.removeWorkflow(forAction);
-			//keep a copy if its on AWS
-				if(this.datamanager.copyMove("clustercolombia", "clustercolombia", "workflowJSON/"+forAction.getGuid(), "workflowJSON/deleted/"+forAction.getGuid()))
-				{
-					this.datamanager.delete("workflowJSON/"+forAction.getGuid());
-					System.out.println(forAction.getName()+" deleted with success");
-					
-					Alert alert = new Alert(AlertType.CONFIRMATION);
-					alert.setTitle("Success");
-					alert.setHeaderText("Workflow deleted");
-					alert.showAndWait();
-					
-				}
-				else {
-					System.out.println(forAction.getName()+" delete failed");
-					Alert alert = new Alert(AlertType.ERROR);
-					alert.setTitle("Failure");
-					alert.setHeaderText("Workflow not deleted");
-					alert.showAndWait();
-				}
+				Alert alert = new Alert(AlertType.CONFIRMATION);
+				alert.setTitle("Confirmation Dialog");
+				alert.setHeaderText("Delete workflow local and remote?");
+				alert.setContentText("Proceed?");
+
+				Optional<ButtonType> result = alert.showAndWait();
+				if (result.get() == ButtonType.OK){
+					//remove from list
+					this.coordinator.removeWorkflow(forAction);
+					//keep a copy if its on AWS
+					String jsonfile = "workflowJSON/"+forAction.getGuid()+".txt";
+					if(this.datamanager.copyMove("clustercolombia", "clustercolombia", jsonfile, "workflowJSON/deleted/"+forAction.getGuid()))
+					{
+						this.datamanager.delete(jsonfile);
+						System.out.println(forAction.getName()+" deleted with success");
+						
+						
+					}
+					else {
+						System.out.println(forAction.getName()+" delete failed");
+						
+					}
+				} 
 			}
 		});
 		tools.add(deleteBtn,4,0);
@@ -299,7 +301,7 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-			
+			GeoVisualisation gvis = new GeoVisualisation(forAction);
 			}
 		});
 		tools.add(map2dBtn,3,1);

@@ -4,6 +4,7 @@ package org.rolson.emr.emrcycle1;
 import java.io.File;
 
 
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,8 +12,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
+import javafx.concurrent.Task;
 import javafx.event.ActionEvent;
 
 import javafx.geometry.Insets;
@@ -86,11 +89,54 @@ public class GUILayout {
 
         stage.setTitle("Clima Cluster Colombia");
         stage.setScene(scene);
-        updateStatusLabel();
-        coordinator.updateAll();
+        startMonitor();
         stage.show();
 	}
-	
+	public void startMonitor() 
+	{
+		// Create a Runnable
+		Runnable task = new Runnable()
+		{
+			public void run()
+			{
+				runMonitor();
+			}
+		};
+		// Run the task in a background thread
+		Thread backgroundThread = new Thread(task);
+		// Terminate the running thread if the application exits
+		backgroundThread.setDaemon(true);
+		// Start the thread
+		backgroundThread.start();
+	}
+	public void runMonitor() 
+	{
+		int i=0;
+		while(true) 
+		{
+			try 
+			{
+				// Update the Label on the JavaFx Application Thread		
+				Platform.runLater(new Runnable() 
+				{
+		            @Override 
+		            public void run() 
+		            {
+		            	
+		            	System.out.println("update thread called ");
+		            	coordinator.updateOnce();
+		            	updateStatusLabel();
+		            }
+		        });
+				Thread.sleep(30000);
+				i++;
+			}
+			catch (InterruptedException e) 
+			{
+				e.printStackTrace();
+			}
+		}
+	}	
 	private void addTabWithButtons(int index, String name, TabPane pane)
 	{
 		Tab tab1 = new Tab();
@@ -218,6 +264,7 @@ public class GUILayout {
 	public void updateStatusLabel()
 	{
 		statuslabel.setText(coordinator.EMRStatus());
+				
 	}
 
 	@SuppressWarnings("unchecked")
@@ -361,7 +408,7 @@ public class GUILayout {
 			break;
 		case "Update status":
 			updateStatusLabel();
-			coordinator.updateAll();
+			coordinator.updateOnce();
 			
 			break;
 		
