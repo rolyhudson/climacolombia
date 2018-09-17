@@ -1,6 +1,13 @@
 package org.rolson.emr.emrcycle1;
 
+import java.io.BufferedReader;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import org.joda.time.DateTime;
@@ -15,45 +22,107 @@ public class GeoVisualisation {
 	private String visResultUri;
 	public GeoVisualisation(Workflow wf)
 	{
+		this.dataBucket = "clustercolombia";
 		workflow= wf;
 		this.dataSourceUri = wf.getOutputFolder();
-		int startYear=wf.getAnalysisParameters().getStartDate().getYear();
-		int endYear=wf.getAnalysisParameters().getEndDate().getYear();
-		int startMonth=wf.getAnalysisParameters().getSeasonStartMonth();
-		int endMonth=wf.getAnalysisParameters().getSeasonEndMonth();
-		int startHour =wf.getAnalysisParameters().getDayStartHour();
-		int endHour =wf.getAnalysisParameters().getDayEndHour();
+		
 		datamanager = new DataManager();
 		outputfolder = Workflow.generateUniqueOutputName("geovis",new DateTime());
-		listResultObjects();
-//		extractBucketAndKey();
-//		if(datamanager.accessObject(this.dataBucket, this.datakey+"/part-00000"))
-//		{
-//		//file exists move it to public folder
-//		
-//		datamanager.copyMove(this.dataBucket, "lacunae.io", this.datakey+"/part-00000", outputfolder+"/results");
-//		movecopyVisTemplates();
-//		this.visResultUri = "www.lacunae.io/"+outputfolder;
-//		}
-		//get bucketname from uri
-		//https://s3.amazonaws.com/rolyhudsontestbucket1/climateData/K-means+clustering_output_2018_07_24_13_29_48/part-00000
-		//datamanager.accessObject();
+		
+		getBasicParams();
+		transferResultObjects();
+
 	}
-	private void listResultObjects() {
+	private void getBasicParams() {
+		int startYear=workflow.getAnalysisParameters().getStartDate().getYear();
+		int endYear=workflow.getAnalysisParameters().getEndDate().getYear();
+		int startMonth=workflow.getAnalysisParameters().getSeasonStartMonth();
+		int endMonth=workflow.getAnalysisParameters().getSeasonEndMonth();
+		int startHour =workflow.getAnalysisParameters().getDayStartHour();
+		int endHour =workflow.getAnalysisParameters().getDayEndHour();
+		//var cars = ["Saab", "Volvo", "BMW"];
+		String years = addValuesToString("var years = [",startYear,endYear);
+		String months = addValuesToString("var hours = [",startMonth,endMonth);
+		String hours = addValuesToString("var hours = [",startHour,endHour);
+		StringBuilder sb = new StringBuilder();
+		sb.append(years+"\n");
+		sb.append(months+"\n");
+		sb.append(hours+"\n");
+		datamanager.uploadStringToFile(outputfolder+"/params.js",sb.toString(),"lacunae.io","application/js");
+	
+	}
+	private String addValuesToString(String base,int s,int e) {
+		for(int i=s;i<=e;i++) {
+			if(i==e)base+=i+"];";
+			else base+=i+",";
+		}
+		return base;
+	}
+	private void dumpResults(List<String> resultsObjects) {
+		PrintWriter writer;
+		try {
+			writer = new PrintWriter("C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\s3Found.txt", "UTF-8");
+			for(String s:resultsObjects) {
+				writer.println(s);
+			}
+			writer.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+	}
+	private List<String> getTestList() throws IOException{
+		List<String> lines = new ArrayList<String>();
+		try(BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\testObjects.txt"))) {
+		    StringBuilder sb = new StringBuilder();
+		    String line = br.readLine();
+
+		    while (line != null) {
+		        lines.add(line);
+		        line = br.readLine();
+		    }
+		   
+		}
+		return lines;
+	}
+	private void transferResultObjects() {
 		String prefixOutput = "results"+workflow.getOutputFolder().substring(workflow.getOutputFolder().lastIndexOf('/'));
 		List<String> resultsObjects = datamanager.listBucketContentsPrefixed(prefixOutput);
+		//List<String> resultsObjects = new ArrayList<String>();
+//		try {
+//			resultsObjects = getTestList();
+//		} catch (IOException e) {
+//			// TODO Auto-generated catch block
+//			e.printStackTrace();
+//		}
 		List<String> jsonToCombine = new ArrayList<String>();
+		dumpResults(resultsObjects);
 		
 		String rootKey="";
 		String rootKeyPrev="";
 		String filename ="";
+		String resultKey ="";
+		String resultPath ="";
 		for(String line:resultsObjects) {
 			filename = line.substring(line.lastIndexOf('/')+1);
 			rootKey = line.substring(0,line.lastIndexOf('/')+1);
+			resultKey=line.substring(prefixOutput.length());
+			resultPath = resultKey.substring(0,resultKey.lastIndexOf('/'));
+			if(line.contains("performanceDF")&&line.contains("json"))
+			{
+				//top level cluster performance report
+				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusteringPerformance");
+				continue;
+			}
 			if(filename.equals("_SUCCESS")) continue;
 			if(filename.equals("part-00000"))
 			{
 				//move file and continue
+				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusters");
 			}
 			else
 			{
@@ -64,6 +133,7 @@ public class GeoVisualisation {
 					}
 					else {
 						//process the previous json set
+						if(jsonToCombine.size()>1)combineJSON(jsonToCombine,outputfolder,prefixOutput);
 						jsonToCombine = new ArrayList<String>();
 						jsonToCombine.add(line);
 					}
@@ -72,6 +142,24 @@ public class GeoVisualisation {
 			}
 			rootKeyPrev=rootKey;
 		}
+		//add the last group
+		if(jsonToCombine.size()>1)combineJSON(jsonToCombine,outputfolder,prefixOutput);
+	}
+	private void combineJSON(List<String> jsonToCombine,String destinationkeypath,String keyprefix) {
+		StringBuilder sb = new StringBuilder();
+		String resultPath = jsonToCombine.get(0).substring(keyprefix.length(),jsonToCombine.get(0).lastIndexOf('/'));
+		for(String key : jsonToCombine) {
+			try {
+				List<String> lines = datamanager.readFromS3(key);
+				for(String l :lines) {
+					sb.append(l+"\n");
+				}
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		datamanager.uploadStringToFile(destinationkeypath+resultPath+".json",sb.toString(),"lacunae.io","application/json");
 	}
 	public String getVisResultUri()
 	{

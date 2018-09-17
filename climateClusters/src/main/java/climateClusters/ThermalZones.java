@@ -45,7 +45,7 @@ public class ThermalZones implements Serializable{
 		long countR = records.count();
 				
 		JavaPairRDD<String, Integer> strategyFreq = records.mapToPair(f->{
-			
+			//this should return multiple strategies if overlap is permitted
 			for(DesignStrategy ds : strategies) {
 				if(ClusterUtils.isPointInPolygon(f.getPsychrometricPoint(), ds.getPoints()))
 				{

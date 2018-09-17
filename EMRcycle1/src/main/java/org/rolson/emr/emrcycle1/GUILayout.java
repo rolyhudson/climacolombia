@@ -427,7 +427,7 @@ public class GUILayout {
 		case "Upload text": if(alertMessage(cmd))
 		{
 			Workflow wfjson = new Workflow();
-			if(this.datamanager.uploadTextToFile("jsontest/test1.txt", wfjson.seraliseWorkflow()))
+			if(this.datamanager.uploadStringToFile("jsontest/test1.txt", wfjson.seraliseWorkflow(),"clustercolombia","plain/text"))
 			{
 				System.out.println("Testworkflow uploaded with success");
 			}

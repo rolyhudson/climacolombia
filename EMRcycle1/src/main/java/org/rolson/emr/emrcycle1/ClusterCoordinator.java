@@ -42,7 +42,7 @@ public class ClusterCoordinator {
 	public ObservableList<Cluster> monitorResourceData = FXCollections.observableArrayList();
 	public ObservableList<Workflow> monitorWorkflowData = FXCollections.observableArrayList();
 	private AmazonElasticMapReduceClient emr;
-	private DateTime monitorFrom = DateTime.now().minusDays(2);
+	private DateTime monitorFrom = DateTime.now().minusDays(5);
 	private DateTime lastUpdate;
 	private DataManager dataManager = new DataManager();
 	public ClusterCoordinator()
@@ -266,7 +266,7 @@ public class ClusterCoordinator {
 		//check for running cluster and give option to add to exsiting
 		String wfString = wf.seraliseWorkflow();
 		
-		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid()+".txt",wfString);
+		this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt",wfString,"clustercolombia","plain/text");
 		
 		Cluster newclus = new Cluster();
 		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
@@ -290,7 +290,7 @@ public class ClusterCoordinator {
 		List<StepConfig> stepConfigs = new ArrayList<StepConfig>();
 		//need to change output if wf guid matches
 		wf.generateNewOutputFolder();
-		this.dataManager.uploadTextToFile("workflowJSON/"+wf.getGuid()+".txt",wf.seraliseWorkflow());
+		this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt",wf.seraliseWorkflow(),"clustercolombia","plain/text");
 		stepConfigs.add(wf.getStepConfig());
 		req.withSteps(stepConfigs);
 		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);

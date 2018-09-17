@@ -1,11 +1,16 @@
 package org.rolson.emr.emrcycle1;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
+
+import org.apache.commons.io.IOUtils;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.s3.AmazonS3;
@@ -13,9 +18,12 @@ import com.amazonaws.services.s3.AmazonS3ClientBuilder;
 import com.amazonaws.services.s3.model.CopyObjectResult;
 import com.amazonaws.services.s3.model.DeleteObjectRequest;
 import com.amazonaws.services.s3.model.GetObjectRequest;
+import com.amazonaws.services.s3.model.ListObjectsRequest;
 import com.amazonaws.services.s3.model.ListObjectsV2Request;
 import com.amazonaws.services.s3.model.ListObjectsV2Result;
 import com.amazonaws.services.s3.model.ObjectListing;
+import com.amazonaws.services.s3.model.ObjectMetadata;
+import com.amazonaws.services.s3.model.PutObjectRequest;
 import com.amazonaws.services.s3.model.PutObjectResult;
 import com.amazonaws.services.s3.model.S3Object;
 import com.amazonaws.services.s3.model.S3ObjectInputStream;
@@ -24,6 +32,7 @@ import com.amazonaws.AmazonClientException;
 import com.amazonaws.AmazonServiceException;
 import com.amazonaws.SdkClientException;
 import com.amazonaws.services.s3.transfer.TransferManager;
+
 
 public class DataManager {
 	private AmazonS3 s3client;
@@ -47,41 +56,73 @@ public class DataManager {
 	{
 		List<String> keys = new ArrayList<String>();
 		ObjectListing objectListing = s3client.listObjects(bucketName);
-		for(S3ObjectSummary os : objectListing.getObjectSummaries()) {
-		    //System.out.print((os.getKey()));
-			keys.add(os.getKey());
+		if(!objectListing.isTruncated())
+		{
+			for(S3ObjectSummary os : objectListing.getObjectSummaries()) {
+			    //System.out.print((os.getKey()));
+				keys.add(os.getKey());
+			}
+		}
+		else
+		{
+			while(objectListing.isTruncated())
+			{
+				for(S3ObjectSummary os : objectListing.getObjectSummaries()) {
+				    //System.out.print((os.getKey()));
+					keys.add(os.getKey());
+				}
+				objectListing = s3client.listNextBatchOfObjects(objectListing);
+			}
 		}
 		return keys;
 	}
 	public List<String> listBucketContentsPrefixed(String prefix){
 		List<String> keys = new ArrayList<String>();
-		ListObjectsV2Request req = new ListObjectsV2Request()
+		System.out.println(("listing objects with prefix: "+prefix));
+		ListObjectsRequest req = new ListObjectsRequest()
 				.withBucketName(bucketName)
 				.withPrefix(prefix);
 				//.withDelimiter(DELIMITER);
-		ListObjectsV2Result listing = s3client.listObjectsV2(req);
-		for (String commonPrefix : listing.getCommonPrefixes()) {
-		        System.out.println(commonPrefix);
+		ObjectListing listing = s3client.listObjects(req);
+		if(!listing.isTruncated())
+		{
+			for (S3ObjectSummary summary: listing.getObjectSummaries()) {
+			    
+			    keys.add(summary.getKey());
+			}
 		}
-		for (S3ObjectSummary summary: listing.getObjectSummaries()) {
-		    System.out.println(summary.getKey());
-		    keys.add(summary.getKey());
+		else
+		{
+			while(listing.isTruncated())
+			{
+				for(S3ObjectSummary os : listing.getObjectSummaries()) {
+				    
+					keys.add(os.getKey());
+				}
+				listing = s3client.listNextBatchOfObjects(listing);
+			}
 		}
 		return keys;
 	}
-	public void readFromS3(String bucketName, String key) throws IOException {
-	    S3Object s3object = s3client.getObject(new GetObjectRequest(
-	            bucketName, key));
+	public List<String> readFromS3( String key) throws IOException {
+		System.out.println(("reading from s3 with key: "+key));
+	    S3Object s3object = s3client.getObject(new GetObjectRequest(bucketName, key));
 	    System.out.println(s3object.getObjectMetadata().getContentType());
 	    System.out.println(s3object.getObjectMetadata().getContentLength());
-
-	    BufferedReader reader = new BufferedReader(new InputStreamReader(s3object.getObjectContent()));
+	    InputStreamReader is = new InputStreamReader(s3object.getObjectContent());
+	    BufferedReader reader = new BufferedReader(is);
+	    List<String> lines = new ArrayList<String>();
+	   
 	    String line;
+	    
 	    while((line = reader.readLine()) != null) {
 	      // can copy the content locally as well
 	      // using a buffered writer
-	      System.out.println(line);
+	    	
+	    	lines.add(line);
+	      //System.out.println(line);
 	    }
+	    return lines;
 	  }
 	public String getString(String key) throws AmazonServiceException
 	{
@@ -149,14 +190,28 @@ public class DataManager {
 	    }
 		return result;
 	}
-	public boolean uploadTextToFile(String keypath,String text) throws AmazonServiceException
+	public boolean uploadStringToFile(String keypath,String text,String targetBucket,String contenttype) throws AmazonServiceException
 	{
 		boolean result = false;
 		this.keyName=keypath;
-		
+		InputStream stream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
+		long cLength=0;
+		try {
+			cLength = IOUtils.toByteArray(stream).length;
+			stream.close();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		stream = new ByteArrayInputStream(text.getBytes(StandardCharsets.UTF_8));
 		setupXFManger();
 		try {
-			PutObjectResult putResult = this.s3client.putObject(this.bucketName, keypath, text);
+			 ObjectMetadata metadata = new ObjectMetadata();
+	            metadata.setContentType(contenttype);
+	           metadata.setContentLength(cLength);
+				
+			PutObjectRequest request = new PutObjectRequest(targetBucket, keypath, stream, metadata);
+			PutObjectResult putResult = this.s3client.putObject(request);
 			result = true;
 		}
 		catch(SdkClientException e) {

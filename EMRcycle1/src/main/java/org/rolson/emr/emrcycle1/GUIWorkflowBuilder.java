@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
@@ -145,7 +146,24 @@ public class GUIWorkflowBuilder {
 		wfEditorBox.getChildren().add(def);
 		
 	}
-	
+	public void startGeoVis() 
+	{
+		// Create a Runnable
+		Runnable task = new Runnable()
+		{
+			public void run()
+			{
+				GeoVisualisation gvis = new GeoVisualisation(forAction);
+			}
+		};
+		// Run the task in a background thread
+		Thread backgroundThread = new Thread(task);
+		// Terminate the running thread if the application exits
+		backgroundThread.setDaemon(true);
+		// Start the thread
+		backgroundThread.start();
+	}
+		
 	private HBox workFlowTools()
 	{
 		HBox box = new HBox();
@@ -197,7 +215,7 @@ public class GUIWorkflowBuilder {
 
 			if(forAction!=null)
 			{
-				if(this.datamanager.uploadTextToFile("workflowJSON/"+forAction.getGuid()+".txt", forAction.seraliseWorkflow()))
+				if(this.datamanager.uploadStringToFile("workflowJSON/"+forAction.getGuid()+".txt", forAction.seraliseWorkflow(),"clustercolombia","plain/text"))
 				{
 					System.out.println(forAction.getName()+" uploaded with success");
 					Alert alert = new Alert(AlertType.CONFIRMATION);
@@ -301,7 +319,8 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-			GeoVisualisation gvis = new GeoVisualisation(forAction);
+				GeoVisualisation gvis = new GeoVisualisation(forAction);
+				//startGeoVis();
 			}
 		});
 		tools.add(map2dBtn,3,1);
