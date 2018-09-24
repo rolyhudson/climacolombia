@@ -115,14 +115,14 @@ public class GeoVisualisation {
 			if(line.contains("performanceDF")&&line.contains("json"))
 			{
 				//top level cluster performance report
-				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusteringPerformance");
+				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusteringPerformance.json");
 				continue;
 			}
 			if(filename.equals("_SUCCESS")) continue;
 			if(filename.equals("part-00000"))
 			{
 				//move file and continue
-				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusters");
+				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusters.json");
 			}
 			else
 			{
@@ -167,9 +167,9 @@ public class GeoVisualisation {
 	}
 	private void movecopyVisTemplates()
 	{
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "climateData/geovistemplates/kmeansout.js", outputfolder+"/kmeansout.js");
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "climateData/geovistemplates/index.html", outputfolder+"/index.html");
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "climateData/geovistemplates/regionsTopo.json", outputfolder+"/regionsTopo.json");
+		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/kmeansout.js", outputfolder+"/kmeansout.js");
+		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/index.html", outputfolder+"/index.html");
+		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/regionsTopo.json", outputfolder+"/regionsTopo.json");
 	}
 	public void setDataSourceUri(String uri)
 	{
