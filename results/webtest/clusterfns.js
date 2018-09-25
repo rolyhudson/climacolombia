@@ -13,6 +13,9 @@ function showPerformance(){
     .defer(d3.text, "stats/performanceDF/clusteringPerformance.json")
     .await(processPerformance);
 }
+function compare(a, b){
+  return a.NClusters - b.NClusters;
+}
 function processPerformance(error, data){
 	tableData = data.split(/\r?\n/);
 	var performanceData=[];
@@ -20,7 +23,7 @@ function processPerformance(error, data){
 	{
 	performanceData.push(JSON.parse(tableData[i]))	
 	}
-
+performanceData.sort(compare);
 	performanceChart = document.getElementById("performancechart");
 	var w = performanceChart.clientWidth;
 	var h = performanceChart.clientHeight;
