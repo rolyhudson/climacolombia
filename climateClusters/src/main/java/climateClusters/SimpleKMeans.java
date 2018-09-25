@@ -79,7 +79,7 @@ public class SimpleKMeans {
 	    		final int yr = y;
 	    		final int mon = m;
 	    		path=output+"/"+y+"/"+m;
-	    		JavaRDD<Record> temporalRecords = recorddata.filter(f->ClusterUtils.matchYearMonth(f, yr, mon));
+	    		JavaRDD<Record> temporalRecords = records.filter(f->ClusterUtils.matchYearMonth(f, yr, mon));
 	    		
 	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toString());
 	    		ymrecords.saveAsTextFile(path);

@@ -1,4 +1,4 @@
-<DOCTYPE html>
+<!DOCTYPE html>
 <!-- HTML5 Boilerplate -->
 <!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
 <!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
@@ -31,28 +31,24 @@
 	<link href="https://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet">
 	<link rel="stylesheet" href="cc.css" media="all">
 	<script src = "clusterfns.js" ></script>
-	<script src = "params.js" ></script>
+	<script src = "drawPChart.js" ></script>
+	<script src = "pmvppdFunction.js" ></script>
+	<script src = "psychrometricTools.js" ></script>
+	<script src = "strategy.js" ></script>
+	<script src = "chartLineGraph.js" ></script>
+	<script src = "mapTools.js" ></script>
+	<script src = "gridMap.js" ></script>
+	<script src = "scaleBar.js" ></script>
 	<script src="https://d3js.org/d3.v4.min.js"></script>
- <style type="text/css">
-            
-            
-             #container{
-                font-size: small;
-             }           
-            .line { 
-            stroke: steelblue;
-            stroke-width: 0.6;
-            fill: none;
-            }
-
-        </style>
+	<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 </head>
 
 <body>
 <div id = "container">
 	<div id="header"></div>
 	<div id="overview"></div>
-	<div id="clusterbrowser"></div>
+	<div id="clusterbrowser"><div ><h1 id="loading">loading data...</h1></div></div>
 	<div id="footer"></div>
 </div>
 				

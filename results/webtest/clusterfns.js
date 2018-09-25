@@ -4,8 +4,62 @@ var performanceChart;
 function makePage(){
 	mainimgHeight = window.innerHeight/6;
 	setuplayout();
-	showParams();
+	runPChartTool();
+	showParams();//runMapTool after params
 	showPerformance();
+	showPopulationOverview();
+	
+}
+function showPopulationOverview(){
+d3.queue()
+    .defer(d3.text, "stats/clusterStats.json")
+    .await(processPopulations);
+}
+function orderPopulation(a, b){
+	return a.clusters-b.clusters;
+}
+function processPopulations(error, data){
+	tableData = data.split(/\r?\n/);
+	var popData=[];
+	for(var i=0;i<tableData.length;i++)
+	{
+	if(tableData[i]!="")popData.push(JSON.parse(tableData[i]))	
+	}
+popData.sort(orderPopulation);
+	var data=[];
+	for(var i=0;i<popData.length;i++){
+		data.push({"x":popData[i].clusterId,"y":popData[i].count});
+		
+	}
+
+	lineGraph("populationchart",data,"cluster #","population","all" );
+}
+function showStrategiesOverview(){
+d3.queue()
+    .defer(d3.text, "stats/strategyStats.json")
+    .await(processStrategies);
+}
+function orderStrategy(a, b){
+	return b.percent-a.percent;
+}
+function processStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=[];
+	for(var i=0;i<tableData.length;i++)
+	{
+	if(tableData[i]!="")strategyData.push(JSON.parse(tableData[i]))	
+	}
+	strategyData.sort(orderStrategy);
+  var stratDiv = document.getElementById("strategiestext");
+  for(var i=0;i<strategyData.length;i++){
+  	var p = addTextToDiv("p",strategyData[i].percent+"% "+strategyData[i].name+" at "+strategyData[i].count+" points");
+  	
+  	if(strategyData[i].name.includes("No strategy found")) p.style.color = "black";
+  	else p.style.color = strategiesDisplay.find(s=>s.name===strategyData[i].name.replace(/ /g,'_')).color;
+
+  	stratDiv.appendChild(p);
+  }
+
 }
 function showPerformance(){
 	//check file ending on server
@@ -16,6 +70,18 @@ function showPerformance(){
 function compare(a, b){
   return a.NClusters - b.NClusters;
 }
+function makeFloatTextDiv(text,textid,titlesize,align)
+{
+	var ele = document.createElement("div");
+	ele.className="floatText";
+	ele.id = textid;
+	ele.style.textAlign = align;
+	var title = document.createElement(titlesize);
+    var node = document.createTextNode(text);
+    title.appendChild(node);
+    ele.appendChild(title);
+	return ele;
+}
 function processPerformance(error, data){
 	tableData = data.split(/\r?\n/);
 	var performanceData=[];
@@ -23,35 +89,26 @@ function processPerformance(error, data){
 	{
 	performanceData.push(JSON.parse(tableData[i]))	
 	}
-performanceData.sort(compare);
-	performanceChart = document.getElementById("performancechart");
-	var w = performanceChart.clientWidth;
-	var h = performanceChart.clientHeight;
-   
-
-var maxmin = d3.extent(performanceData, function(d){return d.NClusters;})
-  var xscale = d3.scaleLinear()
-    .domain(maxmin)
-    .rangeRound([0, 200]);
-
-	maxmin = d3.extent(performanceData, function(d){return d.cost;})
-	var yscale = d3.scaleLinear()
-       .domain(maxmin) 
-       .rangeRound([100,0]); 
-
-    var  rhline = d3.line()
-    .x(function(d) { return xscale(d.NClusters); })
-    .y(function(d) { return yscale(d.cost); });
-
-    var chart = d3.select("#performancechart")
-   .append("svg")
-  .attr("width", w)
-  .attr("height", 100);
-
-  chart.append("path").datum(performanceData)
-  		.attr("fill", "none")
-      .attr("stroke", "black")
-      .attr("d",rhline);
+	if(performanceData.length===1){
+		var div = document.getElementById("performancetext");
+	div.appendChild(addTextToDiv("p",performanceData[0].NClusters+" selected")); 
+	div.appendChild(addTextToDiv("p","cost = "+round(performanceData[0].cost,2)));
+	}
+	else{
+		performanceData.sort(compare);
+	var data=[];
+	for(var i=0;i<performanceData.length;i++){
+		data.push({"x":performanceData[i].NClusters,"y":performanceData[i].cost});
+		
+	}
+	const result = performanceData.findIndex( p => p.selected===true);
+	var div = document.getElementById("performancetext");
+	div.appendChild(addTextToDiv("p","k optimised at: "+performanceData[result].NClusters+" clusters"));
+	div.appendChild(addTextToDiv("p","cost = "+round(performanceData[result].cost,2)));
+	lineGraph("performancechart",data,"k clusters","cost",result ); 
+	}
+	
+	
 }
 function showParams(){
 	d3.queue()
@@ -92,36 +149,49 @@ function processParams(error, data){
         
     }
 }
+runMapTool("mapDiv");
 }
 function setuplayout(){
 	var overview = document.getElementById("overview");
 	overview.append(addTextToDiv("h1","overview"));
 	var rowoverview1 = makeSection();
 	 
-	var p = makeContentElement("input parameters",1,"parameters","h2","twothirds");
-	var a = makeContentElement("performance",1,"performancechart","h2","third");
+	var p = makeContentElement("input parameters",1,"parameters","h2","third");
+	var a = makeContentElement("",1,"performancechart","h2","third");
+	a.appendChild(makeFloatTextDiv("clustering performance","performancetext","h2","right"));
+	var c = makeContentElement("",1,"populationchart","h2","third");
+	c.appendChild(makeFloatTextDiv("cluster populations","populationstext","h2","right"));
 	rowoverview1.appendChild(p);
 	rowoverview1.appendChild(a);
+	rowoverview1.appendChild(c);
 	overview.appendChild(rowoverview1);
 
 	var rowoverview2 = makeSection();
 	 
-	var p = makeContentElement("design strategies",0.6,"strategies","h2","twothirds");
-	var a = makeContentElement("cluster populations",0.6,"populations","h2","third");
-	rowoverview2.appendChild(p);
+	var p = makeContentElement("",0.5,"strategies","h2","twothirds");
+	p.style.overflow = "hidden";
+	p.appendChild(makeFloatTextDiv("design strategies psychrometric chart","strategiescharttext","h2","right"));
+	var a = makeContentElement("",0.5,"populationchart","h2","third");
+	a.appendChild(makeFloatTextDiv("found design strategies","strategiestext","h2","left"));
 	rowoverview2.appendChild(a);
+	rowoverview2.appendChild(p);
+	
 	overview.appendChild(rowoverview2);
 	
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
 
 	var rowexplorer2 = makeSection(); 
-	var p = makeContentElement("map",0.3,"map","h2","full");
+	var p = makeContentElement("",0.3,"mapDiv","h2","full");
+	var scalediv = document.createElement("div");
+	scalediv.id = "scale";
+	p.appendChild(scalediv);
+	p.appendChild(makeFloatTextDiv("map","maptext","h2","left"));
 	rowexplorer2.appendChild(p);
 	clusterbrowser.appendChild(rowexplorer2);
 
 	var rowexplorer1 = makeSection();
-	var p = makeContentElement("control",1,"parameters","h2","third");
+	var p = makeContentElement("control",1,"control","h2","third");
 	var a = makeContentElement("cluster strategies",1,"clusterstrategies","h2","third");
 	var c = makeContentElement("cluster populations",1,"clusterpopulations","h2","third");
 	rowexplorer1.appendChild(p);
@@ -141,7 +211,7 @@ function makeContentElement(title,scale, id,titlesize,colType)
 	if(colType==="third")var contentCol = makeContentCol("col span_1_of_3",mainimgHeight/scale,id);
 	if(colType==="full")var contentCol= makeContentCol("col span_3_of_3",mainimgHeight/scale,id);
 	if(colType==="twothirds")var contentCol= makeContentCol("col span_2_of_3",mainimgHeight/scale,id);
-    contentCol.appendChild(addTextToDiv(titlesize,title));
+    if(title!="")contentCol.appendChild(addTextToDiv(titlesize,title));
     
     return contentCol;
 }

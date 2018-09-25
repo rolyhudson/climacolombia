@@ -8,11 +8,31 @@ a:hover {
     color: hotpink; text-decoration: none;;
 }
 
-img{
-	width: 70%;
+#loading{
+                margin: 0px 40px;
+                height:25px;}
+             #container{
+                font-size: small;
+             }           
+            .line { 
+            stroke: steelblue;
+            stroke-width: 0.6;
+            fill: none;
+            }
+			.strategy{
+				stroke-width: 2;
+			}
+			#overview, #clusterbrowser{
+				border: 1px solid grey;
+				margin: 10;
+			}
+			h3{
+				display: inline-block;
+			}
+#scale{
 	position: absolute;
-	margin: auto;
-    top: 0;
+	top:10px;
+	z-index 10;
 }
 #header{
 position: fixed;
@@ -23,9 +43,8 @@ position: fixed;
 	
 }
 .floatText{
+	width: 100%;
 	position: absolute;
-	bottom: 0;
-
 }
 .menuText{
 	position: absolute;
@@ -45,7 +64,7 @@ position: fixed;
 }
 #container{
 	margin: auto;
-	width: 50%;
+	width: 70%;
 
 }
 /*  SECTIONS  */
@@ -76,8 +95,8 @@ position: fixed;
 .group { zoom:1; /* For IE 6/7 */ }
 /*  GRID OF THREE  */
 .span_3_of_3 { width: 100%; position: relative;}
-.span_2_of_3 { width: 66.33%; }
-.span_1_of_3 { width: 32.33%; position: relative;}
+.span_2_of_3 { width: 66.33%; position: relative;}
+.span_1_of_3 { width: 32.66%; position: relative;}
 
 /*  GO FULL WIDTH BELOW XX0 PIXELS */
 @media only screen and (max-width: 750px) {
