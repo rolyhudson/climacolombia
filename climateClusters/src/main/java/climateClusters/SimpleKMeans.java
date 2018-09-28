@@ -36,9 +36,10 @@ public class SimpleKMeans {
 	    
 	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
+	    numClusters=0;
 	    if(numClusters==0)
 	    {
-	    	for(int i=2;i<=10;i+=2)
+	    	for(int i=2;i<=100;i+=2)
 	    	{
 	    		KMeansModel clusterEp = KMeans.train(dataPoints.rdd(), i, numIterations);
 	    		cp = new ClusteringPerformance();

@@ -7,7 +7,7 @@ setUpMap(w,h);
 
 d3.queue()
     .defer(d3.json, mapfile)
-    .await(drawMap);
+    .await(setMapProjection);
 }
 
 function setUpMap(){
@@ -24,7 +24,7 @@ function setUpMap(){
       .append("g");
 
 }
-function drawMap(error, data){
+function setMapProjection(error, data){
   if (error) throw error;
   console.log(data);
 
@@ -38,9 +38,34 @@ function drawMap(error, data){
   var colom = topojson.feature(data,data.objects[features]);
   projection = d3.geoMercator().fitExtent([[0, 0], [mapW, mapH]], colom);
   var path = d3.geoPath()
-    .projection(projection); 
+    .projection(projection);
 
-      contextWorld();
+    contextWorld(); 
+      
+}
+function drawDepartments(){
+d3.queue()
+    .defer(d3.json, "departTopo.json")
+    .await(addDeparts);
+}
+function addDeparts(error, data){
+  if (error) throw error;
+  
+  //assuming only one set of features
+  var features;
+  for(var prop in data.objects)
+  {
+    features = prop;
+  }
+  var path = d3.geoPath()
+    .projection(projection); 
+      svgMap.append("path")
+      .attr("stroke", "#777")
+      .attr("fill","none" )
+      .attr("class","map")
+      .attr("d", path(topojson.mesh(data,data.objects[features])));
+
+      getData(year+"/"+month+"/clusters.json");
 }
 function contextWorld(){
     d3.queue()
@@ -60,7 +85,7 @@ function addWorld(error, data){
     .projection(projection); 
   svgMap.append("path")
       .attr("stroke", "none")
-            .attr("fill","rgb(176, 222, 187)" )
+            .attr("fill","rgb(235, 249, 235)" )
       .attr("class","map")
       .attr("d", path(topojson.mesh(data,data.objects["land"])));
 
@@ -70,7 +95,7 @@ function addWorld(error, data){
       .attr("class","map")
       .attr("d", path(topojson.mesh(data,data.objects["countries"])));
 
-      getData(year+"/"+month+"/clusters.json");
+      explorerUpdate();
 }
 function defineCell(d){
   var cell=[];

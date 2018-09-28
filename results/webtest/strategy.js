@@ -7,17 +7,10 @@ getZones("zonesdisplay.txt");
 }
 function getZones(file){
 	if(file.includes("display")){
-	d3.queue()
-    .defer(d3.text, file)
-    .await(parseDisplay);
-
-    
+		readData(file,parseDisplay);
 	}
 	else{
-	d3.queue()
-    .defer(d3.text, file)
-    .await(parseZones);
-    
+	readData(file,parseZones);
 	}
 }
 function parseZones(error,data)
@@ -31,7 +24,7 @@ function parseDisplay(error,data)
 tableData = d3.csvParseRows(data);
 strategiesDisplay = readZones(tableData);
 displayOnChart();
-showStrategiesOverview();
+readData("stats/strategyStats.json",processStrategies);
 }
 function readZones(tableData){
 	var boundaries = [];

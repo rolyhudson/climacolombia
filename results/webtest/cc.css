@@ -9,7 +9,6 @@ a:hover {
 }
 
 #loading{
-                margin: 0px 40px;
                 height:25px;}
              #container{
                 font-size: small;
@@ -31,7 +30,7 @@ a:hover {
 			}
 #scale{
 	position: absolute;
-	top:10px;
+	top:40px;
 	z-index 10;
 }
 #header{
@@ -84,7 +83,7 @@ position: fixed;
 	float:left;
 	margin: 1% 0 1% 1%;
 	overflow-y: auto;
-	background-color: lightblue;
+	background-color: #ebf6f9;
 }
 .col:first-child { margin-left: 0; }
 

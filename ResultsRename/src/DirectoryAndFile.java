@@ -1,13 +1,17 @@
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.CopyOption;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class DirectoryAndFile {
@@ -33,9 +37,9 @@ public class DirectoryAndFile {
 		
 	}
 	private static void transferResultObjects() {
-		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\53652781\\";
+		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\36061223\\";
 		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\";
-		getPaths(new File("C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\53652781\\"));
+		getPaths(new File(prefixOutput));
 		
 		List<String> jsonToCombine = new ArrayList<String>();
 		//dumpResults(resultsObjects);
@@ -45,6 +49,7 @@ public class DirectoryAndFile {
 		String filename ="";
 		String resultKey ="";
 		String resultPath ="";
+		List<String> lines = Collections.emptyList();
 		for(String line:resultsObjects) {
 			try {
 			filename = line.substring(line.lastIndexOf('\\')+1);
@@ -55,51 +60,59 @@ public class DirectoryAndFile {
 			catch(Exception e){
 				System.out.println(line + "error");
 			}
-			if(line.contains("performanceDF")&&line.contains("json"))
-			{
-				//top level cluster performance report
-				//datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusteringPerformance");
-				movefile(outputfolder+resultPath,line,"clusteringPerformance");
-				continue;
-			}
 			if(filename.equals("_SUCCESS")) continue;
-			if(filename.equals("part-00000"))
+			if(filename.contains(".crc")) continue;
+			if(filename.contains("part"))
 			{
-				//move file and continue
-				//datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusters");
-				movefile(outputfolder+resultPath,line,"clusters.json");
-			}
-			else
-			{
-				if(filename.contains(".json")){
-					if(line.contains("clusterStats")) {
-						//back up one folder
-						movefile(outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),line,"clusterStats.json");
+				//read contents
+				try
+			    { 
+			      lines = Files.readAllLines(Paths.get(line), StandardCharsets.UTF_8);
+			    } 
+			    catch (IOException e) 
+			    { 
+
+			      e.printStackTrace(); 
+			    } 
+				if(line.contains("clusterStats")) {
+					writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"clusterStats.json");
+				}
+				else {
+					if(line.contains("strategyStats")) {
+						writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"strategyStats.json");
 					}
 					else {
-						if(line.contains("strategyStats")) {
-							//back up one folder
-							movefile(outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),line,"strategyStats.json");
-						}
-						else {
-							movefile(outputfolder+resultPath,line,"clusters.json");
-						}
+						writeToFile(lines,outputfolder+resultPath,"clusters.json");
 					}
-					
-					
 				}
-				
 			}
-			
 		}
-		//add the last group
 		
 	}
 	private static void combineJSON(List<String> jsonToCombine,String output,String prefixOutput) {
 		//read json and shift to new directory
 		//uploadStringToFile(destinationkeypath+resultPath+".json",sb.toString(),"lacunae.io","application/json");
 	}
-	
+	private static void writeToFile(List<String> lines,String outputdir,String filename) {
+		try {
+			Files.createDirectories(Paths.get(outputdir));
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		try (FileWriter f = new FileWriter(outputdir+"\\"+filename, true); 
+				BufferedWriter b = new BufferedWriter(f); 
+				PrintWriter p = new PrintWriter(b);) { 
+			for(String l : lines) {
+				p.println(l); 
+			}
+			 
+			} 
+		catch (IOException i) { 
+			i.printStackTrace(); 
+			}
+	}
 	private static void movefile(String outputdir,String filepath,String filename) {
 		
 		try {

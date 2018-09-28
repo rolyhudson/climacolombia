@@ -1,71 +1,91 @@
 var mainimgHeight = 200;
 var analysisParams;
 var performanceChart;
+var popAllDonut;
+var popTSDonut;
+var popClusterDonut;
 function makePage(){
-	mainimgHeight = window.innerHeight/6;
+	mainimgHeight = window.innerHeight/4;
 	setuplayout();
 	runPChartTool();
 	showParams();//runMapTool after params
-	showPerformance();
-	showPopulationOverview();
+	readData("stats/performanceDF/clusters.json",processPerformance);
+	readData("stats/clusterStats.json",processPopulations);
 	
 }
-function showPopulationOverview(){
+function readData(file,awaitFn){
 d3.queue()
-    .defer(d3.text, "stats/clusterStats.json")
-    .await(processPopulations);
+    .defer(d3.text,file )
+    .await(awaitFn);
 }
 function orderPopulation(a, b){
-	return a.clusters-b.clusters;
+	return a.clusterId-b.clusterId;
 }
 function processPopulations(error, data){
 	tableData = data.split(/\r?\n/);
+	var popData=parsePopData(tableData);
+	popAllDonut = new Donutchart("populationchart",popData,"populationoverviewdonut",["all clusters"]);
+	
+}
+function parsePopData(tableData){
 	var popData=[];
 	for(var i=0;i<tableData.length;i++)
 	{
 	if(tableData[i]!="")popData.push(JSON.parse(tableData[i]))	
 	}
-popData.sort(orderPopulation);
+	popData.sort(orderPopulation);
 	var data=[];
 	for(var i=0;i<popData.length;i++){
 		data.push({"x":popData[i].clusterId,"y":popData[i].count});
 		
 	}
-
-	lineGraph("populationchart",data,"cluster #","population","all" );
-}
-function showStrategiesOverview(){
-d3.queue()
-    .defer(d3.text, "stats/strategyStats.json")
-    .await(processStrategies);
+	return data;
 }
 function orderStrategy(a, b){
 	return b.percent-a.percent;
 }
 function processStrategies(error, data){
 	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+ insertStrategyText("strategiestext",strategyData);
+  
+}
+function insertStrategyText(divID,strategyData){
+	var stratDiv = document.getElementById(divID);
+	  for(var i=0;i<strategyData.length;i++){
+	  	var p = addTextToDiv("p",strategyData[i].percent+"% "+strategyData[i].name+" at "+strategyData[i].count+" points");
+	  	
+	  	if(strategyData[i].name.includes("No strategy found")) p.style.color = "black";
+	  	else p.style.color = strategiesDisplay.find(s=>s.name===strategyData[i].name.replace(/ /g,'_')).color;
+	  	stratDiv.appendChild(p);
+	  }
+}
+function processTSStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+	insertStrategyText("timestepstrategies",strategyData);
+}
+function processTSPopulations(error, data){
+	tableData = data.split(/\r?\n/);
+	var popData=parsePopData(tableData);
+	popTSDonut = new Donutchart("timesteppopulations",popData,"populationTSdonut",["all clusters"]);
+}
+function processClusterStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+}
+function processClusterPopulations(error, data){
+	tableData = data.split(/\r?\n/);
+	var popData=parsePopData(tableData);
+}
+function parseStrategies(tableData){
 	var strategyData=[];
 	for(var i=0;i<tableData.length;i++)
 	{
 	if(tableData[i]!="")strategyData.push(JSON.parse(tableData[i]))	
 	}
 	strategyData.sort(orderStrategy);
-  var stratDiv = document.getElementById("strategiestext");
-  for(var i=0;i<strategyData.length;i++){
-  	var p = addTextToDiv("p",strategyData[i].percent+"% "+strategyData[i].name+" at "+strategyData[i].count+" points");
-  	
-  	if(strategyData[i].name.includes("No strategy found")) p.style.color = "black";
-  	else p.style.color = strategiesDisplay.find(s=>s.name===strategyData[i].name.replace(/ /g,'_')).color;
-
-  	stratDiv.appendChild(p);
-  }
-
-}
-function showPerformance(){
-	//check file ending on server
-	d3.queue()
-    .defer(d3.text, "stats/performanceDF/clusteringPerformance.json")
-    .await(processPerformance);
+	return strategyData;
 }
 function compare(a, b){
   return a.NClusters - b.NClusters;
@@ -87,7 +107,7 @@ function processPerformance(error, data){
 	var performanceData=[];
 	for(var i=0;i<tableData.length;i++)
 	{
-	performanceData.push(JSON.parse(tableData[i]))	
+	if(tableData[i]!="")performanceData.push(JSON.parse(tableData[i]))	
 	}
 	if(performanceData.length===1){
 		var div = document.getElementById("performancetext");
@@ -158,8 +178,10 @@ function setuplayout(){
 	 
 	var p = makeContentElement("input parameters",1,"parameters","h2","third");
 	var a = makeContentElement("",1,"performancechart","h2","third");
+	a.style.overflow = "hidden";
 	a.appendChild(makeFloatTextDiv("clustering performance","performancetext","h2","right"));
 	var c = makeContentElement("",1,"populationchart","h2","third");
+	c.style.overflow = "hidden";
 	c.appendChild(makeFloatTextDiv("cluster populations","populationstext","h2","right"));
 	rowoverview1.appendChild(p);
 	rowoverview1.appendChild(a);
@@ -171,7 +193,7 @@ function setuplayout(){
 	var p = makeContentElement("",0.5,"strategies","h2","twothirds");
 	p.style.overflow = "hidden";
 	p.appendChild(makeFloatTextDiv("design strategies psychrometric chart","strategiescharttext","h2","right"));
-	var a = makeContentElement("",0.5,"populationchart","h2","third");
+	var a = makeContentElement("",0.5,"foundstrategies","h2","third");
 	a.appendChild(makeFloatTextDiv("found design strategies","strategiestext","h2","left"));
 	rowoverview2.appendChild(a);
 	rowoverview2.appendChild(p);
@@ -180,24 +202,63 @@ function setuplayout(){
 	
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
-
+var explorerH =0.4;
 	var rowexplorer2 = makeSection(); 
-	var p = makeContentElement("",0.3,"mapDiv","h2","full");
+	var p = makeContentElement("",explorerH,"mapDiv","h2","third");
+	p.style.overflow = "hidden";
 	var scalediv = document.createElement("div");
 	scalediv.id = "scale";
 	p.appendChild(scalediv);
 	p.appendChild(makeFloatTextDiv("map","maptext","h2","left"));
 	rowexplorer2.appendChild(p);
-	clusterbrowser.appendChild(rowexplorer2);
 
-	var rowexplorer1 = makeSection();
-	var p = makeContentElement("control",1,"control","h2","third");
-	var a = makeContentElement("cluster strategies",1,"clusterstrategies","h2","third");
-	var c = makeContentElement("cluster populations",1,"clusterpopulations","h2","third");
-	rowexplorer1.appendChild(p);
-	rowexplorer1.appendChild(a);
-	rowexplorer1.appendChild(c);
-	clusterbrowser.appendChild(rowexplorer1);
+	var timesteppanel = makeContentElement("",explorerH,"sidePanel","h2","third");
+	rowexplorer2.appendChild(timesteppanel);
+
+	var clusterpanel = makeContentElement("",explorerH,"sidePanel","h2","third");
+	rowexplorer2.appendChild(clusterpanel);
+	clusterbrowser.appendChild(rowexplorer2);
+	timeStepPanel(timesteppanel);
+	clusterPanel(clusterpanel);
+}
+function clusterPanel(sidepanel){
+	var side1 = makeSection();
+	var p = makeContentElement("cluster control",3,"clustercontrol","h2","full");
+
+	side1.appendChild(p);
+	sidepanel.appendChild(side1);
+
+	var side3 = makeSection();
+	var c = makeContentElement("",0.8,"withinclusterpopulations","h2","full");
+	c.appendChild(makeFloatTextDiv("within cluster populations","strategiestext","h2","left"));
+	c.style.overflow = "hidden";
+	side3.appendChild(c);
+	sidepanel.appendChild(side3);
+
+	var side2 = makeSection();
+	var a = makeContentElement("within cluster strategies",2,"withinclusterstrategies","h2","full");
+	side2.appendChild(a);
+	sidepanel.appendChild(side2);
+
+	
+}
+function timeStepPanel(sidepanel){
+	var side1 = makeSection();
+	var p = makeContentElement("time step control",3,"control","h2","full");
+	side1.appendChild(p);
+	sidepanel.appendChild(side1);
+
+	var side3 = makeSection();
+	var c = makeContentElement("",0.8,"timesteppopulations","h2","full");
+	c.appendChild(makeFloatTextDiv("time step populations","strategiestext","h2","left"));
+	c.style.overflow = "hidden";
+	side3.appendChild(c);
+	sidepanel.appendChild(side3);
+
+	var side2 = makeSection();
+	var a = makeContentElement("time step strategies",2,"timestepstrategies","h2","full");
+	side2.appendChild(a);
+	sidepanel.appendChild(side2);
 }
 function makeSection()
 {

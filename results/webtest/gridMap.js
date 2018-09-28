@@ -16,6 +16,7 @@ function runMapTool(divID){
 	mapW =document.getElementById(divID).clientWidth;
 	mapH = document.getElementById(divID).clientHeight;
 	stYr =analysisParams["startDate"].year;
+  year =stYr+1;
 	endYr =analysisParams["endDate"].year;
 	stMonth = analysisParams["seasonStartMonth"];
 	endMonth = analysisParams["seasonEndMonth"];
@@ -28,25 +29,36 @@ function runMapTool(divID){
 }
 function explorerUpdate(){
 	getData(year+"/"+month+"/clusters.json"); 
-	
- 	
+  readData(year+"/"+month+"/stats/clusterStats.json",processTSPopulations);
+  readData(year+"/"+month+"/stats/strategyStats.json",processTSStrategies);
+}
+function timestepupdate(){
 
 }
 function defineScaleBar(){
 	
 	var barlabels=[];
-	for(var i=0;i<=maxClusterId;i+=1)
+	for(var i=0;i<=maxClusterId+1;i+=1)
 	  {
 	    barlabels.push(Math.round(i));
 	  }
-	drawScaleBarText(20,barlabels);
+	drawScaleBarText(20,barlabels,"cluster id");
 
 }
 function setUpMapping(){
 	
-  	addRangeSlider("control","year","yearSelector","yearChange()",stYr,endYr,1,year,"slider","h3","");
+  	addRangeSlider("control","year","yearSelector","yearChange()",stYr,endYr,1,stYr+1,"slider","h3","");
   	addRangeSlider("control","month","monthSelector","monthChange()",stMonth,endMonth,1,month,"slider","h3","");
+    addRangeSlider("clustercontrol","cluster_id","clusterSelector","clusterChange()",0,maxClusterId,1,0,"slider","h3","");
  	
+}
+function clusterChange(){
+  var e = document.getElementById('clusterSelector');
+  var id = e.getAttribute("id");  
+  title =id.substring(0, id.length - 8);
+  year = e.value;
+  updateText(e.value,title+"value");
+  //explorerUpdate();
 }
 function yearChange(){
 	var e = document.getElementById('yearSelector');
@@ -60,7 +72,7 @@ function monthChange(){
 	var e = document.getElementById('monthSelector');
 	var id = e.getAttribute("id");  
 	title =id.substring(0, id.length - 8);
-	month = e.value-1;
+	month = e.value;
 	updateText(e.value,title+"value");
 	explorerUpdate();
 }
