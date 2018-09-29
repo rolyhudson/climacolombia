@@ -61,10 +61,8 @@ public class ClusterCoordinator {
 		updateResourceStatus();
 		//based on clusters in time range get the workflows from aws
 		updateWorkflowStatus();
-		//manage s3 workflows vs emr workflows?
 		//single update in background
 		lastUpdate = new DateTime();
-
 	}
 	
 	public void setEMRClient()
@@ -80,7 +78,7 @@ public class ClusterCoordinator {
 	}
 	public void setMonitorFrom(LocalDate date)
 	{
-		monitorFrom = new DateTime(date);
+		monitorFrom = new DateTime(date.getYear(),date.getMonthValue(),date.getDayOfMonth(),0,0);
 	}
 	public DateTime getMonitorFrom()
 	{
@@ -162,7 +160,9 @@ public class ClusterCoordinator {
 			if(status!=null)
 			{
 				wf.setStatus(status);
-				}
+				//save workflows to aws s3 here could get expensive!
+				//this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt", wf.seraliseWorkflow(),"clustercolombia","plain/text");
+			}
 		}
 		monitorWorkflowData.setAll(allWorkflows);
 	}

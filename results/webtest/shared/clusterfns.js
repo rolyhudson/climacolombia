@@ -4,11 +4,11 @@ var performanceChart;
 var popAllDonut;
 var popTSDonut;
 var popClusterDonut;
-function makePage(){
+function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();
 	runPChartTool();
-	showParams();//runMapTool after params
+	getParams(params);//runMapTool after params
 	readData("stats/performanceDF/clusters.json",processPerformance);
 	readData("stats/clusterStats/clusters.json",processPopulations);
 	
@@ -161,9 +161,9 @@ function processPerformance(error, data){
 	
 	
 }
-function showParams(){
+function getParams(paramsFile){
 	d3.queue()
-    .defer(d3.json, "../shared/parameters.txt")
+    .defer(d3.json, paramsFile)
     .await(processParams);
 }
 function processParams(error, data){

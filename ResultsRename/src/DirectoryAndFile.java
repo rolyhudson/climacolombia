@@ -75,24 +75,10 @@ public class DirectoryAndFile {
 			      e.printStackTrace(); 
 			    } 
 				writeToFile(lines,outputfolder+resultPath,"clusters.json");
-//				if(line.contains("clusterStats")) {
-//					writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"clusterStats.json");
-//				}
-//				else {
-//					if(line.contains("strategyStats")) {
-//						writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"strategyStats.json");
-//					}
-//					else {
-//						writeToFile(lines,outputfolder+resultPath,"clusters.json");
-//					}
-//				}
+
 			}
 		}
 		
-	}
-	private static void combineJSON(List<String> jsonToCombine,String output,String prefixOutput) {
-		//read json and shift to new directory
-		//uploadStringToFile(destinationkeypath+resultPath+".json",sb.toString(),"lacunae.io","application/json");
 	}
 	private static void writeToFile(List<String> lines,String outputdir,String filename) {
 		try {

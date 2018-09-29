@@ -12,6 +12,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 
+import com.guigarage.flatterfx.FlatterFX;
+
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;
@@ -91,6 +93,7 @@ public class GUILayout {
         stage.setScene(scene);
         startMonitor();
         stage.show();
+        //FlatterFX.style();
 	}
 	public void startMonitor() 
 	{
@@ -168,7 +171,6 @@ public class GUILayout {
 		List<String> buttonCmds = new ArrayList<String>();
 		
 		buttonCmds.add("Workflow builder");
-		//buttonCmds.add("Predefined workflows");
 		buttonCmds.add("Resource monitor");
 		buttonCmds.add("Workflow monitor");
 		buttonCmds.add("Visualise");
@@ -180,7 +182,7 @@ public class GUILayout {
 	{
 		WebView browser = new WebView();
 		WebEngine webEngine = browser.getEngine();
-		webEngine.load("http://lacunae.io/geovis2018_07_24_14_51_28/");
+		webEngine.load("http://lacunae.io/geovis2018_09_29_13_35_00/");
 		Tab tab = new Tab();
 		tab.setText(name);
 		tab.setContent(browser);
@@ -227,17 +229,14 @@ public class GUILayout {
 	}
 	private void addSettingsTab(int index,String name,TabPane tabpane )
 	{
-		
 		Label daterangelabel = new Label("Monitor clusters and workflows from: ");
-		// Create the DatePicker.
 		DatePicker startdatePicker = new DatePicker();
 		LocalDate now = LocalDate.now();
-		
 		startdatePicker.setValue(now.minusDays(1)); 
-		// Add some action (in Java 8 lambda syntax style).
 		startdatePicker.setOnAction(event -> {
 		    LocalDate date = startdatePicker.getValue();
-		    System.out.println("Selected date: " + date);
+		    this.coordinator.setMonitorFrom(date);
+		    System.out.println("Monitor from date changed to: " + date);
 		});
 		final HBox monitordaterange = new HBox();
 		monitordaterange.setSpacing(5);

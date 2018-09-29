@@ -28,36 +28,15 @@ public class GeoVisualisation {
 		
 		datamanager = new DataManager();
 		outputfolder = Workflow.generateUniqueOutputName("geovis",new DateTime());
-		
-		getBasicParams();
-		transferResultObjects();
 
+		transferResultObjects();
+		//move the index file
+		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/index.html", outputfolder+"/index.html");
+		//move and rename the workflowfile
+		this.datamanager.uploadStringToFile(outputfolder+"/parameters.txt", workflow.seraliseWorkflow(),"lacunae.io","plain/text");
 	}
-	private void getBasicParams() {
-		int startYear=workflow.getAnalysisParameters().getStartDate().getYear();
-		int endYear=workflow.getAnalysisParameters().getEndDate().getYear();
-		int startMonth=workflow.getAnalysisParameters().getSeasonStartMonth();
-		int endMonth=workflow.getAnalysisParameters().getSeasonEndMonth();
-		int startHour =workflow.getAnalysisParameters().getDayStartHour();
-		int endHour =workflow.getAnalysisParameters().getDayEndHour();
-		//var cars = ["Saab", "Volvo", "BMW"];
-		String years = addValuesToString("var years = [",startYear,endYear);
-		String months = addValuesToString("var hours = [",startMonth,endMonth);
-		String hours = addValuesToString("var hours = [",startHour,endHour);
-		StringBuilder sb = new StringBuilder();
-		sb.append(years+"\n");
-		sb.append(months+"\n");
-		sb.append(hours+"\n");
-		datamanager.uploadStringToFile(outputfolder+"/params.js",sb.toString(),"lacunae.io","application/js");
 	
-	}
-	private String addValuesToString(String base,int s,int e) {
-		for(int i=s;i<=e;i++) {
-			if(i==e)base+=i+"];";
-			else base+=i+",";
-		}
-		return base;
-	}
+	
 	private void dumpResults(List<String> resultsObjects) {
 		PrintWriter writer;
 		try {
@@ -91,7 +70,7 @@ public class GeoVisualisation {
 	}
 	private void transferResultObjects() {
 		String prefixOutput = "results"+workflow.getOutputFolder().substring(workflow.getOutputFolder().lastIndexOf('/'));
-		List<String> resultsObjects = datamanager.listBucketContentsPrefixed(prefixOutput);
+		List<String> resultsObjects = datamanager.listBucketContentsPrefixedV2(prefixOutput);
 		//List<String> resultsObjects = new ArrayList<String>();
 //		try {
 //			resultsObjects = getTestList();
@@ -112,34 +91,22 @@ public class GeoVisualisation {
 			rootKey = line.substring(0,line.lastIndexOf('/')+1);
 			resultKey=line.substring(prefixOutput.length());
 			resultPath = resultKey.substring(0,resultKey.lastIndexOf('/'));
-			if(line.contains("performanceDF")&&line.contains("json"))
-			{
-				//top level cluster performance report
-				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusteringPerformance.json");
-				continue;
-			}
 			if(filename.equals("_SUCCESS")) continue;
-			if(filename.equals("part-00000"))
+			if(filename.contains(".crc")) continue;
+			if(filename.contains("part"))
 			{
-				//move file and continue
-				datamanager.copyMove(this.dataBucket, "lacunae.io", line, outputfolder+resultPath+"/clusters.json");
-			}
-			else
-			{
-				if(filename.contains(".json")){
-					if(rootKey.equals(rootKeyPrev))
-					{
-						jsonToCombine.add(line);
-					}
-					else {
-						//process the previous json set
-						if(jsonToCombine.size()>1)combineJSON(jsonToCombine,outputfolder,prefixOutput);
-						jsonToCombine = new ArrayList<String>();
-						jsonToCombine.add(line);
-					}
+				if(rootKey.equals(rootKeyPrev))
+				{
+					jsonToCombine.add(line);
 				}
-				
+				else {
+					//process the previous json set
+					if(jsonToCombine.size()>0)combineJSON(jsonToCombine,outputfolder,prefixOutput);
+					jsonToCombine = new ArrayList<String>();
+					jsonToCombine.add(line);
+				}
 			}
+
 			rootKeyPrev=rootKey;
 		}
 		//add the last group
@@ -159,18 +126,13 @@ public class GeoVisualisation {
 				e.printStackTrace();
 			}
 		}
-		datamanager.uploadStringToFile(destinationkeypath+resultPath+".json",sb.toString(),"lacunae.io","application/json");
+		datamanager.uploadStringToFile(destinationkeypath+resultPath+"/clusters.json",sb.toString(),"lacunae.io","application/json");
 	}
 	public String getVisResultUri()
 	{
 		return this.visResultUri;
 	}
-	private void movecopyVisTemplates()
-	{
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/kmeansout.js", outputfolder+"/kmeansout.js");
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/index.html", outputfolder+"/index.html");
-		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/regionsTopo.json", outputfolder+"/regionsTopo.json");
-	}
+
 	public void setDataSourceUri(String uri)
 	{
 		this.dataSourceUri = uri;

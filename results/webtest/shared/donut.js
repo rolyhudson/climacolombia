@@ -137,6 +137,25 @@ handleMouseOut(d,i){
     title[1].innerHTML = d.data.originalTitle[1];
     title[2].innerHTML = d.data.originalTitle[2];
 }
+highlight(cluster,id){
+    var arcs = document.getElementsByClassName("arc"+id);
+    var textA = document.getElementsByClassName("graphLabelA donut"+id);
+    var textB = document.getElementsByClassName("graphLabelB donut"+id);
+    var circles = document.getElementsByClassName("circle donut"+id);
+    for(var j=0;j<arcs.length;j++)
+    {
+        if(i!=j){
+            arcs[j].style.opacity = "0.3";
+            textA[j].style.opacity = "0.3";
+            textB[j].style.opacity = "0.3";
+            circles[j].style.opacity = "0.3";
+        }
+    }
+    var title = document.getElementsByClassName("centreTitle donut"+id);
+    title[0].innerHTML = "cluster "+d.data.x;
+    title[1].innerHTML = d.data.y+" data points";
+    title[2].innerHTML = d.data.percent+"%";
+}
 addCentreTitle()
 {
     //text labels

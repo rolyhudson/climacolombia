@@ -66,6 +66,12 @@
     <artifactId>java-uuid-generator</artifactId>
     <version>3.1.5</version>
 </dependency>
+<!-- https://mvnrepository.com/artifact/com.guigarage/flatter -->
+<dependency>
+    <groupId>com.guigarage</groupId>
+    <artifactId>flatter</artifactId>
+    <version>0.7</version>
+</dependency>
 
 
 

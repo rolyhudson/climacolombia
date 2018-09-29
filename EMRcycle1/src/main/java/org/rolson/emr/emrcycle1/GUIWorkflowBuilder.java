@@ -320,6 +320,7 @@ public class GUIWorkflowBuilder {
 			if(forAction!=null)
 			{
 				GeoVisualisation gvis = new GeoVisualisation(forAction);
+				//on background thread
 				//startGeoVis();
 			}
 		});

@@ -106,6 +106,7 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setSeasonEndMonth(analysisParamsNode.get("seasonEndMonth").asInt());
 	        aparams.setSeasonStartDay(analysisParamsNode.get("seasonStartDay").asInt());
 	        aparams.setSeasonStartMonth(analysisParamsNode.get("seasonStartMonth").asInt());
+	        aparams.setNClusters(analysisParamsNode.get("nclusters").asInt());
 	        wf.setAnalysisParameters(aparams);
 	        //set the application
 	        Application app = new Application();

@@ -76,6 +76,30 @@ public class DataManager {
 		}
 		return keys;
 	}
+	public List<String> listBucketContentsPrefixedV2(String prefix){
+		List<String> keys = new ArrayList<String>();
+		System.out.println(("listing objects with prefix: "+prefix));
+		
+		ListObjectsV2Request req = new ListObjectsV2Request().withBucketName(bucketName).withPrefix(prefix);
+        ListObjectsV2Result result;
+		
+        do {
+            result = s3client.listObjectsV2(req);
+
+            for (S3ObjectSummary objectSummary : result.getObjectSummaries()) {
+                //System.out.printf(" - %s (size: %d)\n", objectSummary.getKey(), objectSummary.getSize());
+                keys.add(objectSummary.getKey());
+            }
+            // If there are more than maxKeys keys in the bucket, get a continuation token
+            // and list the next objects.
+            String token = result.getNextContinuationToken();
+            System.out.println("Next Continuation Token: " + token);
+            req.setContinuationToken(token);
+        } while (result.isTruncated());
+        
+		
+		return keys;
+	}
 	public List<String> listBucketContentsPrefixed(String prefix){
 		List<String> keys = new ArrayList<String>();
 		System.out.println(("listing objects with prefix: "+prefix));
