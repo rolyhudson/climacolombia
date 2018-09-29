@@ -37,8 +37,8 @@ public class DirectoryAndFile {
 		
 	}
 	private static void transferResultObjects() {
-		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\36061223\\";
-		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\";
+		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\66549575\\";
+		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\test\\";
 		getPaths(new File(prefixOutput));
 		
 		List<String> jsonToCombine = new ArrayList<String>();
@@ -74,17 +74,18 @@ public class DirectoryAndFile {
 
 			      e.printStackTrace(); 
 			    } 
-				if(line.contains("clusterStats")) {
-					writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"clusterStats.json");
-				}
-				else {
-					if(line.contains("strategyStats")) {
-						writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"strategyStats.json");
-					}
-					else {
-						writeToFile(lines,outputfolder+resultPath,"clusters.json");
-					}
-				}
+				writeToFile(lines,outputfolder+resultPath,"clusters.json");
+//				if(line.contains("clusterStats")) {
+//					writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"clusterStats.json");
+//				}
+//				else {
+//					if(line.contains("strategyStats")) {
+//						writeToFile(lines,outputfolder+resultPath.substring(0,resultPath.lastIndexOf('\\')),"strategyStats.json");
+//					}
+//					else {
+//						writeToFile(lines,outputfolder+resultPath,"clusters.json");
+//					}
+//				}
 			}
 		}
 		

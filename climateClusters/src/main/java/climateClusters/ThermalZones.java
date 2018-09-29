@@ -41,6 +41,38 @@ public class ThermalZones implements Serializable{
 			strategies.add(ds);
 		}
 	}
+	private Record testZones(Record r) {
+		for(DesignStrategy ds : strategies) {
+			if(ClusterUtils.isPointInPolygon(r.getPsychrometricPoint(), ds.getPoints()))
+			{
+				r.addStrategy(ds.getName());		
+			}
+			
+		}
+		return r;
+	}
+	public void reportMultiInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
+		long countR = records.count();
+		JavaRDD<Record> recordsStrategy = records.map(f->testZones(f));
+		JavaRDD<String> strat = recordsStrategy.flatMap(f->f.getInStrategies().iterator());
+		JavaPairRDD<String, Integer> strategyFreq = strat.mapToPair(f->{
+			return new Tuple2<String,Integer>( f, 1);
+		});
+		
+		Map<String, Long> strategyCount = strategyFreq.countByKey();
+		List<StrategySummary> summary = new ArrayList<StrategySummary>();
+		//set the percentages
+		for (Map.Entry<String, Long> entry : strategyCount.entrySet()) {
+			System.out.println("Item : " + entry.getKey() + " Count : " + entry.getValue().intValue());
+			StrategySummary ss = new StrategySummary();
+			ss.setName(entry.getKey());
+			ss.setCount(entry.getValue().intValue());
+			ss.setPercent(entry.getValue().doubleValue()/countR*100.0);
+			summary.add(ss);
+		}
+		Dataset<Row> strategyDF = spark.createDataFrame(summary, StrategySummary.class);
+		strategyDF.toDF().write().json(output);
+	}
 	public void reportInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
 		long countR = records.count();
 				

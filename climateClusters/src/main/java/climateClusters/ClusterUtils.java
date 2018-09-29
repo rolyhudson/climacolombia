@@ -76,9 +76,18 @@ public class ClusterUtils implements Serializable {
 		r.setVectorNorm(n.transform(r.getVector()));
 		return r;
 	}
+	
 	public static boolean matchYearMonth(Record r,int yr, int m)
 	{
 		if(r.getDatetime().getYear()==yr && r.getDatetime().getMonthOfYear()==m)
+		{
+			return true;
+		}
+		else return false;
+	}
+	public static boolean matchCluster(Record r,int c)
+	{
+		if(r.getClusternum()==c)
 		{
 			return true;
 		}
@@ -137,6 +146,7 @@ public class ClusterUtils implements Serializable {
 		double[] p = {Double.parseDouble(sarray[0]),Double.parseDouble(sarray[1])};
 		r.setLocation(p);
 		r.setElevation(Double.parseDouble(sarray[2]));
+		r.setReqVars(reqVariables);
 		Vector data = getValues(line,reqVariables);
 		DateTime currentDate =  DateTime.parse(sarray[3]);
 		r.setDatetime(currentDate);

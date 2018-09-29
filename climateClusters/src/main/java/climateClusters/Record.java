@@ -1,7 +1,8 @@
 package climateClusters;
 import java.io.Serializable;
-
+import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.List;
 
 import org.apache.spark.mllib.linalg.Vector;
 import org.joda.time.DateTime;
@@ -14,6 +15,8 @@ public class Record implements Serializable {
 	private Vector vector;
 	private Vector vectornorm;
 	private DateTime datetime;
+	private List<String> inStrategies = new ArrayList<String>();
+	private List<String> reqVars = new ArrayList<String>();
 	public double[] getLocation() {
 		return location;
 	}
@@ -67,10 +70,47 @@ public class Record implements Serializable {
 	{
 		datetime =dt;
 	}
+	public void addStrategy(String name) {
+		this.inStrategies.add(name);
+	}
+	public List<String> getInStrategies() {
+		return this.inStrategies;
+	}
+	public void setReqVars(List<String> vars) {
+		this.reqVars = vars;
+	}
+	public List<String> getReqVars(){
+		return this.reqVars;
+	}
 	@Override
 	public String toString() {
+		//latitude,longitude,elevation,datetime,temp,vp,rh,tmin,tmax,trange,precip,windSpd
 		return getDatetime()+","+getClusternum()+","+getElevation()
-		+","+getLocation()[0]+","+getLocation()[1]+","+getVectorNorm();
+		+","+getLocation()[0]+","+getLocation()[1]+","+getReqVars()+","+getVector()
+		+",[temp,vp,rh,tmin,tmax,trange,precip,windSpd],"+getVectorAllVar();
+	}
+	public String toJSONString() {
+		String[] allvarNames = {"temp","vp","rh","tmin","tmax","trange","precip","windSpd"};
+		double[] allvarValues = getVectorAllVar().toArray();
+		List<String> reqVars = getReqVars();
+		double[] vectorValues = getVector().toArray();
+		String allParams="{";
+		for(int i=0;i<allvarNames.length;i++) {
+			if(i==allvarNames.length-1)allParams+="\""+allvarNames[i]+"\":"+allvarValues[i]+"}";
+			else allParams+="\""+allvarNames[i]+"\":"+allvarValues[i]+",";
+		}
+		String vector ="{";
+		for(int i=0;i<reqVars.size();i++) {
+			if(i==reqVars.size()-1) vector+="\""+reqVars.get(i)+"\":"+vectorValues[i]+"}";
+			else vector+="\""+reqVars.get(i)+"\":"+vectorValues[i]+",";
+		}
+		return "{\"date\":\""+getDatetime()+"\""+
+				",\"clusternum\":"+getClusternum()+
+				",\"alt\":"+getElevation()+
+				",\"lat\":"+getLocation()[0]+
+				",\"lon\":"+getLocation()[1]+
+				",\"vector\":"+vector+
+				",\"allParams\":" +allParams+"}";
 	}
 }
 class YearComparator implements Comparator<Record>, Serializable {

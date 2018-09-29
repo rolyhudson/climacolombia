@@ -36,7 +36,7 @@ public class SimpleKMeans {
 	    
 	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
-	    numClusters=0;
+	    //numClusters=0;
 	    if(numClusters==0)
 	    {
 	    	for(int i=2;i<=100;i+=2)
@@ -66,7 +66,7 @@ public class SimpleKMeans {
 	    //generate the toplevel reports
 	    Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusteringPerformance.class);
     	performanceDs.toDF().write().json(output+"/stats/performanceDF");
-	    thermalzones.reportInclusion(recorddata,spark,output+"/stats/strategyStats");
+	    thermalzones.reportMultiInclusion(recorddata,spark,output+"/stats/strategyStats");
 	    reportClusterSummary(records,output+"/stats/clusterStats");
 	    
 	    //split results by year month
@@ -82,10 +82,15 @@ public class SimpleKMeans {
 	    		path=output+"/"+y+"/"+m;
 	    		JavaRDD<Record> temporalRecords = records.filter(f->ClusterUtils.matchYearMonth(f, yr, mon));
 	    		
-	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toString());
+	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toJSONString());
 	    		ymrecords.saveAsTextFile(path);
 	    		reportClusterSummary(temporalRecords,path+"/stats/clusterStats");
-	    		thermalzones.reportInclusion(temporalRecords,spark,path+"/stats/strategyStats");
+	    		thermalzones.reportMultiInclusion(temporalRecords,spark,path+"/stats/strategyStats");
+	    		for(int c=0;c<=numClusters;c++) {
+	    			final int cnum =c;
+	    			JavaRDD<Record> clusterRecords = temporalRecords.filter(f->ClusterUtils.matchCluster(f,cnum));
+	    			thermalzones.reportMultiInclusion(clusterRecords,spark,path+"/stats/cluster"+cnum+"Stats");
+	    		}
 	    	}
 	    	
 	    }
