@@ -24,7 +24,6 @@ import climateClusters.ClusterUtils;
 import climateClusters.ClusterSummary;
 public class SimpleKMeans {
 	private SparkSession spark;
-	private JavaRDD<Vector> dataPoints;
 	private Vector[] clusterCenters;
 	public SimpleKMeans(String output,SparkSession spk,int numClusters,ThermalZones thermalzones,JavaRDD<Record> recorddata) {
 		spark =spk;
@@ -36,7 +35,7 @@ public class SimpleKMeans {
 	    
 	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
-	    //numClusters=0;
+	    numClusters=0;
 	    if(numClusters==0)
 	    {
 	    	for(int i=2;i<=100;i+=2)

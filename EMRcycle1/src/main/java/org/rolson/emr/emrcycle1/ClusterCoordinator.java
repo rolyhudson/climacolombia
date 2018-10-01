@@ -296,43 +296,7 @@ public class ClusterCoordinator {
 		AddJobFlowStepsResult result = emr.addJobFlowSteps(req);
 		
 	}
-	private void monitorWorkflow(String id)
-	{
-		DescribeClusterRequest desc = new DescribeClusterRequest().withClusterId(id);
-		Runnable r = new Runnable() {
-			public void run() {
-				boolean flag = true;	
-				int i = 0;
-				while(flag){
-					i++;
-					System.out.println("Thread started... Counter ==> " + i);
-					DescribeClusterResult clusterResult = emr.describeCluster(desc);
-				      com.amazonaws.services.elasticmapreduce.model.Cluster cluster = clusterResult.getCluster();
-				      String status = cluster.getStatus().getState();
-				      System.out.printf("Status: %s\n", status);
-				      //STARTING, BOOTSTRAPPING, RUNNING, WAITING, TERMINATING, TERMINATED, and TERMINATED_WITH_ERRORS
-				      if(status.equals(ClusterState.TERMINATED.toString()) || status.equals(ClusterState.TERMINATED_WITH_ERRORS.toString())) {
-				        break;
-				      }
-				      if(status.equals(ClusterState.WAITING)) {
-				    	  break;
-				      }
-				      try {
-				        TimeUnit.SECONDS.sleep(45);
-				      } catch (InterruptedException e) {
-				        e.printStackTrace();
-				      }
-					try {
-						Thread.sleep(2000);
-					} catch (InterruptedException e) {
-						e.printStackTrace();
-					}
-				}
-			}
-		};
-		Thread t = new Thread(r);
-		t.start();
-	}
+	
 	public void runCluster(Cluster clus)
 	{
 		if(clus!=null)

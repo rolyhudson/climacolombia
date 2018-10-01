@@ -54,18 +54,7 @@ public class WorkflowActionCell extends TableCell<Workflow, Boolean> {
 	                			}
 	                		}
 	                		 break;
-	                	case "map":
-	                		if(forAction.getStatus().equals("COMPLETED"))
-	                		{
-	                			if(alertMessage("Generate georeferenced visualisation for: "+forAction.getName()))
-	        					{
-	            					//run vis
-	                				GeoVisualisation geovis = new GeoVisualisation(forAction);
-	                				visResults(geovis.getVisResultUri());
-	        					}
-	                		}
-	                		
-	                		break;
+	                	
 	                	case "stats":
 	                		if(forAction.getStatus().equals("COMPLETED"))
 	                		{

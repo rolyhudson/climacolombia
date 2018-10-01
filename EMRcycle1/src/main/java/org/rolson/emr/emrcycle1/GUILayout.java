@@ -54,7 +54,7 @@ import javafx.util.Callback;
 
 public class GUILayout {
 	
-	ClusterTests clustest = new ClusterTests();
+
 	private DataManager datamanager = new DataManager();
 	private HashMap<String,Text> buttonLabelMap = new HashMap<String,Text>();
 	int width = 1400;

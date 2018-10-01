@@ -19,7 +19,7 @@ public class GeoVisualisation {
 	private DataManager datamanager;
 	private String datakey;
 	private String dataBucket;
-	private String visResultUri;
+	
 	public GeoVisualisation(Workflow wf)
 	{
 		this.dataBucket = "clustercolombia";
@@ -128,11 +128,7 @@ public class GeoVisualisation {
 		}
 		datamanager.uploadStringToFile(destinationkeypath+resultPath+"/clusters.json",sb.toString(),"lacunae.io","application/json");
 	}
-	public String getVisResultUri()
-	{
-		return this.visResultUri;
-	}
-
+	
 	public void setDataSourceUri(String uri)
 	{
 		this.dataSourceUri = uri;

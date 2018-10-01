@@ -261,19 +261,7 @@ public class SelectionMap implements MapComponentInitializedListener{
         //convertRectangleToPolygon(topleft,bottomright);
         
 	}
-	private void convertRectangleToPolygon(LatLong topleft, LatLong bottomright)
-	{
-		LatLong topright =new LatLong(topleft.getLatitude(),bottomright.getLongitude());
-		LatLong bottomleft = new LatLong(bottomright.getLatitude(),topleft.getLongitude());
-        this.selectionLatLongs.clear();
-        
-        this.selectionLatLongs.add(topleft);
-        this.selectionLatLongs.add(topright);
-        this.selectionLatLongs.add(bottomright);
-        this.selectionLatLongs.add(bottomleft);
-        this.selectionLatLongs.add(topleft);
-
-	}
+	
 	private void setupMaxPolygonPoints()
 	{
 		LatLong p1 = new LatLong(8.766635, -78.221568);

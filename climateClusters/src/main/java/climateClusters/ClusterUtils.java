@@ -117,13 +117,13 @@ public class ClusterUtils implements Serializable {
 	public static Tuple2<Integer,Record> classRecord(Record r){
 		return new Tuple2<Integer,Record>(r.getClusternum(),r);
 	}
-	public static Tuple2<String,Vector> getLabeledData(String line,List<String> reqVariables)
-	{
-		String[] sarray = line.split(",");
-		Vector data = getValues(line,reqVariables);
-		String label = sarray[0]+","+sarray[1];
-		return new Tuple2<String,Vector>(label, data);
-	}
+//	public static Tuple2<String,Vector> getLabeledData(String line,List<String> reqVariables)
+//	{
+//		String[] sarray = line.split(",");
+//		Vector data = getValues(line,reqVariables);
+//		String label = sarray[0]+","+sarray[1];
+//		return new Tuple2<String,Vector>(label, data);
+//	}
 	public static boolean inSeasonRange(String line,int startmonth,int endmonth)
 	{
 		String[] sarray = line.split(",");

@@ -82,7 +82,7 @@ public class GUIWorkflowBuilder {
 	
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	
-	private  ObservableList<Workflow> data = FXCollections.observableArrayList();
+	
 	private Workflow forAction;//currently editing this workflow
 	int[] daysInMonths = new int[] { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31 };
 	List<String> months = Arrays.asList("January","February","March","April","May","June","July","August","September","October","November","December");
@@ -749,20 +749,7 @@ public class GUIWorkflowBuilder {
 			break;
 		}
 	}
-	private boolean alertMessage(String text)
-	{
-		Alert alert = new Alert(AlertType.CONFIRMATION);
-		alert.setTitle("Confirmation Dialog");
-		alert.setHeaderText(text);
-		alert.setContentText("Proceed?");
-
-		Optional<ButtonType> result = alert.showAndWait();
-		if (result.get() == ButtonType.OK){
-		   return true;
-		} else {
-		    return false;
-		}
-	}
+	
 	private TableColumn addColumn(String name,int width,String property)
 	{
 		 TableColumn col = new TableColumn(name);

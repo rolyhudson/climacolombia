@@ -37,8 +37,8 @@ public class DirectoryAndFile {
 		
 	}
 	private static void transferResultObjects() {
-		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\66549575\\";
-		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\test\\";
+		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\29834856\\";
+		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\testOptimised\\";
 		getPaths(new File(prefixOutput));
 		
 		List<String> jsonToCombine = new ArrayList<String>();
