@@ -17,6 +17,7 @@ public class Record implements Serializable {
 	private DateTime datetime;
 	private List<String> inStrategies = new ArrayList<String>();
 	private List<String> reqVars = new ArrayList<String>();
+
 	public double[] getLocation() {
 		return location;
 	}
@@ -36,6 +37,7 @@ public class Record implements Serializable {
 	{
 		elevation = altitude;
 	}
+	
 	public int getClusternum() {
 		return clusternum;
 	}
@@ -94,6 +96,7 @@ public class Record implements Serializable {
 		double[] allvarValues = getVectorAllVar().toArray();
 		List<String> reqVars = getReqVars();
 		double[] vectorValues = getVector().toArray();
+		List<String> allFoundStrategies = getInStrategies();
 		String allParams="{";
 		for(int i=0;i<allvarNames.length;i++) {
 			if(i==allvarNames.length-1)allParams+="\""+allvarNames[i]+"\":"+allvarValues[i]+"}";
@@ -104,13 +107,19 @@ public class Record implements Serializable {
 			if(i==reqVars.size()-1) vector+="\""+reqVars.get(i)+"\":"+vectorValues[i]+"}";
 			else vector+="\""+reqVars.get(i)+"\":"+vectorValues[i]+",";
 		}
+		String strats  ="[";
+		for(int i=0;i<allFoundStrategies.size();i++) {
+			if(i==allFoundStrategies.size()-1)strats  +=allFoundStrategies.get(i)+"]";
+			else strats  +=allFoundStrategies.get(i)+",";
+		}
 		return "{\"date\":\""+getDatetime()+"\""+
 				",\"clusternum\":"+getClusternum()+
 				",\"alt\":"+getElevation()+
 				",\"lat\":"+getLocation()[0]+
 				",\"lon\":"+getLocation()[1]+
 				",\"vector\":"+vector+
-				",\"allParams\":" +allParams+"}";
+				",\"allParams\":" +allParams+
+				",\"strategies\":"+strats+"}";
 	}
 }
 class YearComparator implements Comparator<Record>, Serializable {

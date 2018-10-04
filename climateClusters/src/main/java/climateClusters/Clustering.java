@@ -19,8 +19,8 @@ public class Clustering {
 //                .builder()
 //                .appName("SparkJob")
 //                .getOrCreate();
-//		
-		//local debug
+		
+//		local debug
 		SparkSession spark = SparkSession.builder()
 				  .master("local")
 				  .appName("SparkJob")

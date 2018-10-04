@@ -12,6 +12,7 @@ import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.clustering.KMeans;
 import org.apache.spark.mllib.clustering.KMeansModel;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.rdd.RDD;
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
 import org.apache.spark.sql.SparkSession;
@@ -33,34 +34,49 @@ public class SimpleKMeans {
 	    //KMEANS specific
 	    int numIterations = 20;
 	    
-	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
-	    ClusteringPerformance cp;
-	    numClusters=0;
+	    
+	    //numClusters=0;
+	    double[] bds;
+	    double[] bddunn;
+	    double[] costs;
+	    dataPoints.cache();
+	    int maxclusters=20;
+	    int minClusters=2;
 	    if(numClusters==0)
 	    {
-	    	for(int i=2;i<=100;i+=2)
-	    	{
-	    		KMeansModel clusterEp = KMeans.train(dataPoints.rdd(), i, numIterations);
-	    		cp = new ClusteringPerformance();
-	    		cp.setCost(clusterEp.computeCost(dataPoints.rdd()));
-	    		cp.setNClustsers(i);
-	    		performance.add(cp);
-	    	}
-	    	
-	    	numClusters = ClusteringPerformance.findElbowCluster(performance);
+
+		    maxclusters=20;
+		    minClusters=2;
 	    }
-	    //re-cluster with auto selected k or with preselected k
+	    else {
+	    	maxclusters=numClusters+1;
+		    minClusters=numClusters;
+	    }
+	    bds = ClusterUtils.BDSilhouette(dataPoints,minClusters,maxclusters,numIterations,spark);
+	    bddunn = ClusterUtils.BDDunn(dataPoints,minClusters, maxclusters, numIterations, spark);
+	    costs = ClusterUtils.costs(dataPoints, minClusters, maxclusters, numIterations, spark);
+	    
+	    //store the performance stats
+	    List<ClusteringPerformance> performance = new ArrayList<ClusteringPerformance>();
+	    ClusteringPerformance cp;
+	    for(int i=0;i<bds.length;i++) {
+	    	 cp = new ClusteringPerformance(i+minClusters,costs[i],bds[i],bddunn[i],true);
+	    	
+    		performance.add(cp);
+    		
+    	}
+	    numClusters = ClusteringPerformance.findElbowCluster(performance);
+	  //re-cluster with auto selected k or with preselected k
 	    KMeansModel clusters = KMeans.train(dataPoints.rdd(), numClusters, numIterations);
 	    clusterCenters = clusters.clusterCenters();
-	    cp = new ClusteringPerformance();
-    	cp.setCost(clusters.computeCost(dataPoints.rdd()));
-		cp.setNClustsers(numClusters);
-		cp.setSelected(true);
-		performance.add(cp);
 
-    	//sorted by year and with cluster id
+    	//sorted by year and with cluster id and associated strategies
 	    JavaRDD<Record> records = recorddata.map(f->ClusterUtils.classify(f,clusters))
+	    		.map(r->thermalzones.testZones(r))
 	    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
+	    
+	    //get the psuedoF slow
+	   //double pf = ClusterUtils.pseudoF(records, clusters);
 	    
 	    //generate the toplevel reports
 	    Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusteringPerformance.class);

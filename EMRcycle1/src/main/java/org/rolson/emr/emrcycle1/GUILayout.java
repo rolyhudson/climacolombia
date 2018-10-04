@@ -158,11 +158,6 @@ public class GUILayout {
 			buttonCmds.add("Upload JAR file");
 			buttonCmds.add("Upload text");
 			break;
-		
-		case "Predefined workflows":
-			buttonCmds.add("K-means clustering");
-			buttonCmds.add("Linear Regression");
-			break;
 		}
 		return buttonCmds;
 	}
@@ -171,8 +166,7 @@ public class GUILayout {
 		List<String> buttonCmds = new ArrayList<String>();
 		
 		buttonCmds.add("Workflow builder");
-		buttonCmds.add("Resource monitor");
-		buttonCmds.add("Workflow monitor");
+		buttonCmds.add("Monitor");
 		buttonCmds.add("Visualise");
 		buttonCmds.add("Data manager");
 		buttonCmds.add("Settings");
@@ -192,19 +186,15 @@ public class GUILayout {
 	{
 		TabPane tabPane = new TabPane();
 		List<String> tabnames = tabSet();
-		List<String> cols;
+		
 		for(int i=0; i<tabnames.size();i++)
 		{
 			String tabname = tabnames.get(i);
 			switch(tabname)
 			{
-			case "Resource monitor":
-				cols = Arrays.asList("name", "status" , "awsID");
-				addTabWithTableView(i,tabname,tabPane, this.resourcetable,cols);
-				break;
-			case "Workflow monitor":
-				cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType");
-				addTabWithTableView(i,tabname,tabPane, this.workflowtable,cols);
+			case "Monitor":
+				makeMonitorTab(tabname,tabPane,i );
+				
 				break;
 			case "Settings":
 				addSettingsTab(i,tabname,tabPane );
@@ -292,7 +282,19 @@ public class GUILayout {
         
         return c3;
 	}
-	private void addTabWithTableView(int index,String name,TabPane tabpane,TableView table,List<String> columns)
+	private void makeMonitorTab(String name,TabPane tabpane,int index ) {
+		Tab tab = new Tab();
+        tab.setText(name);
+        List<String> cols = Arrays.asList("name", "status" , "awsID");
+		VBox resource = addTabWithTableView(this.resourcetable,cols,"Resources");
+		cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType");
+		VBox workflow =addTabWithTableView(this.workflowtable,cols,"Workflows");
+		VBox monitor = new VBox();
+		monitor.getChildren().addAll(resource,workflow);
+        tab.setContent(monitor);
+        tabpane.getTabs().add(index, tab);
+	}
+	private VBox addTabWithTableView(TableView table,List<String> columns,String name)
 	{
 		
         //placeholder for no contents
@@ -322,11 +324,8 @@ public class GUILayout {
         {
         	tabColumns.add(addColumn(col,150,col));
         }
-        if(name.contains("Workflow")) {
+        if(!name.contains("Workflow")) {
 
-        }
-        else
-        {
         	TableColumn stopbuttons = addClusterActionColumn(table,"stop","Terminate");
         	tabColumns.add(stopbuttons);
         }
@@ -340,10 +339,7 @@ public class GUILayout {
         vbox.setPadding(new Insets(10, 0, 0, 10));
 
         vbox.getChildren().addAll(hbox, table);
-        Tab tab = new Tab();
-        tab.setText(name);
-        tab.setContent(vbox);
-        tabpane.getTabs().add(index, tab);
+        return vbox;
 	}
 	
 	private void addButtonLabel(Tab tab,List<String> buttons)

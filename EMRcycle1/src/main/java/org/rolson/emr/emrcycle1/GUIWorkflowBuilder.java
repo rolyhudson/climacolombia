@@ -74,9 +74,8 @@ public class GUIWorkflowBuilder {
 	private Button saveBtn;
 	private Button runBtn;
 	private Button stopBtn;
-	private Button map2dBtn;
-	private Button map3dBtn;
-	private Button statsBtn;
+	private Button resultsBtn;
+
 	private SelectionMap selectionMap; 
 	
 	
@@ -312,10 +311,10 @@ public class GUIWorkflowBuilder {
 			}
 		});
 		tools.add(stopBtn,6,0);
-		//2d map
-		this.map2dBtn = new Button("2d map");
-		map2dBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		map2dBtn.setOnAction((event) -> {
+		//results 
+		this.resultsBtn = new Button("Results");
+		resultsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		resultsBtn.setOnAction((event) -> {
 		    
 			if(forAction!=null)
 			{
@@ -324,38 +323,14 @@ public class GUIWorkflowBuilder {
 				//startGeoVis();
 			}
 		});
-		tools.add(map2dBtn,3,1);
-		//res lbl
-		Label resLbl = new Label("Results: ");
-		tools.add(resLbl,2,1);
-		//3d map
-		this.map3dBtn = new Button("3d map");
-		map3dBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		map3dBtn.setOnAction((event) -> {
-		    
-			if(forAction!=null)
-			{
-			
-			}
-		});
-		tools.add(map3dBtn,4,1);
-		//stats
-		this.statsBtn = new Button("Stats");
-		statsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		statsBtn.setOnAction((event) -> {
-		    
-			if(forAction!=null)
-			{
-			
-			}
-		});
-		tools.add(statsBtn,5,1);
+		tools.add(resultsBtn,2,1);
 		//status label
-		Label status = new Label("STATUS: ");
-				this.statusLbl = new Label("");
-				tools.add(status,0,1);
-				tools.add(statusLbl,1,1);
-				box.getChildren().add(tools);
+				Label status = new Label("STATUS: ");
+						this.statusLbl = new Label("");
+						tools.add(status,0,1);
+						tools.add(statusLbl,1,1);
+						
+		box.getChildren().add(tools);
 		return box;
 	}
 	private VBox configTools()
@@ -659,9 +634,7 @@ public class GUIWorkflowBuilder {
 		{
 			//full editing permitted no results
 			//disabled stop 2d map 3d map stats
-			this.map2dBtn.setDisable(true);
-			this.map3dBtn.setDisable(true);
-			this.statsBtn.setDisable(true);
+			this.resultsBtn.setDisable(true);
 			this.stopBtn.setDisable(true);
 			
 			this.copyBtn.setDisable(false);
@@ -676,9 +649,7 @@ public class GUIWorkflowBuilder {
 			this.configTools.setDisable(true);
 			this.mappingBox.setDisable(true);
 			//results enabled
-			this.map2dBtn.setDisable(false);
-			this.map3dBtn.setDisable(false);
-			this.statsBtn.setDisable(false);
+			this.resultsBtn.setDisable(false);
 			this.stopBtn.setDisable(true);
 			
 			this.copyBtn.setDisable(false);
@@ -691,9 +662,7 @@ public class GUIWorkflowBuilder {
 			this.configTools.setDisable(true);
 			this.mappingBox.setDisable(true);
 			
-			this.map2dBtn.setDisable(true);
-			this.map3dBtn.setDisable(true);
-			this.statsBtn.setDisable(true);
+			this.resultsBtn.setDisable(true);
 			this.stopBtn.setDisable(false);
 			
 			this.copyBtn.setDisable(false);

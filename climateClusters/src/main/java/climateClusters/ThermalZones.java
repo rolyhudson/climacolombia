@@ -41,7 +41,7 @@ public class ThermalZones implements Serializable{
 			strategies.add(ds);
 		}
 	}
-	private Record testZones(Record r) {
+	public Record testZones(Record r) {
 		for(DesignStrategy ds : strategies) {
 			if(ClusterUtils.isPointInPolygon(r.getPsychrometricPoint(), ds.getPoints()))
 			{
@@ -51,10 +51,11 @@ public class ThermalZones implements Serializable{
 		}
 		return r;
 	}
+	
 	public void reportMultiInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
 		long countR = records.count();
-		JavaRDD<Record> recordsStrategy = records.map(f->testZones(f));
-		JavaRDD<String> strat = recordsStrategy.flatMap(f->f.getInStrategies().iterator());
+		//JavaRDD<Record> recordsStrategy = records.map(f->testZones(f));
+		JavaRDD<String> strat = records.flatMap(f->f.getInStrategies().iterator());
 		JavaPairRDD<String, Integer> strategyFreq = strat.mapToPair(f->{
 			return new Tuple2<String,Integer>( f, 1);
 		});
