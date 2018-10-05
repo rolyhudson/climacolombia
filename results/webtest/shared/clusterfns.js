@@ -7,11 +7,16 @@ var popClusterDonut;
 function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();
-	runPChartTool();
+	//runPChartTool();
+
+	addPCharts();
 	getParams(params);//runMapTool after params
 	readData("stats/performanceDF/clusters.json",processPerformance);
 	readData("stats/clusterStats/clusters.json",processPopulations);
 	
+}
+function addPCharts(){
+	pc1 = new Pchart("alltimestepsallclusterspchart");
 }
 function readData(file,awaitFn){
 d3.queue()
@@ -202,97 +207,130 @@ function processParams(error, data){
 }
 runMapTool("mapDiv");
 }
-function setuplayout(){
+function setupOverview(){
 	var overview = document.getElementById("overview");
 	overview.append(addTextToDiv("h1","overview"));
 	var rowoverview1 = makeSection();
-	 
-	var p = makeContentElement("input parameters",1,"parameters","h2","third");
-	var a = makeContentElement("",1,"performancechart","h2","third");
-	a.style.overflow = "hidden";
-	a.appendChild(makeFloatTextDiv("clustering performance","performancetext","h2","right"));
-	var c = makeContentElement("",1,"populationchart","h2","third");
-	c.style.overflow = "hidden";
-	c.appendChild(makeFloatTextDiv("cluster populations","populationstext","h2","right"));
-	rowoverview1.appendChild(p);
-	rowoverview1.appendChild(a);
-	rowoverview1.appendChild(c);
+	var param = makeContentElement("input parameters",1,"parameters","h2","1/5");
+	var sil = makeContentElement("",1,"performanceSil","h2","1/5");
+	sil.style.overflow = "hidden";
+	var dunn = makeContentElement("",1,"performanceDunn","h2","1/5");
+	dunn.style.overflow = "hidden";
+	var wssse = makeContentElement("",1,"performanceWssse","h2","1/5");
+	wssse.style.overflow = "hidden";
+	rowoverview1.appendChild(param);
+	rowoverview1.appendChild(sil);
+	rowoverview1.appendChild(dunn);
+	rowoverview1.appendChild(wssse);
+	
 	overview.appendChild(rowoverview1);
-
-	var rowoverview2 = makeSection();
-	 
-	var p = makeContentElement("",0.5,"strategies","h2","twothirds");
-	p.style.overflow = "hidden";
-	p.appendChild(makeFloatTextDiv("design strategies psychrometric chart","strategiescharttext","h2","right"));
-	var a = makeContentElement("",0.5,"foundstrategies","h2","third");
-	a.appendChild(makeFloatTextDiv("found design strategies","strategiestext","h2","left"));
-	rowoverview2.appendChild(a);
-	rowoverview2.appendChild(p);
-	
-	overview.appendChild(rowoverview2);
-	
+}
+function setupClusterBrowser(){
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
-var explorerH =0.4;
-	var rowexplorer2 = makeSection(); 
-	var p = makeContentElement("",explorerH,"mapDiv","h2","third");
+	var rowexplorer1 = makeSection();
+	var p = makeContentElement("",0.4,"timestepTabs","h2","5/5");
 	p.style.overflow = "hidden";
-	var scalediv = document.createElement("div");
-	scalediv.id = "scale";
-	p.appendChild(scalediv);
-	p.appendChild(makeFloatTextDiv("map","maptext","h2","left"));
-	rowexplorer2.appendChild(p);
-
-	var timesteppanel = makeContentElement("",explorerH,"sidePanel","h2","third");
-	timesteppanel.style.overflow = "hidden";
-	rowexplorer2.appendChild(timesteppanel);
-
-	var clusterpanel = makeContentElement("",explorerH,"sidePanel","h2","third");
-	clusterpanel.style.overflow = "hidden";
-	rowexplorer2.appendChild(clusterpanel);
-	clusterbrowser.appendChild(rowexplorer2);
-	timeStepPanel(timesteppanel);
-	clusterPanel(clusterpanel);
-}
-function clusterPanel(sidepanel){
-	var side1 = makeSection();
-	var p = makeContentElement("cluster control",3,"clustercontrol","h2","full");
-
-	side1.appendChild(p);
-	sidepanel.appendChild(side1);
-
-	var side3 = makeSection();
-	var c = makeContentElement("",0.8,"withinclusterpopulations","h2","full");
-	c.appendChild(makeFloatTextDiv("within cluster population detail","clusterdetailtext","h2","left"));
 	
-	side3.appendChild(c);
-	sidepanel.appendChild(side3);
+	//addtab panel
+	p.appendChild(tabButtonsDiv(["all time steps","single time step"],clickTimeStepTab,["alltimesteps","singletimestep"],"timeTabContent"));
+	addContentTab(["alltimesteps","singletimestep"],p,"timeTabContent");
+	rowexplorer1.appendChild(p);
+	clusterbrowser.appendChild(rowexplorer1);
+	//add contents to tabs
+	insertTimeTabContents(["alltimesteps","singletimestep"],0.5);
 
-	var side2 = makeSection();
-	var a = makeContentElement("within cluster strategies",1,"withinclusterstrategies","h2","full");
-	side2.appendChild(a);
-	sidepanel.appendChild(side2);
+}
+function insertTimeTabContents(tabIDs,h){
+	for(var i=0;i<tabIDs.length;i++){
+	var tabsection = makeSection();
+	var map = makeContentElement(tabIDs[i]+" map",h,tabIDs[i]+"mapDiv","h2","2/5");
+	map.style.overflow = "hidden";
+	var clustertabs = makeContentElement(tabIDs[i]+" cluster control",h,tabIDs[i]+"clustertabs","h2","3/5");
+	clustertabs.style.overflow = "hidden";
+	var clusterTabIDs = [tabIDs[i]+"allclusters",tabIDs[i]+"singlecluster"]
+	clustertabs.appendChild(tabButtonsDiv(["all clusters","single cluster"],clickTimeStepTab,clusterTabIDs,"clusterTabContent"));
+	addContentTab(clusterTabIDs,clustertabs,"clusterTabContent");
 
+	tabsection.appendChild(map);
+	tabsection.appendChild(clustertabs);
+	document.getElementById(tabIDs[i]).appendChild(tabsection);
+	//add cluster tab contents
+	insertClusterTabContents(clusterTabIDs);
+	}
 	
 }
-function timeStepPanel(sidepanel){
-	var side1 = makeSection();
-	var p = makeContentElement("time step control",3,"control","h2","full");
-	side1.appendChild(p);
-	sidepanel.appendChild(side1);
+function insertClusterTabContents(tabIDs){
+	for(var i=0;i<tabIDs.length;i++){
+		var tabsection = makeSection();
+		if(tabIDs[i].includes("all")){
+			var pop = makeContentElement(tabIDs[i]+" pop",1,tabIDs[i]+"pop","h2","third");
+			pop.style.overflow = "hidden";
+			tabsection.appendChild(pop);
+		}
+		else{
+			var control = makeContentElement(tabIDs[i]+" control",1,tabIDs[i]+"control","h2","third");
+			control.style.overflow = "hidden";
+			tabsection.appendChild(control);
+		}
+		var pchart = makeContentElement(tabIDs[i]+" pchart",1,tabIDs[i]+"pchart","h2","twothirds");
+			pchart.style.overflow = "hidden";
+			tabsection.appendChild(pchart);
 
-	var side3 = makeSection();
-	var c = makeContentElement("",0.8,"timesteppopulations","h2","full");
-	c.appendChild(makeFloatTextDiv("time step populations","strategiestext","h2","left"));
-	c.style.overflow = "hidden";
-	side3.appendChild(c);
-	sidepanel.appendChild(side3);
-
-	var side2 = makeSection();
-	var a = makeContentElement("time step strategies",1,"timestepstrategies","h2","full");
-	side2.appendChild(a);
-	sidepanel.appendChild(side2);
+		document.getElementById(tabIDs[i]).appendChild(tabsection);
+	}
 }
+function tabButtonsDiv(text,onlclickfn,divids,tabcontentClass){
+	var tabbuttons = document.createElement("div");
+	for(var i=0;i<text.length;i++){
+		var button = document.createElement("button");
+		button.addEventListener("click", onlclickfn);
+		button.tabname = divids[i]; 
+		button.tabclass = tabcontentClass;
+		var t = document.createTextNode(text[i]);
+		button.appendChild(t);
+		button.className = tabcontentClass+ " tablinks";
+		tabbuttons.appendChild(button);
+	}
+	tabbuttons.className="tab";
+	return tabbuttons;
+}
+function addContentTab(divids,parentdiv,tabcontentClass){
+	for(var i=0;i<divids.length;i++){
+
+	var tabcontent= document.createElement("div");
+	tabcontent.id = divids[i];
+	tabcontent.className = tabcontentClass+" tabcontent";
+	if(i===0) tabcontent.style.display ="block";
+	parentdiv.appendChild(tabcontent);
+
+	}
+}
+function clickTimeStepTab(event){
+ //window.alert( event.target.tabname );
+ var i, tabcontent, tablinks;
+    tabcontent = document.getElementsByClassName(event.target.tabclass+" tabcontent");
+    for (i = 0; i < tabcontent.length; i++) {
+        tabcontent[i].style.display = "none";
+    }
+    tablinks = document.getElementsByClassName(event.target.tabclass+" tablinks");
+    for (i = 0; i < tablinks.length; i++) {
+        tablinks[i].className = tablinks[i].className.replace(" active", "");
+    }
+    document.getElementById(event.target.tabname).style.display = "block";
+    event.currentTarget.className += " active";
+
+}
+
+function setuplayout(){
+;
+	setupOverview();
+	setupClusterBrowser();
+	eventFire(document.getElementById("alltimesteps"), 'click');
+	eventFire(document.getElementById("alltimestepsallclusters"), 'click');
+
+}
+
 function makeSection()
 {
 	var ele = document.createElement("div");
@@ -305,6 +343,12 @@ function makeContentElement(title,scale, id,titlesize,colType)
 	if(colType==="third")var contentCol = makeContentCol("col span_1_of_3",mainimgHeight/scale,id);
 	if(colType==="full")var contentCol= makeContentCol("col span_3_of_3",mainimgHeight/scale,id);
 	if(colType==="twothirds")var contentCol= makeContentCol("col span_2_of_3",mainimgHeight/scale,id);
+
+	if(colType==="1/5")var contentCol = makeContentCol("col span_1_of_5",mainimgHeight/scale,id);
+	if(colType==="2/5")var contentCol= makeContentCol("col span_2_of_5",mainimgHeight/scale,id);
+	if(colType==="3/5")var contentCol= makeContentCol("col span_3_of_5",mainimgHeight/scale,id);
+	if(colType==="4/5")var contentCol= makeContentCol("col span_4_of_5",mainimgHeight/scale,id);
+	if(colType==="5/5")var contentCol= makeContentCol("col span_5_of_5",mainimgHeight/scale,id);
     if(title!="")contentCol.appendChild(addTextToDiv(titlesize,title));
     
     return contentCol;
@@ -324,4 +368,13 @@ function addTextToDiv(tType,text)
 	var node = document.createTextNode(text);
 	p.appendChild(node);
 	return p;
+}
+function eventFire(el, etype){
+  if (el.fireEvent) {
+    el.fireEvent('on' + etype);
+  } else {
+    var evObj = document.createEvent('Events');
+    evObj.initEvent(etype, true, false);
+    el.dispatchEvent(evObj);
+  }
 }

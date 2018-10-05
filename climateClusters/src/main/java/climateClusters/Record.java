@@ -17,7 +17,8 @@ public class Record implements Serializable {
 	private DateTime datetime;
 	private List<String> inStrategies = new ArrayList<String>();
 	private List<String> reqVars = new ArrayList<String>();
-
+	private double utci;
+	private double ideamci;
 	public double[] getLocation() {
 		return location;
 	}
@@ -84,6 +85,18 @@ public class Record implements Serializable {
 	public List<String> getReqVars(){
 		return this.reqVars;
 	}
+	public double getUtci() {
+		return utci;
+	}
+	public void setUtci(double ut) {
+		utci = Math.round(ut * 100.0) / 100.0;
+	}
+	public double getIdeamci() {
+		return ideamci;
+	}
+	public void setIdeamci(double ci) {
+		ideamci=Math.round(ci * 100.0) / 100.0;
+	}
 	@Override
 	public String toString() {
 		//latitude,longitude,elevation,datetime,temp,vp,rh,tmin,tmax,trange,precip,windSpd
@@ -109,8 +122,8 @@ public class Record implements Serializable {
 		}
 		String strats  ="[";
 		for(int i=0;i<allFoundStrategies.size();i++) {
-			if(i==allFoundStrategies.size()-1)strats  +=allFoundStrategies.get(i)+"]";
-			else strats  +=allFoundStrategies.get(i)+",";
+			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"]";
+			else strats  +="\""+allFoundStrategies.get(i)+"\",";
 		}
 		return "{\"date\":\""+getDatetime()+"\""+
 				",\"clusternum\":"+getClusternum()+
@@ -119,7 +132,9 @@ public class Record implements Serializable {
 				",\"lon\":"+getLocation()[1]+
 				",\"vector\":"+vector+
 				",\"allParams\":" +allParams+
-				",\"strategies\":"+strats+"}";
+				",\"strategies\":"+strats+
+				",\"utci\":"+getUtci()+
+				",\"ideamci\":"+getIdeamci()+"}";
 	}
 }
 class YearComparator implements Comparator<Record>, Serializable {

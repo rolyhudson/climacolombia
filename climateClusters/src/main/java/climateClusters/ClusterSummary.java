@@ -11,6 +11,8 @@ public class ClusterSummary implements Serializable{
 	private Long count;
 	private Vector centroid;
 	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
+	private double clusterUTCI;
+	private double clusterIdeamCI;
 	public void setClusterId(int id) {
 		clusterId = id;
 	}
@@ -25,6 +27,18 @@ public class ClusterSummary implements Serializable{
 	}
 	public void setCentroid(Vector c) {
 		centroid = c;
+	}
+	public double getClusterUTCI() {
+		return clusterUTCI;
+	}
+	public void setClusterUTCI(double utci) {
+		clusterUTCI = utci;
+	}
+	public double getClusterIdeamCI() {
+		return clusterIdeamCI;
+	}
+	public void setClusterIdeamCI(double ideamci) {
+		clusterIdeamCI = ideamci;
 	}
 	public Vector getCentroid() {
 		return centroid;

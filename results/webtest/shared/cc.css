@@ -7,27 +7,62 @@ a:link {color: black; text-decoration: none;}
 a:hover {
     color: hotpink; text-decoration: none;;
 }
+.tab {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+/* Style the buttons inside the tab */
+.tab button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of buttons on hover */
+.tab button:hover {
+    background-color: #ddd;
+}
+
+/* Create an active/current tablink class */
+.tab button.active {
+    background-color: #ccc;
+}
+
+/* Style the tab content */
+.tabcontent {
+    display: none;
+    padding: 6px 12px;
+    border: 1px solid #ccc;
+    border-top: none;
+}
 
 #loading{
-                height:25px;}
-             #container{
-                font-size: small;
-             }           
-            .line { 
-            stroke: steelblue;
-            stroke-width: 0.6;
-            fill: none;
-            }
-			.strategy{
-				stroke-width: 2;
-			}
-			#overview, #clusterbrowser{
-				border: 1px solid grey;
-				margin: 10;
-			}
-			h3{
-				display: inline-block;
-			}
+    height:25px;}
+ #container{
+    font-size: small;
+ }           
+.line { 
+stroke: steelblue;
+stroke-width: 0.6;
+fill: none;
+}
+.strategy{
+	stroke-width: 2;
+}
+#overview, #clusterbrowser{
+	border: 1px solid grey;
+	margin: 10;
+}
+h3{
+	display: inline-block;
+}
 #scale{
 	position: absolute;
 	top:40px;
@@ -96,12 +131,18 @@ position: fixed;
 .span_3_of_3 { width: 100%; position: relative;}
 .span_2_of_3 { width: 66.33%; position: relative;}
 .span_1_of_3 { width: 32.66%; position: relative;}
+/*  GRID OF FIVE  */
+.span_5_of_5 {width: 100%;}
+.span_4_of_5 {width: 79.8%;}
+.span_3_of_5 {width: 59.6%;}
+.span_2_of_5 {	width: 39.4%;}
+.span_1_of_5 {	width: 19.2%;}
 
 /*  GO FULL WIDTH BELOW XX0 PIXELS */
 @media only screen and (max-width: 750px) {
 	.col {  margin: 1% 0 1% 0%; }
 	.span_3_of_3, .span_2_of_3, .span_1_of_3 { width: 100%; }
-	.span_1_of_3_logo {width: 32.33%; position: relative;}
+	.span_1_of_5, .span_2_of_5, .span_3_of_5, .span_4_of_5, .span_5_of_5 { width: 100%; }
 	#container{width: 100%;}
 	.menuTextCentre, .menuTextRight{position: absolute;}
 	.menuTextRight > h4{

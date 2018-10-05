@@ -168,6 +168,8 @@ public class ClusterUtils implements Serializable {
 			if(i==6) psychrometricPoint[1] = Double.parseDouble(sarray[i]);
 			v.add(Double.parseDouble(sarray[i]));
 		}
+		r.setUtci(ComfortIndices.CalcUTCI(v.get(0), v.get(7), v.get(0), v.get(2)));
+		r.setIdeamci(ComfortIndices.ideamIC(r.getElevation(),v.get(0), v.get(2), v.get(7)));
 		Vector allVar = Vectors.dense(v.stream().mapToDouble(Double::doubleValue).toArray());
 		r.setVectorAllVar(allVar);
 		r.setPsychrometricPoint(psychrometricPoint);

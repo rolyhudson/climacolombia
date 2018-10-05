@@ -75,16 +75,18 @@ public class SimpleKMeans {
 	    		.map(r->thermalzones.testZones(r))
 	    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 	    
+	    
 	    //get the psuedoF slow
 	   //double pf = ClusterUtils.pseudoF(records, clusters);
 	    
 	    //generate the toplevel reports
 	    Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusteringPerformance.class);
     	performanceDs.toDF().write().json(output+"/stats/performanceDF");
-	    thermalzones.reportMultiInclusion(recorddata,spark,output+"/stats/strategyStats");
-	    reportClusterSummary(records,output+"/stats/clusterStats");
+	    thermalzones.reportMultiInclusion(records,spark,output+"/stats/strategyStats");
+	    double[][] comfortIndices = ComfortIndices.getComfortIndicesClusters(records,clusters);
+	    reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices);
 	    
-	    //split results by year month
+	    //split results by year month this could be done from DB in the dashboard
 	    int maxyear = records.max(new YearComparator()).getDatetime().getYear();
 	    int minyear = records.min(new YearComparator()).getDatetime().getYear();
 	    String path="";
@@ -99,7 +101,8 @@ public class SimpleKMeans {
 	    		
 	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toJSONString());
 	    		ymrecords.saveAsTextFile(path);
-	    		reportClusterSummary(temporalRecords,path+"/stats/clusterStats");
+	    		//could add indices per cluster per time step
+	    		reportClusterSummary(temporalRecords,path+"/stats/clusterStats",comfortIndices);
 	    		thermalzones.reportMultiInclusion(temporalRecords,spark,path+"/stats/strategyStats");
 	    		for(int c=0;c<=numClusters;c++) {
 	    			final int cnum =c;
@@ -113,7 +116,7 @@ public class SimpleKMeans {
 	    
 	    spark.stop();
 	}
-	private void reportClusterSummary(JavaRDD<Record> records,String output) {
+	private void reportClusterSummary(JavaRDD<Record> records,String output,double[][] comfort) {
 	List<ClusterSummary> summary = new ArrayList<ClusterSummary>();
     Map<Integer,Long> clusterStats = records.map(f->f.getClusternum()).countByValue();
     
@@ -122,6 +125,8 @@ public class SimpleKMeans {
     	cs.setCentroid(clusterCenters[i]);
     	cs.setClusterId(i);
     	cs.setCount(clusterStats.get(i));
+    	cs.setClusterUTCI(comfort[i][0]);
+    	cs.setClusterIdeamCI(comfort[i][1]);
     	summary.add(cs);
     }
     Dataset<Row> clusteringDs = spark.createDataFrame(summary, ClusterSummary.class);
