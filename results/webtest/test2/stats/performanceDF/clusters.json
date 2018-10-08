@@ -1,1 +1,11 @@
-{"NClusters":10,"costWSSSE":9.634723722305926,"dunn":3.5157746158292458,"selected":true,"silhouette":0.9177955569745072}
+{"NClusters":10,"costWSSSE":9.634723722305926,"dunn":3.5157746158292458,"selected":false,"silhouette":0.9177955569745072}
+{"NClusters":9,"costWSSSE":9.634723722305926,"dunn":4.5157746158292458,"selected":false,"silhouette":0.9177955569745072}
+{"NClusters":7,"costWSSSE":19.634723722305926,"dunn":5.5157746158292458,"selected":false,"silhouette":0.77955569745072}
+{"NClusters":8,"costWSSSE":9.634723722305926,"dunn":6.5157746158292458,"selected":false,"silhouette":0.4177955569745072}
+{"NClusters":6,"costWSSSE":29.634723722305926,"dunn":3.5157746158292458,"selected":true,"silhouette":0.677955569745072}
+{"NClusters":5,"costWSSSE":29.634723722305926,"dunn":7.5157746158292458,"selected":false,"silhouette":0.877955569745072}
+{"NClusters":1,"costWSSSE":39.634723722305926,"dunn":13.5157746158292458,"selected":false,"silhouette":0.9177955569745072}
+{"NClusters":0,"costWSSSE":39.634723722305926,"dunn":23.5157746158292458,"selected":false,"silhouette":0.9177955569745072}
+{"NClusters":2,"costWSSSE":59.634723722305926,"dunn":3.5157746158292458,"selected":false,"silhouette":0.877955569745072}
+{"NClusters":3,"costWSSSE":69.634723722305926,"dunn":3.5157746158292458,"selected":false,"silhouette":0.477955569745072}
+{"NClusters":4,"costWSSSE":9.634723722305926,"dunn":3.5157746158292458,"selected":false,"silhouette":0.9177955569745072}

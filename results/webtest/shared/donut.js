@@ -1,17 +1,24 @@
 class Donutchart{
-constructor(divID,info,id,centreTitleA){
+constructor(divID,info,id,centreTitleA,w,h){
 this.centreTitle = [centreTitleA];
 this.data=info;
 this.links=[]
 this.par =  document.getElementById(divID);
 this.id = id;
 this.circleRad = this.par.clientWidth*0.025;
-
-this.w = this.par.clientWidth;
-this.h = this.par.clientHeight;
-
-this.radius = this.w/3.5;
-
+if(w===0&&h===0){
+    this.w = this.par.clientWidth;
+    this.h = this.par.clientHeight;
+}
+else{
+    this.w = w;
+    this.h = h;
+}
+for(var i=0;i<this.par.childNodes.length;i++){
+   if(this.par.childNodes[i].classList.length==0) this.h-=this.par.childNodes[i].clientHeight;
+}
+this.radius = this.h/4;
+this.donutCentre = [this.w/3,this.h/4];
 d3.select(".svg"+this.id).remove();
 this.svgChart = d3.select("#"+divID)
   .append("svg")
@@ -26,7 +33,7 @@ this.drawPie();
 this.drawKey();
 
 this.addCentreTitle();
-//this.drawDerivedStats()
+
 }
 
 updateChart(){
@@ -70,7 +77,7 @@ drawPie(){
   var h = this.h;
 this.g =this.svgChart.selectAll(".graphic"+this.id).remove();
 this.g = this.svgChart.append('g')
-          .attr('transform', 'translate(' + (this.w/ 3.5) +',' + (this.h/2) + ')')
+          .attr('transform', 'translate(' + (this.donutCentre[0]) +',' + (this.donutCentre[1]) + ')')
           .attr("class","graphic"+this.id)
           .attr("id",this.id);
   
@@ -116,6 +123,16 @@ handleMouseOver(d,i){
     title[0].innerHTML = "cluster "+d.data.x;
     title[1].innerHTML = d.data.y+" data points";
     title[2].innerHTML = d.data.percent+"%";
+    //on the scale
+    singleTimeStepMap.scalebar.highlightBlock(d.data.x,"red");
+    //on the map
+     var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+ 
+    for(var b=0;b<mapBlocks.length;b++){
+        if(Number(mapBlocks[b].id)===d.data.x){
+        mapBlocks[b].style.fill = "red";   
+        }
+    }
 }
 handleMouseOut(d,i){
     var id = d.data.id;
@@ -132,10 +149,18 @@ handleMouseOut(d,i){
     }
     
     var title = document.getElementsByClassName("centreTitle donut"+id);
-    var t = this;
+    
     title[0].innerHTML = d.data.originalTitle[0];
     title[1].innerHTML = d.data.originalTitle[1];
     title[2].innerHTML = d.data.originalTitle[2];
+    //off scale
+    singleTimeStepMap.scalebar.resethighlightBlock();
+    //off map
+    var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+    
+    for(var i=0;i<mapBlocks.length;i++){
+    mapBlocks[i].style.fill = getColorSpectral(mapBlocks[i].id);
+    }
 }
 highlight(cluster,id){
     var arcs = document.getElementsByClassName("arc"+id);
@@ -144,47 +169,67 @@ highlight(cluster,id){
     var circles = document.getElementsByClassName("circle donut"+id);
     for(var j=0;j<arcs.length;j++)
     {
-        if(i!=j){
+        if(cluster!=j){
             arcs[j].style.opacity = "0.3";
             textA[j].style.opacity = "0.3";
             textB[j].style.opacity = "0.3";
             circles[j].style.opacity = "0.3";
         }
     }
+    //var result = allclustersstats.find(s=>s.x===clusNum);
+    var data = this.data.find(d=>d.x===Number(cluster));
     var title = document.getElementsByClassName("centreTitle donut"+id);
-    title[0].innerHTML = "cluster "+d.data.x;
-    title[1].innerHTML = d.data.y+" data points";
-    title[2].innerHTML = d.data.percent+"%";
+    title[0].innerHTML = "cluster "+data.x;
+    title[1].innerHTML = data.y+" data points";
+    title[2].innerHTML = data.percent+"%";
+}
+unhighlight(cluster,id){
+    var arcs = document.getElementsByClassName("arc"+id);
+    var textA = document.getElementsByClassName("graphLabelA donut"+id);
+    var textB = document.getElementsByClassName("graphLabelB donut"+id);
+    var circles = document.getElementsByClassName("circle donut"+id);
+    for(var j=0;j<arcs.length;j++)
+    {
+        arcs[j].style.opacity = "";
+        textA[j].style.opacity = "";
+        textB[j].style.opacity = "";
+        circles[j].style.opacity = "";
+    }
+
+    var title = document.getElementsByClassName("centreTitle donut"+id);
+   title[0].innerHTML = this.data[0].originalTitle[0];
+    title[1].innerHTML =this.data[0].originalTitle[1];
+    title[2].innerHTML = this.data[0].originalTitle[2];
 }
 addCentreTitle()
 {
     //text labels
-    var margin = this.radius*0.1;
-    var h = this.h/2-margin;
+    var row = this.radius*0.15;
+    var h = this.donutCentre[1];
     this.svgChart.selectAll(".centreTitle donut"+this.id).remove();
     this.svgChart.selectAll(".centreTitle donut"+this.id)
     .data(this.centreTitle)
     .enter().append("text")
     .attr("class","centreTitle donut"+this.id)
-    .attr("y",function(d,i){return h+i*margin;}) 
-    .attr("x", this.w/3.5)
+    .attr("y",function(d,i){return h+i*row;}) 
+    .attr("x",this.donutCentre[0])
     .attr("text-anchor","middle")
     .text(String);
 }
 drawKey(){
     
     //top to top of donut
-    var margin = this.radius*0.35;
-    var r = (this.h-margin)/(this.data.length+2)/2;
-    
+    var marginy = this.donutCentre[1]+this.radius;
+    var r = (this.h-marginy)/(this.data.length+2)/2;
+    var marginx = this.radius*0.2;
     this.svgChart.selectAll(".circle donut"+this.id).remove();
     this.svgChart.selectAll(".circle donut"+this.id)
     .data(this.data)
     .enter().append("circle")
     .attr("class","circle donut"+this.id)
     .attr("id",function(d) { return d.x; })
-    .attr("cy", function(d,i) { return (margin)+i*r*2.1; })
-    .attr("cx", this.w*0.55)
+    .attr("cy", function(d,i) { return (marginy)+i*r*2.1; })
+    .attr("cx", marginx)
     .attr("r", r+"px")
     .attr("fill", function(d) { return d.col; });
     
@@ -195,8 +240,8 @@ drawKey(){
     .enter().append("text")
     .attr("class","graphLabelA donut"+this.id)
     .attr("id",function(d) { return d.x; })
-    .attr("y", function(d,i) { return (margin+r/2)+i*r*2.1; })
-    .attr("x", this.w*0.6)
+    .attr("y", function(d,i) { return (marginy+r/2)+i*r*2.1; })
+    .attr("x", marginx*2)
     .text(function(d){return d.x;});
 
     //text info
@@ -206,8 +251,8 @@ drawKey(){
     .enter().append("text")
     .attr("class","graphLabelB  donut"+this.id)
     .attr("id",function(d) { return d.x; })
-    .attr("y", function(d,i) { return (margin+r/2)+i*r*2.1;})
-    .attr("x", this.w*0.65)
+    .attr("y", function(d,i) { return (marginy+r/2)+i*r*2.1;})
+    .attr("x", marginx*3)
     .text(function(d){return d.percent+"% "+d.y+" points";});
     
     

@@ -1,30 +1,85 @@
 var strategies = [];
 var strategiesDisplay=[];
+var atmosPress=101000;
 var zoneColors = ["#66cc00","turquoise", "dodgerblue","blue","orchid","purple","SandyBrown","lightsalmon","gold","orange","darkorange","red","darkred" ];
-function setStrategy(){
-getZones("../shared/zones.txt");
-getZones("../shared/zonesdisplay.txt");
+function getStrategiesZones(){
+readData("../shared/zonesdisplay.txt",parseDisplay);
 }
-function getZones(file){
-	if(file.includes("display")){
-		readData(file,parseDisplay);
-	}
-	else{
-	readData(file,parseZones);
-	}
-}
-function parseZones(error,data)
-{
-tableData = d3.csvParseRows(data);
-strategies = readZones(tableData);
-percentInZone();
-}
+
 function parseDisplay(error,data)
 {
 tableData = d3.csvParseRows(data);
 strategiesDisplay = readZones(tableData);
-displayOnChart();
-readData("stats/strategyStats/clusters.json",processStrategies);
+addPCharts();
+
+}
+function highlightPoints(sName){
+	var blocks = [];
+	
+	for(var i=0;i<clusterData.length;i++){
+		var foundstrat=false;
+		for(var s=0;s<clusterData[i].strategies.length;s++){
+			if(clusterData[i].strategies[s]===sName) foundstrat=true;
+			
+		}
+		blocks.push(foundstrat);
+	}
+	return blocks;
+}
+function highlightPointsByCluster(sName,cnum){
+	var blocks = [];
+	for(var i=0;i<clusterData.length;i++){
+		var foundstrat=false;
+		if(clusterData[i].clusternum===cnum){
+			for(var s=0;s<clusterData[i].strategies.length;s++){
+				if(clusterData[i].strategies[s]===sName) foundstrat=true;
+			}
+		}
+		blocks.push(foundstrat);
+	}
+	return blocks;
+}
+function pointsInSingleTimeStepSingleCluster(clusNum){
+	var total =0;
+	for(var i=0;i<clusterData.length;i++){
+		if(clusterData[i].clusternum===clusNum) total++;
+	}
+	return total;
+}
+function pointsInAllTimeStepSingleCluster(clusNum){
+	var total =0;
+	var result = allclustersstats.find(s=>s.x===clusNum);
+	
+	return result.y;
+}
+function processAllTimeAllClusterStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+	pc1.addFoundStrategies(strategyData,"pc1");
+}
+function processTimeStepSingleClusterStrategies(error,data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+	pc4.addFoundStrategies(strategyData,"pc4");
+}
+function processTimeStepAllClusterStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+	pc3.addFoundStrategies(strategyData,"pc3");
+}
+
+function processAllTimeSingleClusterStrategies(error, data){
+	tableData = data.split(/\r?\n/);
+	var strategyData=parseStrategies(tableData);
+}
+function parseStrategies(tableData){
+	var strategyData=[];
+	for(var i=0;i<tableData.length;i++)
+	{
+	if(tableData[i]!="")strategyData.push(JSON.parse(tableData[i]))	
+	}
+	strategyData.sort(orderStrategy);
+	return strategyData;
 }
 function readZones(tableData){
 	var boundaries = [];
@@ -82,81 +137,159 @@ function readZones(tableData){
 	return boundaries;
 }
 
-function displayOnChart(){
-	for(var i=0;i<strategiesDisplay.length;i++){
-		d3.selectAll("."+strategiesDisplay[i].name+".strategy").remove();
-           svgChart.append("path")
-           .data([strategiesDisplay[i].bound])
-          	.attr("class", strategiesDisplay[i].name+" strategy")
-          	.attr("d", comfBound)
-         	.attr("id", "sz"+i)
-         	.attr("stroke", strategiesDisplay[i].color)
-         	.attr("fill","none")
-			.on("mouseover", handleMouseOverStrategy)
-    		.on("mouseout", handleMouseOutStrategy);
+function round(value, precision) {
+    var multiplier = Math.pow(10, precision || 0);
+    return Math.round(value * multiplier) / multiplier;
+	}
+function orderPopulation(a, b){
+	return a.count-b.count;
 }
-
+function processAllTimeAllClusterPop(error, data){
+	tableData = data.split(/\r?\n/);
+	allclustersstats=parsePopData(tableData);
+	popAllDonut = new Donutchart("alltimestepsallclusterscontrol",allclustersstats,"populationoverviewdonut",["all clusters"],0,0);
 	
 }
-
-function handleMouseOverStrategy(d, i) {  // Add interactivity
-
-  // Use D3 to select element, change color and size
-var name = this.classList[0];
-
-var result = strategies.filter(obj => {
-  return obj.name === name
-})
-
-var coords = comfortZoneChartCoords([result[0].centroid]);
-var col = result[0].color;
-  d3.select(this).style("fill", col);
-d3.select(this).style("opacity", 0.5);
-
-
-svgChart.append("text")
-  .attr("x", coords[0][0])
-  .attr("y", coords[0][1])
-  .attr("text-anchor","middle")
-  .text(name)
-  .attr("class", "mOver sztext");
-}
-
-function handleMouseOutStrategy(d, i) {
-  // Use D3 to select element, change color back to normal
-  d3.select(this).style("fill","none");
-  d3.select(this).style("opacity", 1);
-  d3.selectAll(".mOver").remove();
-}
-function percentInZone(){
-	var results= [];
-	for(var i=0;i<strategies.length;i++){
-		comfZpoints = comfortZoneChartCoords(strategies[i].bound);
-   comfortHours = hoursInComfortZ(climatePoints, comfZpoints);
-   var percentYr = round(comfortHours/87.6,1);
-   if(percentYr>0){
-   	results.push({"hours":comfortHours,"percent":percentYr,"name":strategies[i].name,"color":strategies[i].color,"text":percentYr+"% "+strategies[i].name+" "+comfortHours +"hrs" });
-   
- }
+function parsePopData(tableData){
+	var popData=[];
+	for(var i=0;i<tableData.length;i++)
+	{
+	if(tableData[i]!="")popData.push(JSON.parse(tableData[i]))	
 	}
-// sort by value
-results.sort(function (a, b) {
-  return b.percent-a.percent ;
-});
-for(var i=0;i<results.length;i++){
+	popData.sort(orderPopulation);
+	var data=[];
+	for(var i=0;i<popData.length;i++){
+		if(popData[i].hasOwnProperty("count")){
+			data.push({"x":popData[i].clusterId,"y":popData[i].count});
+		}
+		
+		
+	}
+	return data;
 }
-d3.selectAll(".comfH").remove();
-  svgChart.selectAll(".comfH")
-  .data(results)
-   .enter()
-   .append("text")
-    .attr("class",function(d){return "comfH "+  d.name;} )
-    .attr("stroke", function(d,i){return  d.color;})
-   .attr("x", 5)
-  .attr("y",function(d,i){return  30+(15*i);})
-  .attr("font-size", 10+"px")  
-  .text(function(d){return  d.text;});
+function orderStrategy(a, b){
+	return b.percent-a.percent;
 }
-function textPos(d,i){
-	return  15+(15*i);
+
+
+function processSingleTimeStepAllClusterPop(error, data){
+	tableData = data.split(/\r?\n/);
+	var popData=parsePopData(tableData);
+	popTSDonut = new Donutchart("singletimestepallclusterscontrol",popData,"populationTSdonut",["all clusters"],popAllDonut.w,popAllDonut.h);
 }
+function processSingleTimeStepClusterSingleClusterPop(error, data){
+	tableData = data.split(/\r?\n/);
+	var popData=parsePopData(tableData);
+}
+
+
+function processPerformance(error, data){
+	tableData = data.split(/\r?\n/);
+	var performanceData=[];
+	for(var i=0;i<tableData.length;i++)
+	{
+	if(tableData[i]!="")performanceData.push(JSON.parse(tableData[i]))	
+	}
+	var performanceDivs=["performanceWssse","performanceDunn","performanceSil"];
+	if(performanceData.length===1){
+		for(var i=0;i<performanceDivs.length;i++){
+			var div = document.getElementById(performanceDivs[i]);
+			var text="";
+			var value;
+			if(i==0) {value=round(performanceData[0].costWSSSE,2);}
+			if(i==1) {value=round(performanceData[0].dunn,2);}
+			if(i==2) {value=round(performanceData[0].silhouette,2);}
+			div.appendChild(addTextToDiv("p",performanceData[0].NClusters+" user selected clusters")); 
+			div.appendChild(addTextToDiv("h1",value));
+		}
+	}
+	else{
+		performanceData.sort(compare);
+		const result = performanceData.findIndex( p => p.selected===true);
+		for(var i=0;i<performanceDivs.length;i++){
+			var data=[];
+			for(var d=0;d<performanceData.length;d++){
+				if(i==0) {text = "WSSSE";value=round(performanceData[d].costWSSSE,2);}
+				if(i==1) {text = "Dunn";value=round(performanceData[d].dunn,2);}
+				if(i==2) {text = "Silhouette";value=round(performanceData[d].silhouette,2);}
+				data.push({"x":performanceData[d].NClusters,"y":value});
+			}
+			
+			LineGraph(performanceDivs[i],data,"k clusters",text, result );
+
+			if(i==0){
+				var div = document.getElementById("performanceOther");
+				div.appendChild(addTextToDiv("p","k optimised for wssse at: "+performanceData[result].NClusters+" clusters"));
+				div.appendChild(addTextToDiv("p","wssse cost = "+round(performanceData[result].costWSSSE,2)));
+			}
+		}
+	}
+}
+function compare(a, b){
+  	return a.NClusters - b.NClusters;
+}
+function getColorSpectral(t){
+
+var cScale = d3.scaleLinear()
+ .domain([0,maxClusterId])
+ .range([1, 0]);
+
+  return d3.interpolateCool(cScale(t));
+}
+function handleMouseOverStrategy(d,i) { 
+		var name = event.target.classList[0];
+		var pChartSvg = d3.select("#"+event.path[2].id+"_svg");
+		var result = strategiesDisplay.filter(obj => {
+		return obj.name === name})
+
+		var objectsToHighlight = document.getElementById(event.path[2].id+"_svg").getElementsByClassName(name);
+		var col = result[0].color;
+		for(var i=0;i<objectsToHighlight.length;i++){
+			if(objectsToHighlight[i].id=="sztext"){
+				objectsToHighlight[i].attributes["font-weight"].value= "bold";
+			}
+			else{
+				objectsToHighlight[i].attributes["fill"].value= col;
+				objectsToHighlight[i].attributes["opacity"].value= 0.5;
+			}
+		}
+		//highlight on map if single time step
+		var blocks=[];
+		var pNodeId = event.target.parentNode.id;
+		if(pNodeId.includes("singlecluster")){
+			blocks = highlightPointsByCluster(name.replace(/_/g,' '),cluster);
+		}
+		else{
+			blocks = highlightPoints(name.replace(/_/g,' '));
+		}
+		var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+		for(var i=0;i<mapBlocks.length;i++){
+			if(blocks[i]) mapBlocks[i].style.fill = "red";
+		}
+		
+	}
+
+	function handleMouseOutStrategy(d, i) {
+		var name = event.target.classList[0];
+		var pChartSvg = d3.select("#"+event.path[2].id+"_svg");
+		var result = strategiesDisplay.filter(obj => {
+		return obj.name === name})
+
+		var objectsToHighlight = document.getElementById(event.path[2].id+"_svg").getElementsByClassName(name);
+		var col = result[0].color;
+		for(var i=0;i<objectsToHighlight.length;i++){
+			if(objectsToHighlight[i].id=="sztext"){
+				objectsToHighlight[i].attributes["font-weight"].value= "normal";
+			}
+			else{
+				objectsToHighlight[i].attributes["fill"].value= "none";
+				objectsToHighlight[i].attributes["opacity"].value= 1;
+			}
+		}
+		var blocks = highlightPoints(name.replace(/_/g,' '));
+		var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+		for(var i=0;i<mapBlocks.length;i++){
+			if(blocks[i]) mapBlocks[i].style.fill = getColorSpectral(mapBlocks[i].id);
+		}
+		//remove highlight on map
+	}

@@ -4,128 +4,40 @@ var performanceChart;
 var popAllDonut;
 var popTSDonut;
 var popClusterDonut;
+var pc1,pc2,pc3,pc4;
+var allclustersstats=[];
+var singleTimeStepMap;
 function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();
 	//runPChartTool();
-
-	addPCharts();
+	getStrategiesZones();
 	getParams(params);//runMapTool after params
 	readData("stats/performanceDF/clusters.json",processPerformance);
-	readData("stats/clusterStats/clusters.json",processPopulations);
+	
 	
 }
+function allTimeStepAllClusterInfo(){
+	//all time all clusters only loaded once
+	readData("stats/clusterStats/clusters.json",processAllTimeAllClusterPop);
+	
+	readData("stats/strategyStats/clusters.json",processAllTimeAllClusterStrategies)
+}
 function addPCharts(){
-	pc1 = new Pchart("alltimestepsallclusterspchart");
+	
+	pc1 = new Pchart("alltimestepsallclusterspchart",strategiesDisplay,"pc1",0,0);
+	pc2 = new Pchart("alltimestepssingleclusterpchart",strategiesDisplay,"pc2",pc1.w,pc1.h);
+	pc3 = new Pchart("singletimestepallclusterspchart",strategiesDisplay,"pc3",pc1.w,pc1.h);
+	pc4 = new Pchart("singletimestepsingleclusterpchart",strategiesDisplay,"pc4",pc1.w,pc1.h);
+	//getFoundStrategies();
+	allTimeStepAllClusterInfo();
 }
 function readData(file,awaitFn){
 d3.queue()
     .defer(d3.text,file )
     .await(awaitFn);
 }
-function orderPopulation(a, b){
-	return a.count-b.count;
-}
-function processPopulations(error, data){
-	tableData = data.split(/\r?\n/);
-	var popData=parsePopData(tableData);
-	popAllDonut = new Donutchart("populationchart",popData,"populationoverviewdonut",["all clusters"]);
-	
-}
-function parsePopData(tableData){
-	var popData=[];
-	for(var i=0;i<tableData.length;i++)
-	{
-	if(tableData[i]!="")popData.push(JSON.parse(tableData[i]))	
-	}
-	popData.sort(orderPopulation);
-	var data=[];
-	for(var i=0;i<popData.length;i++){
-		if(popData[i].hasOwnProperty("count")){
-			data.push({"x":popData[i].clusterId,"y":popData[i].count});
-		}
-		
-		
-	}
-	return data;
-}
-function orderStrategy(a, b){
-	return b.percent-a.percent;
-}
-function processStrategies(error, data){
-	tableData = data.split(/\r?\n/);
-	var strategyData=parseStrategies(tableData);
- insertStrategyText("strategiestext",strategyData);
-  
-}
-function processWithinClusterStrategies(error,data){
-	tableData = data.split(/\r?\n/);
-	var strategyData=parseStrategies(tableData);
-	insertStrategyText("withinclusterstrategies",strategyData);
-}
-function insertStrategyText(divID,strategyData){
-	var stratDiv = document.getElementById(divID);
-var cnodes =stratDiv.childNodes; 
-while (cnodes.length>1) {
-	stratDiv.removeChild(stratDiv.lastChild);
-	cnodes =stratDiv.childNodes;
-}
-	  for(var i=0;i<strategyData.length;i++){
-	  	var p = addTextToDiv("p",strategyData[i].percent+"% "+strategyData[i].name+" ("+strategyData[i].count+" points)");
-	  	var classname = strategyData[i].name.replace(/ /g,'_');
-	  	p.onmouseover = function(){strategyMouseOver(this)};
-	  	p.onmouseout = function(){strategyMouseOut(this)};
-	  	p.className = classname;
-	  	if(strategyData[i].name.includes("No strategy found")) p.style.color = "black";
-	  	else p.style.color = strategiesDisplay.find(s=>s.name===classname).color;
-	  	stratDiv.appendChild(p);
-	  }
-}
-function strategyMouseOver(x){
-	var classname = x.className;
-	x.style.fontWeight="bold";
-	var zone = document.getElementsByClassName(classname+" strategy");
-	var color = strategiesDisplay.find(s=>s.name===classname).color;
-	zone[0].setAttribute("fill",color);
-	zone[0].setAttribute("opacity",0.5);
-}
-function strategyMouseOut(x){
-	var classname = x.className;
-	x.style.fontWeight="normal";
-	var zone = document.getElementsByClassName(classname+" strategy");
-	zone[0].setAttribute("fill","none");
-	zone[0].setAttribute("opacity",1);
-}
-function processTSStrategies(error, data){
-	tableData = data.split(/\r?\n/);
-	var strategyData=parseStrategies(tableData);
-	insertStrategyText("timestepstrategies",strategyData);
-}
-function processTSPopulations(error, data){
-	tableData = data.split(/\r?\n/);
-	var popData=parsePopData(tableData);
-	popTSDonut = new Donutchart("timesteppopulations",popData,"populationTSdonut",["all clusters"]);
-}
-function processClusterStrategies(error, data){
-	tableData = data.split(/\r?\n/);
-	var strategyData=parseStrategies(tableData);
-}
-function processClusterPopulations(error, data){
-	tableData = data.split(/\r?\n/);
-	var popData=parsePopData(tableData);
-}
-function parseStrategies(tableData){
-	var strategyData=[];
-	for(var i=0;i<tableData.length;i++)
-	{
-	if(tableData[i]!="")strategyData.push(JSON.parse(tableData[i]))	
-	}
-	strategyData.sort(orderStrategy);
-	return strategyData;
-}
-function compare(a, b){
-  return a.NClusters - b.NClusters;
-}
+
 function makeFloatTextDiv(text,textid,titlesize,align)
 {
 	var ele = document.createElement("div");
@@ -138,34 +50,7 @@ function makeFloatTextDiv(text,textid,titlesize,align)
     ele.appendChild(title);
 	return ele;
 }
-function processPerformance(error, data){
-	tableData = data.split(/\r?\n/);
-	var performanceData=[];
-	for(var i=0;i<tableData.length;i++)
-	{
-	if(tableData[i]!="")performanceData.push(JSON.parse(tableData[i]))	
-	}
-	if(performanceData.length===1){
-		var div = document.getElementById("performancetext");
-	div.appendChild(addTextToDiv("p",performanceData[0].NClusters+" user selected clusters")); 
-	div.appendChild(addTextToDiv("p","cost = "+round(performanceData[0].cost,2)));
-	}
-	else{
-		performanceData.sort(compare);
-	var data=[];
-	for(var i=0;i<performanceData.length;i++){
-		data.push({"x":performanceData[i].NClusters,"y":performanceData[i].cost});
-		
-	}
-	const result = performanceData.findIndex( p => p.selected===true);
-	var div = document.getElementById("performancetext");
-	div.appendChild(addTextToDiv("p","k optimised at: "+performanceData[result].NClusters+" clusters"));
-	div.appendChild(addTextToDiv("p","cost = "+round(performanceData[result].cost,2)));
-	lineGraph("performancechart",data,"k clusters","cost",result ); 
-	}
-	
-	
-}
+
 function getParams(paramsFile){
 	d3.queue()
     .defer(d3.json, paramsFile)
@@ -205,75 +90,91 @@ function processParams(error, data){
         
     }
 }
-runMapTool("mapDiv");
+
+runExplorerMapTool();
+}
+function set3dView(divid){
+	var viewer = document.getElementById(divid);
+	return [viewer.clientWidth,viewer.clientHeight];
 }
 function setupOverview(){
 	var overview = document.getElementById("overview");
 	overview.append(addTextToDiv("h1","overview"));
 	var rowoverview1 = makeSection();
 	var param = makeContentElement("input parameters",1,"parameters","h2","1/5");
-	var sil = makeContentElement("",1,"performanceSil","h2","1/5");
+	var sil = makeContentElement("Silhouette coefficient",1,"performanceSil","p","1/5");
 	sil.style.overflow = "hidden";
-	var dunn = makeContentElement("",1,"performanceDunn","h2","1/5");
+	var dunn = makeContentElement("Dunn index",1,"performanceDunn","p","1/5");
 	dunn.style.overflow = "hidden";
-	var wssse = makeContentElement("",1,"performanceWssse","h2","1/5");
+	var wssse = makeContentElement("Within Set Sum of Squared Errors",1,"performanceWssse","p","1/5");
+	wssse.style.overflow = "hidden";
+	var pother = makeContentElement("",1,"performanceOther","p","1/5");
 	wssse.style.overflow = "hidden";
 	rowoverview1.appendChild(param);
 	rowoverview1.appendChild(sil);
 	rowoverview1.appendChild(dunn);
 	rowoverview1.appendChild(wssse);
-	
+	rowoverview1.appendChild(pother);
 	overview.appendChild(rowoverview1);
 }
 function setupClusterBrowser(){
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
 	var rowexplorer1 = makeSection();
-	var p = makeContentElement("",0.4,"timestepTabs","h2","5/5");
-	p.style.overflow = "hidden";
-	
 	//addtab panel
-	p.appendChild(tabButtonsDiv(["all time steps","single time step"],clickTimeStepTab,["alltimesteps","singletimestep"],"timeTabContent"));
-	addContentTab(["alltimesteps","singletimestep"],p,"timeTabContent");
-	rowexplorer1.appendChild(p);
+	var tabb = tabButtonsDiv(["all time steps","single time step"],clickTimeStepTab,["alltimesteps","singletimestep"],"timeTabContent");
+	rowexplorer1.appendChild(tabb);
+	addContentTab(["alltimesteps","singletimestep"],rowexplorer1 ,"timeTabContent");
+	
 	clusterbrowser.appendChild(rowexplorer1);
 	//add contents to tabs
 	insertTimeTabContents(["alltimesteps","singletimestep"],0.5);
-
+	//select start tabs
+	var selected = document.getElementsByClassName("timeTabContent tablinks");
+	selected[0].className += " active";
 }
 function insertTimeTabContents(tabIDs,h){
 	for(var i=0;i<tabIDs.length;i++){
 	var tabsection = makeSection();
 	var map = makeContentElement(tabIDs[i]+" map",h,tabIDs[i]+"mapDiv","h2","2/5");
 	map.style.overflow = "hidden";
+	var scalediv = document.createElement("div");
+	scalediv.id = tabIDs[i]+"mapDiv"+"scale";
+	map.appendChild(scalediv);
 	var clustertabs = makeContentElement(tabIDs[i]+" cluster control",h,tabIDs[i]+"clustertabs","h2","3/5");
-	clustertabs.style.overflow = "hidden";
-	var clusterTabIDs = [tabIDs[i]+"allclusters",tabIDs[i]+"singlecluster"]
-	clustertabs.appendChild(tabButtonsDiv(["all clusters","single cluster"],clickTimeStepTab,clusterTabIDs,"clusterTabContent"));
-	addContentTab(clusterTabIDs,clustertabs,"clusterTabContent");
+	
+	var clusterTabIDs = [tabIDs[i]+"allclusters",tabIDs[i]+"singlecluster"];
+	var tabb = tabButtonsDiv(["all clusters","single cluster"],clickTimeStepTab,clusterTabIDs,"clusterTabContent "+i);
+	clustertabs.appendChild(tabb);
+	addContentTab(clusterTabIDs,clustertabs,"clusterTabContent "+i);
 
 	tabsection.appendChild(map);
 	tabsection.appendChild(clustertabs);
 	document.getElementById(tabIDs[i]).appendChild(tabsection);
 	//add cluster tab contents
-	insertClusterTabContents(clusterTabIDs);
-	}
+	insertClusterTabContents(clusterTabIDs,0.6);
 	
+
+	}
+	//set selected
+	var selected = document.getElementsByClassName("clusterTabContent tablinks");
+	selected[0].className += " active";
+	selected[2].className += " active";
 }
-function insertClusterTabContents(tabIDs){
+function insertClusterTabContents(tabIDs,h){
 	for(var i=0;i<tabIDs.length;i++){
 		var tabsection = makeSection();
 		if(tabIDs[i].includes("all")){
-			var pop = makeContentElement(tabIDs[i]+" pop",1,tabIDs[i]+"pop","h2","third");
+			var pop = makeContentElement(tabIDs[i]+" control",h,tabIDs[i]+"control","h2","third");
 			pop.style.overflow = "hidden";
 			tabsection.appendChild(pop);
 		}
 		else{
-			var control = makeContentElement(tabIDs[i]+" control",1,tabIDs[i]+"control","h2","third");
+			var control = makeContentElement(tabIDs[i]+" control",h,tabIDs[i]+"control","h2","third");
 			control.style.overflow = "hidden";
 			tabsection.appendChild(control);
 		}
-		var pchart = makeContentElement(tabIDs[i]+" pchart",1,tabIDs[i]+"pchart","h2","twothirds");
+		var pchart = makeContentElement(tabIDs[i]+" pchart",h,tabIDs[i]+"pchart","h2","twothirds");
 			pchart.style.overflow = "hidden";
 			tabsection.appendChild(pchart);
 
@@ -301,7 +202,10 @@ function addContentTab(divids,parentdiv,tabcontentClass){
 	var tabcontent= document.createElement("div");
 	tabcontent.id = divids[i];
 	tabcontent.className = tabcontentClass+" tabcontent";
-	if(i===0) tabcontent.style.display ="block";
+	if(i===0) {
+		tabcontent.style.display ="block";
+		
+	}
 	parentdiv.appendChild(tabcontent);
 
 	}
@@ -323,7 +227,6 @@ function clickTimeStepTab(event){
 }
 
 function setuplayout(){
-;
 	setupOverview();
 	setupClusterBrowser();
 	eventFire(document.getElementById("alltimesteps"), 'click');
@@ -377,4 +280,42 @@ function eventFire(el, etype){
     evObj.initEvent(etype, true, false);
     el.dispatchEvent(evObj);
   }
+}
+
+	function addRangeSlider(divID,title,selectorID,onChangeFn,start,end,step,optionSet,classN,style,units){
+
+if(units==null) units="";
+  var control = document.getElementById(divID);
+  var p = document.createElement("p");
+    var x = document.createElement("INPUT");
+    x.setAttribute("type", "range");
+    x.setAttribute("class", selectorID);
+    x.addEventListener("change", onChangeFn);
+    x.setAttribute("className",classN);
+    x.setAttribute("value",optionSet);
+    x.setAttribute("min",start);
+    x.setAttribute("max",end);
+    x.setAttribute("step",step);
+    x.style.width = "100px";
+    x.style.height = "10px";
+    p.appendChild(x);
+    p.appendChild(makeTextID("comTitle"," "+title+": ",style));
+    p.appendChild(makeTextID(title+"value",optionSet+" "+units,style));
+    
+    control.appendChild(p);
+   
+    
+}
+function makeTextID(id,text,style){
+  var x = document.createElement(style);
+    //x.setAttribute("id",id);
+    x.className =id;
+    var t = document.createTextNode(text);
+    x.appendChild(t);
+    return x;
+}
+function updateText(text,id){
+  var h = document.getElementsByClassName(id);
+  var t = document.createTextNode(text);
+  h[0].replaceChild(t, h[0].childNodes[0]);
 }

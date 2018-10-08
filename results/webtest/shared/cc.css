@@ -20,7 +20,7 @@ a:hover {
     border: none;
     outline: none;
     cursor: pointer;
-    padding: 14px 16px;
+   
     transition: 0.3s;
     font-size: 17px;
 }
@@ -38,7 +38,7 @@ a:hover {
 /* Style the tab content */
 .tabcontent {
     display: none;
-    padding: 6px 12px;
+    
     border: 1px solid #ccc;
     border-top: none;
 }
@@ -63,7 +63,7 @@ fill: none;
 h3{
 	display: inline-block;
 }
-#scale{
+.svgScaleBar{
 	position: absolute;
 	top:40px;
 	z-index 10;
@@ -132,11 +132,11 @@ position: fixed;
 .span_2_of_3 { width: 66.33%; position: relative;}
 .span_1_of_3 { width: 32.66%; position: relative;}
 /*  GRID OF FIVE  */
-.span_5_of_5 {width: 100%;}
-.span_4_of_5 {width: 79.8%;}
-.span_3_of_5 {width: 59.6%;}
-.span_2_of_5 {	width: 39.4%;}
-.span_1_of_5 {	width: 19.2%;}
+.span_5_of_5 {width: 100%;position: relative;}
+.span_4_of_5 {width: 79.8%;position: relative;}
+.span_3_of_5 {width: 59.6%;position: relative;}
+.span_2_of_5 {	width: 39.4%;position: relative;}
+.span_1_of_5 {	width: 19.2%;position: relative;}
 
 /*  GO FULL WIDTH BELOW XX0 PIXELS */
 @media only screen and (max-width: 750px) {

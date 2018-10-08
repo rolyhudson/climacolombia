@@ -1,19 +1,19 @@
 
-var svgMap;
-var projection;
+// var svgMap;
+// var projection;
 
-function setMap(mapfile){
-setUpMap(w,h);
+function setMap(mapfile,divid){
+setUpMap(divid);
 
 d3.queue()
     .defer(d3.json, mapfile)
     .await(setMapProjection);
 }
 
-function setUpMap(){
+function setUpMap(divid){
 
  d3.selectAll(".mapspace").remove();
- svgMap = d3.select("#mapDiv")
+ svgMap = d3.select("#"+divid)
   .append("svg")
   .attr("class","mapspace")
   .attr("width", mapW)
@@ -43,30 +43,7 @@ function setMapProjection(error, data){
     contextWorld(); 
       
 }
-function drawDepartments(){
-d3.queue()
-    .defer(d3.json, "../shared/departTopo.json")
-    .await(addDeparts);
-}
-function addDeparts(error, data){
-  if (error) throw error;
-  
-  //assuming only one set of features
-  var features;
-  for(var prop in data.objects)
-  {
-    features = prop;
-  }
-  var path = d3.geoPath()
-    .projection(projection); 
-      svgMap.append("path")
-      .attr("stroke", "#777")
-      .attr("fill","none" )
-      .attr("class","map")
-      .attr("d", path(topojson.mesh(data,data.objects[features])));
 
-      getData(year+"/"+month+"/clusters.json");
-}
 function contextWorld(){
     d3.queue()
     .defer(d3.json, "../shared/worldTopo.json")
@@ -126,36 +103,6 @@ function mapUpdate(){
     .on("mouseout", handleMouseOutMap);
 }
 
-// Create Event Handlers for mouse
-function handleMouseOverMap(d, i) {  // Add interactivity
-  // Use D3 to select element, change color and size
-  d3.select(this).attr("fill", "red");
-  // var info = getAllValuesFromCell(d);
 
-  // svgMap.selectAll(".mOver")
-  // .data(info)
-  //  .enter()
-  //  .append("text")
-  //   .attr("class", "mOver")
-  //  .attr("x", 610)
-  // .attr("y",function(d,i){return  15+(15*i);})
-  // .attr("font-size", 12+"px")  
-  // .text(String);
-  // get the block in the scale bar
-  
-  findBlockInScale(d);
-  highlightBlock("red");
-
-}
-
-
-function handleMouseOutMap(d, i) {
-  // Use D3 to select element, change color back to normal
-  d3.select(this).attr("fill",function (d) {return  getColorSpectral(d.clusternum);} )
-  d3.selectAll(".mOver").remove();
-  resethighlightBlock();
-  // Select text by id and then remove
-  
-}
 
 

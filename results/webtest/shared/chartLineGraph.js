@@ -1,19 +1,18 @@
-function lineGraph(divID,data,xtitle,ytitle,points){
+function LineGraph(divID,data,xtitle,ytitle,points){
 	//console.log(info);
     var chartDiv = document.getElementById(divID);
-    var margin = {top: 20, right: 20, bottom: 20, left: 40};
+    var margin = {top: 40, right: 20, bottom: 50, left: 50};
     var w = chartDiv.clientWidth- margin.left - margin.right;
-    var h = chartDiv.clientHeight- margin.top - margin.bottom;
+    var h = chartDiv.clientHeight- margin.top - margin.bottom-chartDiv.childNodes[0].clientHeight;
    
 
-    var maxmin = d3.extent(data, function(d){return d.x;})
+    var max = d3.max(data, function(d){return d.x;})
     var xscale = d3.scaleLinear()
-    .domain(maxmin)
+    .domain([0,max])
     .rangeRound([0, w]);
-
-    maxmin = d3.extent(data, function(d){return d.y;})
+    max= d3.max(data, function(d){return d.y;})
     var yscale = d3.scaleLinear()
-    .domain(maxmin) 
+    .domain([0,max]) 
     .rangeRound([h,0]); 
 
     var pline = d3.line()
@@ -35,11 +34,10 @@ function lineGraph(divID,data,xtitle,ytitle,points){
     chart.append("g")
     .attr("transform", "translate(" + margin.left + "," + (h+ margin.top) + ")")
     .call(d3.axisBottom(xscale)).append("text")
-    .attr("y",-10)
-      .attr("x",h/2)
+    .attr("y",margin.bottom/2)
+      .attr("x",margin.left/2)
       .attr("fill", "#000")
       .attr("dy", "0.71em")
-      .attr("text-anchor", "start")
       .text(xtitle+" ->")
     .select(".domain");
 
@@ -49,8 +47,8 @@ function lineGraph(divID,data,xtitle,ytitle,points){
     .append("text")
       .attr("fill", "#000")
       .attr("transform","rotate(-90)")
-      .attr("y",6)
-      .attr("x",-h/2)
+      .attr("y",-margin.left*0.8)
+      .attr("x",-h)
       .attr("dy", "0.71em")
       .attr("text-anchor", "start")
       .text(ytitle+" ->");
