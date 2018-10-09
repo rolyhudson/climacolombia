@@ -2,6 +2,7 @@ var strategies = [];
 var strategiesDisplay=[];
 var atmosPress=101000;
 var zoneColors = ["#66cc00","turquoise", "dodgerblue","blue","orchid","purple","SandyBrown","lightsalmon","gold","orange","darkorange","red","darkred" ];
+var thermalData=[];
 function getStrategiesZones(){
 readData("../shared/zonesdisplay.txt",parseDisplay);
 }
@@ -160,7 +161,7 @@ function parsePopData(tableData){
 	var data=[];
 	for(var i=0;i<popData.length;i++){
 		if(popData[i].hasOwnProperty("count")){
-			data.push({"x":popData[i].clusterId,"y":popData[i].count});
+			data.push({"x":popData[i].clusterId,"y":popData[i].count,"clusterUtci":popData[i].clusterUTCI,"clusterIdeamci":popData[i].clusterIdeamCI});
 		}
 		
 		
@@ -293,3 +294,4 @@ function handleMouseOverStrategy(d,i) {
 		}
 		//remove highlight on map
 	}
+	

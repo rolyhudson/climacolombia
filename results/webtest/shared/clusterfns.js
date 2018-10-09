@@ -10,18 +10,15 @@ var singleTimeStepMap;
 function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();
-	//runPChartTool();
+	
 	getStrategiesZones();
-	getParams(params);//runMapTool after params
+	getParams(params);//runMapTool and thermal maps after params
 	readData("stats/performanceDF/clusters.json",processPerformance);
-	
-	
 }
 function allTimeStepAllClusterInfo(){
 	//all time all clusters only loaded once
 	readData("stats/clusterStats/clusters.json",processAllTimeAllClusterPop);
-	
-	readData("stats/strategyStats/clusters.json",processAllTimeAllClusterStrategies)
+	readData("stats/strategyStats/clusters.json",processAllTimeAllClusterStrategies);
 }
 function addPCharts(){
 	
@@ -31,6 +28,7 @@ function addPCharts(){
 	pc4 = new Pchart("singletimestepsingleclusterpchart",strategiesDisplay,"pc4",pc1.w,pc1.h);
 	//getFoundStrategies();
 	allTimeStepAllClusterInfo();
+	
 }
 function readData(file,awaitFn){
 d3.queue()
@@ -64,7 +62,6 @@ function processParams(error, data){
     	if(key==="name"){
     		document.getElementById("parameters").append(addTextToDiv("p",key + " -> " + data[key]));
     	}
-    	
     	if(key==="analysisParameters"){
     		analysisParams = data[key];
     		var text="";
@@ -77,29 +74,87 @@ function processParams(error, data){
     					var day = date["dayOfMonth"];
     					document.getElementById("parameters").append(addTextToDiv("p",k + " -> " + day+" "+month+" "+year));
     				}
-    				else
-    				{
+    				else{
     				document.getElementById("parameters").append(addTextToDiv("p",k + " -> " + analysisParams[k]));
-    			}
-    			
+    				}
     			}
     		}
-    		
     	}
-
-        
     }
 }
 
 runExplorerMapTool();
+
 }
 function set3dView(divid){
 	var viewer = document.getElementById(divid);
 	return [viewer.clientWidth,viewer.clientHeight];
 }
+function setupThermalComparision(){
+	var mapH=0.9;
+	var comfortComp = document.getElementById("comfortcomparison");
+	comfortComp.append(addTextToDiv("h1","comfort comparison"));
+	var row1 = makeSection();
+	var title = makeContentElement("Universal thermal comfort index (UTCI)",mapH,"utci","h2","1/5");
+	var predicted = makeContentElement("predicted UTCI by cluster",mapH,"predictedutci","p","1/5");
+	var calculated = makeContentElement("calculated UTCI by grid cell",mapH,"calculatedutci","p","1/5");
+	var delta = makeContentElement("delta UTCI",mapH,"deltautci","p","1/5");
+	var stats = makeContentElement("stats UTCI",mapH,"statsutci","p","1/5");
+	predicted.style.overflow = "hidden";
+	calculated.style.overflow = "hidden";
+	delta.style.overflow = "hidden";
+	 title.appendChild(addTextToDiv("p","The UTCI is a thermal comfort indicator based on human heat balance models and designed to be applicable in all seasons and climates and for all spatial and temporal scales"));
+	 
+	title.appendChild(addTextToDiv("p","            ci >= 46 extreme heat stress")); 
+	title.appendChild(addTextToDiv("p","ci >= 38 && ci <  46 very strong heat stress")); 
+	title.appendChild(addTextToDiv("p","ci >= 32 && ci <  38 strong heat stress")); 
+	title.appendChild(addTextToDiv("p","ci >= 26 && ci <  32 moderate heat stress")); 
+
+	title.appendChild(addTextToDiv("p","ci >= 9  && ci <  26 no thermal stress")); 
+	title.appendChild(addTextToDiv("p","ci >= 0  && ci <  9 slight cold stress")); 
+	title.appendChild(addTextToDiv("p","ci >=-13 && ci <  0 moderate cold stress")); 
+	title.appendChild(addTextToDiv("p","ci >=-27 && ci < -13 strong cold stress")); 
+	title.appendChild(addTextToDiv("p","ci >=-40 && ci < -27 very strong cold stress")); 
+	title.appendChild(addTextToDiv("p","            ci < -40 extreme cold stress"));
+	title.appendChild(onelineLink("More details","http://www.utci.org/"));
+	row1.appendChild(title);
+	row1.appendChild(predicted);
+	row1.appendChild(calculated);
+	row1.appendChild(delta);
+	row1.appendChild(stats);
+
+	var row2 = makeSection();
+	var title = makeContentElement("IDEAM Comfort Index (IDEAMCI)",mapH,"ideamci","h2","1/5");
+	var predicted = makeContentElement("predicted IDEAMCI by cluster",mapH,"predictedideamci","p","1/5");
+	var calculated = makeContentElement("calculated IDEAMCI by grid cell",mapH,"calculatedideamci","p","1/5");
+	var delta = makeContentElement("delta IDEAMCI",mapH,"deltaideamci","p","1/5");
+	var stats = makeContentElement("stats IDEAMCI",mapH,"statsideamci","p","1/5");
+	predicted.style.overflow = "hidden";
+	calculated.style.overflow = "hidden";
+	delta.style.overflow = "hidden";
+
+	title.appendChild(addTextToDiv("p","Thermal sensation indicator developed by Colombia's Institute of Hydrology, Meteorology and Environmental Studies (IDEAM)."));
+	 
+	title.appendChild(addTextToDiv("p","           ci <= 3 very hot"));
+    title.appendChild(addTextToDiv("p","ci > 3  && ci <= 5 hot"));
+    title.appendChild(addTextToDiv("p","ci > 5  && ci <= 7 warm"));
+    title.appendChild(addTextToDiv("p","ci > 7  && ci <= 11 comfortable"));
+    title.appendChild(addTextToDiv("p","ci > 11 && ci <= 13 somewhat cold"));
+    title.appendChild(addTextToDiv("p","ci > 13 && ci <= 15 cold"));
+    title.appendChild(addTextToDiv("p","		   ci >  15 very cold"));
+    title.appendChild(onelineLink("More details","http://documentacion.ideam.gov.co/openbiblio/bvirtual/007574/Metodologiaconfort.pdf"));
+	row2.appendChild(title);
+	row2.appendChild(predicted);
+	row2.appendChild(calculated);
+	row2.appendChild(delta);
+	row2.appendChild(stats);
+
+	comfortComp.appendChild(row1);
+	comfortComp.appendChild(row2);
+}
 function setupOverview(){
 	var overview = document.getElementById("overview");
-	overview.append(addTextToDiv("h1","overview"));
+	overview.append(addTextToDiv("h1","overview @"+window.location.href));
 	var rowoverview1 = makeSection();
 	var param = makeContentElement("input parameters",1,"parameters","h2","1/5");
 	var sil = makeContentElement("Silhouette coefficient",1,"performanceSil","p","1/5");
@@ -117,6 +172,13 @@ function setupOverview(){
 	rowoverview1.appendChild(pother);
 	overview.appendChild(rowoverview1);
 }
+function onelineLink(name, href)
+{
+    var link = document.createElement("a");
+    link.innerHTML=name;
+    link.href = href;
+	return link;
+}
 function setupClusterBrowser(){
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
@@ -130,18 +192,26 @@ function setupClusterBrowser(){
 	//add contents to tabs
 	insertTimeTabContents(["alltimesteps","singletimestep"],0.5);
 	//select start tabs
+	//set selected time tab
 	var selected = document.getElementsByClassName("timeTabContent tablinks");
 	selected[0].className += " active";
+	// //cluster tabs all clusters
+	var selected = document.getElementsByClassName("clusterTabContent tablinks");
+	selected[0].className += " active";
+	selected[2].className += " active";
+
+
+	
 }
 function insertTimeTabContents(tabIDs,h){
 	for(var i=0;i<tabIDs.length;i++){
 	var tabsection = makeSection();
-	var map = makeContentElement(tabIDs[i]+" map",h,tabIDs[i]+"mapDiv","h2","2/5");
+	var map = makeContentElement("",h,tabIDs[i]+"mapDiv","h2","2/5");
 	map.style.overflow = "hidden";
 	var scalediv = document.createElement("div");
 	scalediv.id = tabIDs[i]+"mapDiv"+"scale";
 	map.appendChild(scalediv);
-	var clustertabs = makeContentElement(tabIDs[i]+" cluster control",h,tabIDs[i]+"clustertabs","h2","3/5");
+	var clustertabs = makeContentElement("",h,tabIDs[i]+"clustertabs","h2","3/5");
 	
 	var clusterTabIDs = [tabIDs[i]+"allclusters",tabIDs[i]+"singlecluster"];
 	var tabb = tabButtonsDiv(["all clusters","single cluster"],clickTimeStepTab,clusterTabIDs,"clusterTabContent "+i);
@@ -152,29 +222,24 @@ function insertTimeTabContents(tabIDs,h){
 	tabsection.appendChild(clustertabs);
 	document.getElementById(tabIDs[i]).appendChild(tabsection);
 	//add cluster tab contents
-	insertClusterTabContents(clusterTabIDs,0.6);
-	
-
+	insertClusterTabContents(clusterTabIDs,0.55);
 	}
-	//set selected
-	var selected = document.getElementsByClassName("clusterTabContent tablinks");
-	selected[0].className += " active";
-	selected[2].className += " active";
+	
 }
 function insertClusterTabContents(tabIDs,h){
 	for(var i=0;i<tabIDs.length;i++){
 		var tabsection = makeSection();
 		if(tabIDs[i].includes("all")){
-			var pop = makeContentElement(tabIDs[i]+" control",h,tabIDs[i]+"control","h2","third");
+			var pop = makeContentElement("",h,tabIDs[i]+"control","h2","third");
 			pop.style.overflow = "hidden";
 			tabsection.appendChild(pop);
 		}
 		else{
-			var control = makeContentElement(tabIDs[i]+" control",h,tabIDs[i]+"control","h2","third");
+			var control = makeContentElement("",h,tabIDs[i]+"control","h2","third");
 			control.style.overflow = "hidden";
 			tabsection.appendChild(control);
 		}
-		var pchart = makeContentElement(tabIDs[i]+" pchart",h,tabIDs[i]+"pchart","h2","twothirds");
+		var pchart = makeContentElement("",h,tabIDs[i]+"pchart","h2","twothirds");
 			pchart.style.overflow = "hidden";
 			tabsection.appendChild(pchart);
 
@@ -198,14 +263,10 @@ function tabButtonsDiv(text,onlclickfn,divids,tabcontentClass){
 }
 function addContentTab(divids,parentdiv,tabcontentClass){
 	for(var i=0;i<divids.length;i++){
-
 	var tabcontent= document.createElement("div");
 	tabcontent.id = divids[i];
 	tabcontent.className = tabcontentClass+" tabcontent";
-	if(i===0) {
-		tabcontent.style.display ="block";
-		
-	}
+	if(i===0) tabcontent.style.display = "block";
 	parentdiv.appendChild(tabcontent);
 
 	}
@@ -229,9 +290,8 @@ function clickTimeStepTab(event){
 function setuplayout(){
 	setupOverview();
 	setupClusterBrowser();
-	eventFire(document.getElementById("alltimesteps"), 'click');
-	eventFire(document.getElementById("alltimestepsallclusters"), 'click');
-
+	
+    setupThermalComparision();
 }
 
 function makeSection()
@@ -272,15 +332,7 @@ function addTextToDiv(tType,text)
 	p.appendChild(node);
 	return p;
 }
-function eventFire(el, etype){
-  if (el.fireEvent) {
-    el.fireEvent('on' + etype);
-  } else {
-    var evObj = document.createEvent('Events');
-    evObj.initEvent(etype, true, false);
-    el.dispatchEvent(evObj);
-  }
-}
+
 
 	function addRangeSlider(divID,title,selectorID,onChangeFn,start,end,step,optionSet,classN,style,units){
 

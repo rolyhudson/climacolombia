@@ -11,6 +11,8 @@ var cluster =0
 var clusterData=[];
 var minClusterId=0;
 var maxClusterId;
+var contextMapData;
+var countryMap;
 function runExplorerMapTool(){
 
 	stYr =analysisParams["startDate"].year;
@@ -30,10 +32,13 @@ function readMapData(){
     .await(createMap);
 }
 function createMap(error, context, country){
-
+  contextMapData=context;
+  countryMap=country;
   var viewerdims = set3dView("alltimestepsmapDiv");
-  singleTimeStepMap = new MapGrid("singletimestepmapDiv",viewerdims[0],viewerdims[1],context,country,"clusterMap");
+  singleTimeStepMap = new MapGrid("singletimestepmapDiv",viewerdims[0],viewerdims[1],context,country,"clusterMap","clusternum","c_id",getColorSpectral);
   
+  singleTimeStepMap.makeScaleBarCluster();
+  runThermalComparison();
   explorerUpdate();
 }
 function explorerUpdate(){
@@ -41,6 +46,7 @@ function explorerUpdate(){
   readData(year+"/"+month+"/stats/clusterStats/clusters.json",processSingleTimeStepAllClusterPop);
   readData(year+"/"+month+"/stats/strategyStats/clusters.json",processTimeStepAllClusterStrategies);
   withinClusterUpdate();
+
 }
 function withinClusterUpdate(){
   readData(year+"/"+month+"/stats/cluster"+cluster+"Stats/clusters.json",processTimeStepSingleClusterStrategies);
@@ -128,6 +134,11 @@ function process(error, data)
   	}
   	singleTimeStepMap.mapUpdate(clusterData);
     withinClusterUpdate();
+    //get the thermal data
+    thermalComparison();
+    //update the thermal comparisons
+    utciMaps.updateMaps(thermalData);
+    ideamciMaps.updateMaps(thermalData);
 }
 function loading(){
 	document.getElementById("loading").innerHTML="loading data...";

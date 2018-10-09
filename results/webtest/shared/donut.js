@@ -154,7 +154,7 @@ handleMouseOut(d,i){
     title[1].innerHTML = d.data.originalTitle[1];
     title[2].innerHTML = d.data.originalTitle[2];
     //off scale
-    singleTimeStepMap.scalebar.resethighlightBlock();
+    singleTimeStepMap.scalebar.resethighlightBlock(d.data.x);
     //off map
     var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
     
