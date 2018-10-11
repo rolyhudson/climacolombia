@@ -131,6 +131,7 @@ public class ClusterCoordinator {
 		    for(StepSummary step:steps.getSteps())
 		    {
 			    //get the guid from the command args
+		    	try {
 			    List<String> args = step.getConfig().getArgs();
 			    String wfJSONfile =args.get(args.size()-2);
 			    String guid = wfJSONfile.substring(wfJSONfile.lastIndexOf("/")+1, wfJSONfile.lastIndexOf("."));
@@ -151,6 +152,10 @@ public class ClusterCoordinator {
 		    		}
 		    			
 		    	}
+		    	}
+		    	catch(Exception e) {
+		    		System.out.println("no cluster colombia workflow on cluster "+c.getName()+" awsID:"+c.getAwsID());
+		    	}
 		    }
 		}
 		for(Workflow wf : allWorkflows)
@@ -165,6 +170,13 @@ public class ClusterCoordinator {
 			}
 		}
 		monitorWorkflowData.setAll(allWorkflows);
+	}
+	public void saveWorkflows() {
+		System.out.println("Saving workflows");
+		for(Workflow wf : allWorkflows)
+		{
+		this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt", wf.seraliseWorkflow(),"clustercolombia","plain/text");
+		}
 	}
 	public void updateStoredWorkflows()
 	{
@@ -262,15 +274,17 @@ public class ClusterCoordinator {
 	}
 	public void runWorkflow(Workflow wf)
 	{
-		//workflow is already in allWorkflows list
-		//check for running cluster and give option to add to exsiting
+
 		String wfString = wf.seraliseWorkflow();
 		
 		this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt",wfString,"clustercolombia","plain/text");
 		
 		Cluster newclus = new Cluster();
+		newclus.setInstances(wf.getAnalysisParameters().getInstances());
+		newclus.setMasterInstance(wf.getAnalysisParameters().getMasterInstance());
 		newclus.addWorkflow(getWorkflow(wf.getCreationDate()));
 		newclus.setName("Cluster with workflow: "+wf.getName());
+		newclus.setRequest();
 		addCluster(newclus);
 		runCluster(newclus);
 		

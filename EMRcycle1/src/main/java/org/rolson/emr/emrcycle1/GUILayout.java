@@ -39,7 +39,8 @@ import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
 import javafx.scene.control.TextInputDialog;
 import javafx.scene.control.cell.PropertyValueFactory;
-
+import javafx.scene.image.Image;
+import javafx.scene.image.ImageView;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.StackPane;
@@ -166,6 +167,7 @@ public class GUILayout {
 		List<String> buttonCmds = new ArrayList<String>();
 		
 		buttonCmds.add("Workflow builder");
+		buttonCmds.add("Design strategy editor");
 		buttonCmds.add("Monitor");
 		buttonCmds.add("Visualise");
 		buttonCmds.add("Data manager");
@@ -196,6 +198,10 @@ public class GUILayout {
 				makeMonitorTab(tabname,tabPane,i );
 				
 				break;
+			case "Design strategy editor":
+				addDesignStratgeyTab(i,tabname,tabPane );
+				
+				break;
 			case "Settings":
 				addSettingsTab(i,tabname,tabPane );
 				break;
@@ -216,6 +222,16 @@ public class GUILayout {
         tabPane.setTabClosingPolicy(TabClosingPolicy.UNAVAILABLE);
         
         return tabPane;
+	}
+	private void addDesignStratgeyTab(int index,String name,TabPane tabpane ) {
+		File file = new File("C:/Users/Admin/Documents/projects/clusterColombia/climacolombia/documentation/writeUp/strategyEditor.png");
+        Image image = new Image(file.toURI().toString());
+        ImageView imageView = new ImageView(image);
+        imageView.setImage(image);
+        Tab tab = new Tab();
+		tab.setText(name);
+		tab.setContent(imageView);
+		tabpane.getTabs().add(index, tab);
 	}
 	private void addSettingsTab(int index,String name,TabPane tabpane )
 	{

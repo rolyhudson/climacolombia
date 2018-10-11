@@ -71,6 +71,9 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setEndDate(end.get("year").asInt(),end.get("monthValue").asInt(),end.get("dayOfMonth").asInt());
 	        aparams.setStartDate(start.get("year").asInt(),start.get("monthValue").asInt(),start.get("dayOfMonth").asInt());
 	        aparams.setSelectionShape(analysisParamsNode.get("selectionShape").asText());
+	        aparams.setInstances(analysisParamsNode.get("instances").asInt());
+	        aparams.setMasterInstance(analysisParamsNode.get("masterInstance").asText());
+	        aparams.setDashboardURL(analysisParamsNode.get("dashboardURL").asText());
 	        if (variables.isArray()) {
 	        	int count =0;
 		        for(JsonNode objNode : variables)

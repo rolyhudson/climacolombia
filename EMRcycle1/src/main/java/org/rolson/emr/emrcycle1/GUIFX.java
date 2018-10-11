@@ -12,15 +12,20 @@ import javafx.util.Duration;
 
 public class GUIFX extends Application {
 
-	
+	ClusterCoordinator coordinator = new ClusterCoordinator();
 	public void start(Stage stage) {
 
-		ClusterCoordinator coordinator = new ClusterCoordinator();
+		
         GUILayout gui = new GUILayout(coordinator,stage);
     }
     public static void main(String[] args) {
 
         launch(args);
     }
-    
+    @Override
+    public void stop(){
+        System.out.println("Stage is closing");
+        // Save file
+        coordinator.saveWorkflows();
+    }
 }

@@ -64,6 +64,9 @@ public class AnalysisParameters {
 	private List<double[]> selectionCoords;
 	private String selectionShape;
 	private int nClusters;
+	private String masterInstance;
+	private int instances;
+	private String dashboardURL;
 	public AnalysisParameters()
 	{
 		setDefaults();
@@ -84,7 +87,9 @@ public class AnalysisParameters {
 		this.dayStartHour=8;
 		this.dayEndHour=16;
 		this.selectionShape = "polygon";
-		
+		this.instances = 4;
+		this.masterInstance= "m4.large";
+		this.dashboardURL="";
 		this.selectionCoords = new ArrayList<double[]>();
 		this.selectionCoords.add(new double[] {8.766635, -78.221568});
 		this.selectionCoords.add(new double[] {1.024341, -79.778153});
@@ -94,9 +99,29 @@ public class AnalysisParameters {
 		this.selectionCoords.add(new double[] {13.615007, -71.219707});
 		this.nClusters=10;
 	}
+	public String getMasterInstance() {
+		return this.masterInstance;
+	}
+	public void setMasterInstance(String master) {
+		this.masterInstance = master;
+	}
+	public int getInstances() {
+		return this.instances;
+	}
+	public void setInstances(int n) {
+		this.instances=n;
+	}
 	public void setDataSet(String data)
 	{
 		this.dataset = Dataset.valueOf(data);
+	}
+	public String getDashboardURL()
+	{
+		return this.dashboardURL;
+	}
+	public void setDashboardURL(String url)
+	{
+		this.dashboardURL= url;
 	}
 	public String getDataSet()
 	{

@@ -39,6 +39,7 @@ public class Workflow {
 	private StepConfig stepConfig;
 	private DateTime creationDate;
 	private AnalysisParameters analysisParameters;
+	
 	private ActionOnFailure actionOnFailure;
 	
 	private List<String> commandArgs = new ArrayList<String>();

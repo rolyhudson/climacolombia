@@ -67,6 +67,8 @@ public class GUIWorkflowBuilder {
 	private ComboBox<String> nClustersCB;
 	private ComboBox<String> dayStartHour;
 	private ComboBox<String> dayEndHour;
+	private ComboBox<String> masterInstanceCB;
+	private ComboBox<String> instancesCB;
 	private boolean newWorkflow;
 	private Label statusLbl;
 	private Button copyBtn;
@@ -177,17 +179,16 @@ public class GUIWorkflowBuilder {
 	    //name editor
 			Label nameLbl = new Label("Name: ");
 			tools.add(nameLbl,0,0);
-		wfNameTextField = new TextField ();
-		wfNameTextField.textProperty().addListener((obs, oldText, newText) -> {
-		   if(!this.newWorkflow) {
-			forAction.setName(newText);
-			
-			this.coordinator.updateWorkflowList();
+			wfNameTextField = new TextField ();
+			wfNameTextField.textProperty().addListener((obs, oldText, newText) -> {
+		    if(!this.newWorkflow) {
+				forAction.setName(newText);
+				
+				this.coordinator.updateWorkflowList();
 		   }
 		});
 		tools.add(wfNameTextField, 1, 0);
 		
-		//copy button
 		
 		this.copyBtn = new Button("Copy");
 		copyBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
@@ -292,10 +293,10 @@ public class GUIWorkflowBuilder {
 				}
 				if(newcluster) {
 					//run if new cluster
-				this.coordinator.runWorkflow(forAction);
+					this.coordinator.runWorkflow(forAction);
 				}
 				else{
-				this.coordinator.addWorkflowToCluster(forAction);	
+					this.coordinator.addWorkflowToCluster(forAction);	
 				}
 			}
 		});
@@ -318,9 +319,14 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
+				if(forAction.getAnalysisParameters().getDashboardURL().equals("")) {
+					//push url to vis tab or open in new browser window
+				}
+				else {
 				GeoVisualisation gvis = new GeoVisualisation(forAction);
 				//on background thread
 				//startGeoVis();
+				}
 			}
 		});
 		tools.add(resultsBtn,2,1);
@@ -336,7 +342,7 @@ public class GUIWorkflowBuilder {
 	private VBox configTools()
 	{
 		VBox tools = new VBox();
-		List<String> panels = Arrays.asList("Dataset","Variables", "Clustering method", "N clusters","Date range","Season range","Daily range","Map refresh");
+		List<String> panels = Arrays.asList("Hardware configuration","Dataset","Variables", "Clustering method", "N clusters","Date range","Season range","Daily range","Map refresh");
 
 		for(String p : panels)
 		{
@@ -362,7 +368,32 @@ public class GUIWorkflowBuilder {
 				 mappingBox.getChildren().addAll(selectionMap.mapTools(),selectionMap.getMapView());
 				});
 				break;
-			
+			case "Hardware configuration":
+				//master cb
+				this.masterInstanceCB = createCombo(new Cluster().instanceTypes,1);
+				masterInstanceCB.setOnAction((event) -> {
+					if(forAction!=null&&!this.newWorkflow)
+					{
+					String master = (String)masterInstanceCB.getSelectionModel().getSelectedItem();
+				    AnalysisParameters ap = forAction.getAnalysisParameters();
+				    System.out.println("master is "+ap.getMasterInstance());
+				    ap.setMasterInstance(master);
+				    System.out.println("master changed to "+ap.getMasterInstance());
+					}
+					
+				});
+				//slave cb
+					this.instancesCB = createCombo(Arrays.asList("2", "3", "4", "5", "6","7", "8", "9", "10", "11", "12", "13", "14","15", "16", "17", "18", "19","20"),3);
+					instancesCB.setOnAction((event)->{
+						String n = instancesCB.getSelectionModel().getSelectedItem();
+					    AnalysisParameters ap = forAction.getAnalysisParameters();
+					    System.out.println("instances "+ap.getInstances());
+					    ap.setInstances(Integer.parseInt(n));
+					    System.out.println("instances changed to "+ap.getInstances());
+						
+					});
+					toolpanel.getChildren().addAll(this.masterInstanceCB,this.instancesCB);
+				break;
 			case "Dataset":
 				
 				this.datasetCB = createCombo( AnalysisParameters.enumToStringDataset(),0);
@@ -642,6 +673,8 @@ public class GUIWorkflowBuilder {
 			this.runBtn.setDisable(false);
 			this.configTools.setDisable(false);
 			this.mappingBox.setDisable(false);
+			this.masterInstanceCB.setDisable(false);
+			this.instancesCB.setDisable(false);
 		}
 		if(status.equals("COMPLETED"))
 		{
@@ -655,6 +688,8 @@ public class GUIWorkflowBuilder {
 			this.copyBtn.setDisable(false);
 			this.saveBtn.setDisable(true);
 			this.runBtn.setDisable(true);
+			this.masterInstanceCB.setDisable(true);
+			this.instancesCB.setDisable(true);
 		}
 		if(status.equals("PENDING")||status.equals("CANCEL_PENDING")||status.equals("RUNNING"))
 		{
@@ -668,6 +703,8 @@ public class GUIWorkflowBuilder {
 			this.copyBtn.setDisable(false);
 			this.saveBtn.setDisable(true);
 			this.runBtn.setDisable(true);
+			this.masterInstanceCB.setDisable(true);
+			this.instancesCB.setDisable(true);
 		}
 		
 	}
@@ -703,7 +740,8 @@ public class GUIWorkflowBuilder {
 		
 		dayStartHour.getSelectionModel().select(ap.getDayStartHour()-1);
 		dayEndHour.getSelectionModel().select(ap.getDayEndHour()-1);
-		
+		this.masterInstanceCB.getSelectionModel().select(ap.getMasterInstance());
+		this.instancesCB.getSelectionModel().select(Integer.toString(ap.getInstances()));
 		this.selectionMap.addMapShapeFromWorkflow();
 		this.newWorkflow = false;
 	}
