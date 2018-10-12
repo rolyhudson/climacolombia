@@ -106,6 +106,8 @@ this.arc.append("path")
 }
 handleMouseOver(d,i){
     var id = d.data.id;
+    var map = allTimeStepMap;
+    if(id.includes("TS")) map =singleTimeStepMap;
     var arcs = document.getElementsByClassName("arc"+id);
     var textA = document.getElementsByClassName("graphLabelA donut"+id);
     var textB = document.getElementsByClassName("graphLabelB donut"+id);
@@ -124,9 +126,9 @@ handleMouseOver(d,i){
     title[1].innerHTML = d.data.y+" data points";
     title[2].innerHTML = d.data.percent+"%";
     //on the scale
-    singleTimeStepMap.scalebar.highlightBlock(d.data.x,"red");
+    map.scalebar.highlightBlock(d.data.x,"red");
     //on the map
-     var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+     var mapBlocks = document.getElementsByClassName("mapBlocks "+map.mapname);
  
     for(var b=0;b<mapBlocks.length;b++){
         if(Number(mapBlocks[b].id)===d.data.x){
@@ -136,6 +138,8 @@ handleMouseOver(d,i){
 }
 handleMouseOut(d,i){
     var id = d.data.id;
+    var map = allTimeStepMap;
+    if(id.includes("TS")) map =singleTimeStepMap;
     var arcs = document.getElementsByClassName("arc"+id);
     var textA = document.getElementsByClassName("graphLabelA donut"+id);
     var textB = document.getElementsByClassName("graphLabelB donut"+id);
@@ -154,9 +158,9 @@ handleMouseOut(d,i){
     title[1].innerHTML = d.data.originalTitle[1];
     title[2].innerHTML = d.data.originalTitle[2];
     //off scale
-    singleTimeStepMap.scalebar.resethighlightBlock(d.data.x);
+    map.scalebar.resethighlightBlock(d.data.x);
     //off map
-    var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+    var mapBlocks = document.getElementsByClassName("mapBlocks "+map.mapname);
     
     for(var i=0;i<mapBlocks.length;i++){
     mapBlocks[i].style.fill = getColorSpectral(mapBlocks[i].id);

@@ -3,9 +3,14 @@ package climateClusters;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.clustering.KMeansModel;
+import org.apache.spark.mllib.linalg.DenseVector;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.mllib.linalg.Vectors;
+
+import scala.Tuple2;
 
 public class ComfortIndices
 {
@@ -341,45 +346,64 @@ public class ComfortIndices
         double vp = rh / 100 * 6.105 * Math.exp(17.27 * t / (237.7 + t));
         return vp;
     }
+    private static void averageComfortIndex(JavaRDD<Record> records,int nclusters) {
+    	JavaPairRDD<Integer , Iterable<Vector>> comfortRecords = records
+				.mapToPair(f->ClusterUtils.getComfortIndices(f)).groupByKey();
+    	
+    	JavaPairRDD<Integer,Vector> typicalyear = comfortRecords.mapToPair(d->{
+			Iterable<Vector> it = d._2;
+			double sumideamci = 0;
+			double sumutci = 0;
+			int count=0;
+			for (Vector cPair : it) {
+				double[] vals = cPair.toArray();
+			    sumutci += vals[0];
+			    sumideamci +=vals[1];
+			    count++;
+			}
+			Vector avIndices = Vectors.dense(sumutci /count,sumideamci/count);
+			Tuple2<Integer,Vector> result = new Tuple2<Integer,Vector>(d._1,avIndices);
+			return result; 
+		});
+    }
     public static double[][] getComfortIndicesClusters(JavaRDD<Record> records,int nclusters) {
     	
-    	wind = new double[nclusters];
-    	alt = new double[nclusters];
-    	rh= new double[nclusters];
-    	temp = new double[nclusters];
-    	pointsInside = new int[nclusters];
+    	JavaPairRDD<Integer , Iterable<Vector>> comfortRecords = records
+				.mapToPair(f->ClusterUtils.getComfortIndices(f)).groupByKey();
+    	//comfort index vector is utci, ideamci,temp, rh
+    	JavaPairRDD<Integer,Vector> clusterComfort = comfortRecords.mapToPair(d->{
+			Iterable<Vector> it = d._2;
+			double sumideamci = 0;
+			double sumutci = 0;
+			double sumtemp = 0;
+			double sumrh = 0;
+			int count=0;
+			for (Vector cPair : it) {
+				double[] vals = cPair.toArray();
+			    sumutci += vals[0];
+			    sumideamci +=vals[1];
+			    sumtemp+=vals[2];
+			    sumrh+=vals[3];
+			    count++;
+			}
+			
+			Vector avIndices = Vectors.dense(sumutci /count,sumideamci/count,sumtemp/count,sumrh/count);
+			Tuple2<Integer,Vector> result = new Tuple2<Integer,Vector>(d._1,avIndices);
+			return result; 
+		});
     	double[][] indices = new double[nclusters][];
     	double[] utci = new double[nclusters];
     	double[] ideamCI = new double[nclusters];
     	//temp,vp,rh,tmin,tmax,trange,precip,windSpd
-    	records.foreach(f->{
-    		try {
-    		int cnum = f.getClusternum();
-    		double[] vars = f.getVectorAllVar().toArray();
-    		wind[cnum]+=vars[7];
-    		alt[cnum]+=f.getElevation();
-    		temp[cnum]+=vars[0];
-    		rh[cnum]+=vars[2];
-    		pointsInside[cnum]+=1;
-    		}
-    		catch(Exception e) {
-    			
-    		}
-    	});
-    	double t=0;
-    	double w=0;
-    	double relH=0;
-    	double ele =0;
-    	for(int i=0;i<nclusters;i++) {
-    		t= temp[i]/pointsInside[i];
-    		w =wind[i]/pointsInside[i];
-    		relH =  rh[i]/pointsInside[i];
-    		ele = alt[i]/pointsInside[i];
-    		utci[i] = CalcUTCI(t, w, t,relH);
-    		ideamCI[i] = ideamIC(ele, t,relH, w);
-    		double[] ind = {utci[i],ideamCI[i]};
-    		indices[i] = ind;
+    	List<Tuple2<Integer,Vector>> kvs = clusterComfort.collect();
+    	for(int i=0;i<kvs.size();i++) {
+    		double[] vals = kvs.get(i)._2.toArray();
+    		int cnum =kvs.get(i)._1$mcI$sp();
+    		indices[cnum] = vals;
     	}
+    	
+    	
+    	
     	return indices;
     }
 }

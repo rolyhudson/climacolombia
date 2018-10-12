@@ -128,8 +128,15 @@ public class ClusterUtils implements Serializable {
 		return r.toString();
 		
 	}
+	public static Tuple2<Integer,Vector>getComfortIndices(Record r){
+		double [] indices = new double[] {r.getUtci(),r.getIdeamci(),r.getPsychrometricPoint()[0],r.getPsychrometricPoint()[1]};
+		return new Tuple2<Integer,Vector>(r.getClusternum(),new DenseVector(indices));
+	}
 	public static Tuple2<Vector,Integer> getLocationCluster(Record r){
 		return new Tuple2<Vector,Integer>(new DenseVector(r.getLocation()),r.getClusternum());
+	}
+	public static Tuple2<Vector,Record> getLocationRecord(Record r){
+		return new Tuple2<Vector,Record>(new DenseVector(r.getLocation()),r);
 	}
 	public static String classPoint2(Tuple2<String,Vector> dl,KMeansModel clusters)
 	{

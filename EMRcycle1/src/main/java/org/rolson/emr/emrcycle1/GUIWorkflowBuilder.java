@@ -1,5 +1,8 @@
 package org.rolson.emr.emrcycle1;
 
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.time.LocalDate;
 
 import java.time.format.DateTimeFormatter;
@@ -8,6 +11,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+
+import org.joda.time.DateTime;
 
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
@@ -23,6 +28,7 @@ import javafx.scene.control.ButtonType;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Control;
 import javafx.scene.control.DatePicker;
+import javafx.scene.control.Hyperlink;
 import javafx.scene.control.Label;
 import javafx.scene.control.ListView;
 import javafx.scene.control.Tab;
@@ -78,6 +84,7 @@ public class GUIWorkflowBuilder {
 	private Button runBtn;
 	private Button stopBtn;
 	private Button resultsBtn;
+	private Hyperlink dashboardlink;
 
 	private SelectionMap selectionMap; 
 	
@@ -157,6 +164,9 @@ public class GUIWorkflowBuilder {
 			public void run()
 			{
 				GeoVisualisation gvis = new GeoVisualisation(forAction);
+				statusLbl.setText("COMPLETED");
+				forAction.getAnalysisParameters().setDashboardFolder(Workflow.generateUniqueOutputName("geovis",new DateTime()));
+				datamanager.uploadStringToFile("workflowJSON/"+forAction.getGuid()+".txt", forAction.seraliseWorkflow(),"clustercolombia","plain/text");
 			}
 		};
 		// Run the task in a background thread
@@ -165,6 +175,7 @@ public class GUIWorkflowBuilder {
 		backgroundThread.setDaemon(true);
 		// Start the thread
 		backgroundThread.start();
+		
 	}
 		
 	private HBox workFlowTools()
@@ -321,18 +332,51 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-				if(!forAction.getAnalysisParameters().getDashboardURL().equals("")) {
+				if(!forAction.getAnalysisParameters().getDashboardFolder().equals("")) {
 					//push url to vis tab or open in new browser window
-					this.resultsVisualiser.load(forAction.getAnalysisParameters().getDashboardURL());
+					String url = "http://lacunae.io/"+forAction.getAnalysisParameters().getDashboardFolder();
+					this.resultsVisualiser.load(url);
+					try {
+						java.awt.Desktop.getDesktop().browse(new URI(url));
+					} catch (IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					} catch (URISyntaxException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
 				}
 				else {
-				GeoVisualisation gvis = new GeoVisualisation(forAction);
+				
+				forAction.setStatus("PREPARING DASHBOARD");
+				this.statusLbl.setText("PREPARING DASHBOARD");
+				this.coordinator.saveWorkflows();
+				//GeoVisualisation gvis = new GeoVisualisation(forAction);
 				//on background thread
-				//startGeoVis();
+				startGeoVis();
 				}
 			}
 		});
 		tools.add(resultsBtn,2,1);
+		Label urlLbl = new Label("Results link: ");
+		tools.add(urlLbl,7,1);
+		dashboardlink = new Hyperlink();
+		
+		dashboardlink.setText("");
+		dashboardlink.setOnAction((ActionEvent e) -> {
+		    System.out.println("This link is clicked");
+		    try {
+		    	String url = "http://lacunae.io/"+forAction.getAnalysisParameters().getDashboardFolder();
+				java.awt.Desktop.getDesktop().browse(new URI(url));
+			} catch (IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (URISyntaxException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+		});
+		tools.add(dashboardlink,8,1);
 		//status label
 				Label status = new Label("STATUS: ");
 						this.statusLbl = new Label("");
@@ -741,6 +785,8 @@ public class GUIWorkflowBuilder {
 		seasonStartDay.getSelectionModel().select(ap.getSeasonStartDay()-1);
 		seasonEndDay.getSelectionModel().select(ap.getSeasonEndDay()-1);
 		
+		if(!ap.getDashboardFolder().equals("")) dashboardlink.setText("lacunae.io/"+ap.getDashboardFolder());
+		else dashboardlink.setText("");
 		dayStartHour.getSelectionModel().select(ap.getDayStartHour()-1);
 		dayEndHour.getSelectionModel().select(ap.getDayEndHour()-1);
 		this.masterInstanceCB.getSelectionModel().select(ap.getMasterInstance());

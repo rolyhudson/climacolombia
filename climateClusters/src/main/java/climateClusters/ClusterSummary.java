@@ -18,6 +18,8 @@ public class ClusterSummary implements Serializable{
 	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
 	private double clusterUTCI;
 	private double clusterIdeamCI;
+	private double clusterTemp;
+	private double clusterRh;
 	public void setClusterId(int id) {
 		clusterId = id;
 	}
@@ -42,6 +44,18 @@ public class ClusterSummary implements Serializable{
 	public double getClusterIdeamCI() {
 		return clusterIdeamCI;
 	}
+	public void setClusterTemp(double t) {
+		clusterTemp = t;
+	}
+	public double getClusterTemp() {
+		return clusterTemp;
+	}
+	public void setClusterRh(double rh) {
+		clusterRh = rh;
+	}
+	public double getClusterRh() {
+		return clusterRh;
+	}
 	public void setClusterIdeamCI(double ideamci) {
 		clusterIdeamCI = ideamci;
 	}
@@ -65,6 +79,8 @@ public class ClusterSummary implements Serializable{
 	    	cs.setCount(clusterStats.get(i));
 	    	cs.setClusterUTCI(comfort[i][0]);
 	    	cs.setClusterIdeamCI(comfort[i][1]);
+	    	cs.setClusterTemp(comfort[i][2]);
+	    	cs.setClusterRh(comfort[i][2]);
 	    	summary.add(cs);
 	    }
 	    Dataset<Row> clusteringDs = spark.createDataFrame(summary, ClusterSummary.class);

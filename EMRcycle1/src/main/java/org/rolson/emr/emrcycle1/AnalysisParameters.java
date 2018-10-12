@@ -65,7 +65,7 @@ public class AnalysisParameters {
 	private int nClusters;
 	private String masterInstance;
 	private int instances;
-	private String dashboardURL;
+	private String dashboardFolder;
 	public AnalysisParameters()
 	{
 		setDefaults();
@@ -88,7 +88,7 @@ public class AnalysisParameters {
 		this.selectionShape = "polygon";
 		this.instances = 4;
 		this.masterInstance= "m4.large";
-		this.dashboardURL="";
+		this.dashboardFolder="";
 		this.selectionCoords = new ArrayList<double[]>();
 		this.selectionCoords.add(new double[] {8.766635, -78.221568});
 		this.selectionCoords.add(new double[] {1.024341, -79.778153});
@@ -114,13 +114,13 @@ public class AnalysisParameters {
 	{
 		this.dataset = Dataset.valueOf(data);
 	}
-	public String getDashboardURL()
+	public String getDashboardFolder()
 	{
-		return this.dashboardURL;
+		return this.dashboardFolder;
 	}
-	public void setDashboardURL(String url)
+	public void setDashboardFolder(String folder)
 	{
-		this.dashboardURL= url;
+		this.dashboardFolder= folder;
 	}
 	public String getDataSet()
 	{

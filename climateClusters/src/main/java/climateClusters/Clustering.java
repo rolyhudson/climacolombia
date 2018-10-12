@@ -41,7 +41,7 @@ public class Clustering {
 //				  .master("local[4]")
 //				  .appName("SparkJob")
 //				  .getOrCreate();
-		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
+//		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
 //		//end local debug
 		
 		ClusterParams clusterParams = new ClusterParams(args[2],spark);
@@ -70,7 +70,7 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			kmodel = simpleKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyKmeans(f,kmodel))
-		    		.map(r->thermalzones.testZones(r))
+		    		.map(r->ThermalZones.testZones(r))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    timelog.add(new TimeLog(start,"data classified"));
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
@@ -82,7 +82,7 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			bkmodel = BiKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyBKmeans(f,bkmodel))
-		    		.map(r->thermalzones.testZones(r))
+		    		.map(r->ThermalZones.testZones(r))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    timelog.add(new TimeLog(start,"data classified"));
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
@@ -95,7 +95,7 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			kmodel = simpleKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyKmeans(f,kmodel))
-		    		.map(r->thermalzones.testZones(r))
+		    		.map(r->ThermalZones.testZones(r))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    timelog.add(new TimeLog(start,"data classified"));
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);

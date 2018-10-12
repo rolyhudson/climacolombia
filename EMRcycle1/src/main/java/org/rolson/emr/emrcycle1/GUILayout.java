@@ -65,6 +65,7 @@ public class GUILayout {
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	private SelectionMap selectionMap = new SelectionMap();
 	private WebEngine webEngine;
+	private  WebView browser;
 	Label statuslabel = new Label();
 	Stage stage;
 	public GUILayout(ClusterCoordinator wfc,Stage stg)
@@ -76,6 +77,9 @@ public class GUILayout {
 		Button statusbutton = new Button("Update status");
 		statusbutton.setOnAction(this::handler);
 	    statuslabel.setFont(new Font("Arial", 15));
+	    
+	    browser = new WebView();
+		webEngine = browser.getEngine();
 	    
 	    HBox hbox = new HBox();
 	    hbox.setAlignment(Pos.CENTER_LEFT);
@@ -132,7 +136,7 @@ public class GUILayout {
 		            	updateStatusLabel();
 		            }
 		        });
-				Thread.sleep(30000);
+				Thread.sleep(60000);
 				i++;
 			}
 			catch (InterruptedException e) 
@@ -176,8 +180,7 @@ public class GUILayout {
 	}
 	private void addWebView(int index,String name,TabPane tabpane)
 	{
-		WebView browser = new WebView();
-		webEngine = browser.getEngine();
+		
 		webEngine.load("http://lacunae.io/geovis2018_09_29_13_35_00/");
 		Tab tab = new Tab();
 		tab.setText(name);

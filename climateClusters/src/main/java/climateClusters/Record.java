@@ -104,6 +104,18 @@ public class Record implements Serializable {
 		+","+getLocation()[0]+","+getLocation()[1]+","+getReqVars()+","+getVector()
 		+",[temp,vp,rh,tmin,tmax,trange,precip,windSpd],"+getVectorAllVar();
 	}
+	public String toJSONStringSImple() {
+		List<String> allFoundStrategies = getInStrategies();
+		String strats  ="[";
+		for(int i=0;i<allFoundStrategies.size();i++) {
+			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"]";
+			else strats  +="\""+allFoundStrategies.get(i)+"\",";
+		}
+		return "{\"clusternum\":"+getClusternum()+
+				",\"lat\":"+getLocation()[0]+
+				",\"lon\":"+getLocation()[1]+
+				",\"strategies\":"+strats+"}";
+	}
 	public String toJSONString() {
 		String[] allvarNames = {"temp","vp","rh","tmin","tmax","trange","precip","windSpd"};
 		double[] allvarValues = getVectorAllVar().toArray();

@@ -27,6 +27,7 @@ class ThermalComparison{
 			if(this.mapDivs[i].includes("delta")) colorf=this.getColorDelta;
 			var map =new MapGrid(this.mapDivs[i],this.mapw,this.maph,this.context,this.country,this.mapDivs[i]+"Map",this.mapProps[i],this.scaleTitle,colorf);
 			this.maps.push(map);
+			mapNames.push({"name":this.mapDivs[i]+"Map","mapObject":map});
 		}
 		
 	}

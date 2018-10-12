@@ -27,7 +27,7 @@ public class GeoVisualisation {
 		this.dataSourceUri = wf.getOutputFolder();
 		
 		datamanager = new DataManager();
-		outputfolder = Workflow.generateUniqueOutputName("geovis",new DateTime());
+		outputfolder = wf.getAnalysisParameters().getDashboardFolder();
 
 		transferResultObjects();
 		//move the index file

@@ -19,7 +19,7 @@ import climateClusters.DesignStrategy;
 import climateClusters.ClusterUtils;
 import  climateClusters.StrategySummary;
 public class ThermalZones implements Serializable{
-	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
+	private static List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
 	public ThermalZones(SparkSession spark,String zonefile) {
 		List<String> strategiesString = spark.read().textFile(zonefile).collectAsList();
 		for(String s : strategiesString){
@@ -43,7 +43,7 @@ public class ThermalZones implements Serializable{
 			strategies.add(ds);
 		}
 	}
-	public Record testZones(Record r) {
+	public static Record testZones(Record r) {
 		for(DesignStrategy ds : strategies) {
 			if(ClusterUtils.isPointInPolygon(r.getPsychrometricPoint(), ds.getPoints()))
 			{

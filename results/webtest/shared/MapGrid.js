@@ -129,22 +129,13 @@ class MapGrid{
 		// Use D3 to select element, change color and size
 		var ownerMap = this.classList[1];
 		var mapIndex;
-		var map;
+		var map= mapNames.find(m=>m.name===ownerMap).mapObject;
 		d3.select(this).style("fill", "red");
 		if(ownerMap==="clusterMap"){
-		
-		map = singleTimeStepMap;
 		popTSDonut.highlight(d.clusternum,popTSDonut.id);
 		}
-		else{
-			mapIndex = utciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-			if(mapIndex===-1) {
-				mapIndex = ideamciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-				map = ideamciMaps.maps[mapIndex];
-			}
-			else{
-				map = utciMaps.maps[mapIndex];
-			}
+		if(ownerMap==="TYclusterMap"){
+		popAllDonut.highlight(d.clusternum,popAllDonut.id);
 		}
 		map.scalebar.highlightBlock(d[map.prop],"red");
 	}
@@ -152,22 +143,15 @@ class MapGrid{
 		// Use D3 to select element, change color back to normal
 		var ownerMap = this.classList[1];
 		var mapIndex;
-		var map;
+		var map= mapNames.find(m=>m.name===ownerMap).mapObject;
 		d3.selectAll(".mOver").remove();
 		if(ownerMap==="clusterMap"){
-			map = singleTimeStepMap;
 			popTSDonut.unhighlight(d.clusternum,popTSDonut.id);
 		}
-		else{
-				mapIndex = utciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-				if(mapIndex===-1) {
-					mapIndex = ideamciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-					map = ideamciMaps.maps[mapIndex];
-				}
-				else{
-					map = utciMaps.maps[mapIndex];
-				}
+		if(ownerMap==="TYclusterMap"){
+				popAllDonut.unhighlight(d.clusternum,popAllDonut.id);
 		}
+		
 		var prop = map.prop;	
 		d3.select(this).style("fill",function (d) {return  map.colorFn(d[prop]);} )
 		map.scalebar.resethighlightBlock(d[prop]);

@@ -9,10 +9,12 @@ var year =2007;
 var month =7;
 var cluster =0
 var clusterData=[];
+var typicalYearClusterData=[];
 var minClusterId=0;
 var maxClusterId;
 var contextMapData;
 var countryMap;
+var mapNames=[];
 function runExplorerMapTool(){
 
 	stYr =analysisParams["startDate"].year;
@@ -26,6 +28,7 @@ function runExplorerMapTool(){
   
 }
 function readMapData(){
+  //typical year and map context files are only read once
     d3.queue()
     .defer(d3.json,"../shared/worldTopo.json")
     .defer(d3.json,"../shared/regionsTopo.json")
@@ -34,10 +37,14 @@ function readMapData(){
 function createMap(error, context, country){
   contextMapData=context;
   countryMap=country;
-  var viewerdims = set3dView("alltimestepsmapDiv");
-  singleTimeStepMap = new MapGrid("singletimestepmapDiv",viewerdims[0],viewerdims[1],context,country,"clusterMap","clusternum","c_id",getColorSpectral);
   
+  allTimeStepMap = new MapGrid("alltimestepsmapDiv",0,0,context,country,"TYclusterMap","clusternum","c_id",getColorSpectral);
+  allTimeStepMap.makeScaleBarCluster();
+  allTimeStepMap.mapUpdate(typicalYearClusterData);
+  mapNames.push({"name":"TYclusterMap","mapObject":allTimeStepMap});
+  singleTimeStepMap = new MapGrid("singletimestepmapDiv",allTimeStepMap.mapW,allTimeStepMap.mapH,context,country,"clusterMap","clusternum","c_id",getColorSpectral);
   singleTimeStepMap.makeScaleBarCluster();
+  mapNames.push({"name":"clusterMap","mapObject":allTimeStepMap});
   runThermalComparison();
   explorerUpdate();
 }
@@ -55,8 +62,15 @@ function withinClusterUpdate(){
   updateText("cluster population :"+pop,"singletimestepsingleclusterPop");
   var popAll = pointsInAllTimeStepSingleCluster(cluster);
   updateText("cluster population :"+popAll,"alltimestepsingleclusterPop");
+  processAllTimeSingleClusterStrategies(cluster);
 }
+function readTypicalYear(error,data){
+  tableData = data.split(/\r?\n/);
+  for(var i=0;i<tableData.length;i++){
+      if(tableData[i]!="")typicalYearClusterData.push(JSON.parse(tableData[i]));
 
+    }
+}
 
 function setUpControl(){
 	 addRangeSlider("alltimestepssingleclustercontrol","cluster_id","cluster_idSelector",clusterChange,0,maxClusterId,1,cluster,"slider","h3","");

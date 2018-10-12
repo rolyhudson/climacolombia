@@ -14,26 +14,26 @@ strategiesDisplay = readZones(tableData);
 addPCharts();
 
 }
-function highlightPoints(sName){
+function highlightPoints(sName,cData){
 	var blocks = [];
 	
-	for(var i=0;i<clusterData.length;i++){
+	for(var i=0;i<cData.length;i++){
 		var foundstrat=false;
-		for(var s=0;s<clusterData[i].strategies.length;s++){
-			if(clusterData[i].strategies[s]===sName) foundstrat=true;
+		for(var s=0;s<cData[i].strategies.length;s++){
+			if(cData[i].strategies[s]===sName) foundstrat=true;
 			
 		}
 		blocks.push(foundstrat);
 	}
 	return blocks;
 }
-function highlightPointsByCluster(sName,cnum){
+function highlightPointsByCluster(sName,cnum,cData){
 	var blocks = [];
-	for(var i=0;i<clusterData.length;i++){
+	for(var i=0;i<cData.length;i++){
 		var foundstrat=false;
-		if(clusterData[i].clusternum===cnum){
-			for(var s=0;s<clusterData[i].strategies.length;s++){
-				if(clusterData[i].strategies[s]===sName) foundstrat=true;
+		if(cData[i].clusternum===cnum){
+			for(var s=0;s<cData[i].strategies.length;s++){
+				if(cData[i].strategies[s]===sName) foundstrat=true;
 			}
 		}
 		blocks.push(foundstrat);
@@ -49,9 +49,10 @@ function pointsInSingleTimeStepSingleCluster(clusNum){
 }
 function pointsInAllTimeStepSingleCluster(clusNum){
 	var total =0;
-	var result = allclustersstats.find(s=>s.x===clusNum);
-	
-	return result.y;
+	for(var i=0;i<typicalYearClusterData.length;i++){
+		if(typicalYearClusterData[i].clusternum===clusNum) total++;
+	}
+	return total;
 }
 function processAllTimeAllClusterStrategies(error, data){
 	tableData = data.split(/\r?\n/);
@@ -69,9 +70,36 @@ function processTimeStepAllClusterStrategies(error, data){
 	pc3.addFoundStrategies(strategyData,"pc3");
 }
 
-function processAllTimeSingleClusterStrategies(error, data){
-	tableData = data.split(/\r?\n/);
-	var strategyData=parseStrategies(tableData);
+function processAllTimeSingleClusterStrategies(cnum){
+	var foundstrat = [];
+	var strategyData=[];
+	var points=0;
+	for(var i=0;i<typicalYearClusterData.length;i++){
+		if(typicalYearClusterData[i].clusternum===cnum){
+			points++;
+		for(var j=0;j<typicalYearClusterData[i].strategies.length;j++){
+			foundstrat.push(typicalYearClusterData[i].strategies[j]);
+		}
+		}
+		
+	}
+	var s;
+	//summarise occurances
+	for(var i=0;i<foundstrat.length;i++){
+		s = strategyData.find(sd=>sd.name===foundstrat[i]);
+		if(s=== undefined){
+			strategyData.push({"name":foundstrat[i],"count":1,"percent":0});
+		}
+		else{
+			s.count++;
+		}
+			
+	}
+	//calc percentages
+	for(var i=0;i<strategyData.length;i++){
+		strategyData[i].percent = strategyData[i].count/points*100;
+	}
+	pc2.addFoundStrategies(strategyData,"pc2");
 }
 function parseStrategies(tableData){
 	var strategyData=[];
@@ -239,6 +267,7 @@ var cScale = d3.scaleLinear()
 }
 function handleMouseOverStrategy(d,i) { 
 		var name = event.target.classList[0];
+		var pc = event.target.classList[2];
 		var pChartSvg = d3.select("#"+event.path[2].id+"_svg");
 		var result = strategiesDisplay.filter(obj => {
 		return obj.name === name})
@@ -256,14 +285,20 @@ function handleMouseOverStrategy(d,i) {
 		}
 		//highlight on map if single time step
 		var blocks=[];
+		var cData = clusterData;
+		var map = singleTimeStepMap;
+		if(pc==="pc1"||pc==="pc2") {
+			map = allTimeStepMap;
+			cData = typicalYearClusterData; 
+		}
 		var pNodeId = event.target.parentNode.id;
 		if(pNodeId.includes("singlecluster")){
-			blocks = highlightPointsByCluster(name.replace(/_/g,' '),cluster);
+			blocks = highlightPointsByCluster(name.replace(/_/g,' '),cluster,cData);
 		}
 		else{
-			blocks = highlightPoints(name.replace(/_/g,' '));
+			blocks = highlightPoints(name.replace(/_/g,' '),cData);
 		}
-		var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+		var mapBlocks = document.getElementsByClassName("mapBlocks "+map.mapname);
 		for(var i=0;i<mapBlocks.length;i++){
 			if(blocks[i]) mapBlocks[i].style.fill = "red";
 		}
@@ -272,6 +307,7 @@ function handleMouseOverStrategy(d,i) {
 
 	function handleMouseOutStrategy(d, i) {
 		var name = event.target.classList[0];
+		var pc = event.target.classList[2];
 		var pChartSvg = d3.select("#"+event.path[2].id+"_svg");
 		var result = strategiesDisplay.filter(obj => {
 		return obj.name === name})
@@ -287,11 +323,18 @@ function handleMouseOverStrategy(d,i) {
 				objectsToHighlight[i].attributes["opacity"].value= 1;
 			}
 		}
-		var blocks = highlightPoints(name.replace(/_/g,' '));
-		var mapBlocks = document.getElementsByClassName("mapBlocks clusterMap");
+		//remove highlight on map
+		var cData = clusterData;
+		var map = singleTimeStepMap;
+		if(pc==="pc1"||pc==="pc2") {
+			map = allTimeStepMap;
+			cData = typicalYearClusterData; 
+		}
+		var blocks = highlightPoints(name.replace(/_/g,' '),cData);
+		var mapBlocks = document.getElementsByClassName("mapBlocks "+map.mapname);
 		for(var i=0;i<mapBlocks.length;i++){
 			if(blocks[i]) mapBlocks[i].style.fill = getColorSpectral(mapBlocks[i].id);
 		}
-		//remove highlight on map
+		
 	}
 	

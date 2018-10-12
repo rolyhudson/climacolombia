@@ -73,7 +73,7 @@ public class WorkflowDeserializer extends StdDeserializer<Workflow>{
 	        aparams.setSelectionShape(analysisParamsNode.get("selectionShape").asText());
 	        aparams.setInstances(analysisParamsNode.get("instances").asInt());
 	        aparams.setMasterInstance(analysisParamsNode.get("masterInstance").asText());
-	        aparams.setDashboardURL(analysisParamsNode.get("dashboardURL").asText());
+	        aparams.setDashboardFolder(analysisParamsNode.get("dashboardFolder").asText());
 	        if (variables.isArray()) {
 	        	int count =0;
 		        for(JsonNode objNode : variables)

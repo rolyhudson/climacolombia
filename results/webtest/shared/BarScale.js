@@ -75,22 +75,14 @@ class ScaleBar{
     var owner = this.classList[1]
     var mapBlocks = document.getElementsByClassName("mapBlocks "+owner);
     d3.select(this).style("fill", "red");
-    var map;
-    var mapIndex;
+    var map = mapNames.find(m=>m.name===owner).mapObject;
     if(owner==="clusterMap"){
-      map = singleTimeStepMap;
       popTSDonut.highlight(d.value,popTSDonut.id);
     }
-    else{
-      mapIndex = utciMaps.maps.findIndex(m=>m.mapname===owner);
-        if(mapIndex===-1) {
-          mapIndex = ideamciMaps.maps.findIndex(m=>m.mapname===owner);
-          map = ideamciMaps.maps[mapIndex];
-        }
-        else{
-          map = utciMaps.maps[mapIndex];
-        }
+    if(owner==="TYclusterMap"){
+    popAllDonut.highlight(d.value,popAllDonut.id);
     }
+    
     for(var b=0;b<mapBlocks.length;b++){
       var bnum = map.scalebar.findBlockInScale(mapBlocks[b].id)
       if(Number(bnum)===d.sblock){
@@ -102,21 +94,12 @@ class ScaleBar{
   handleMouseOutScale(d, i){
     var ownerMap = this.classList[1]
     var mapBlocks = document.getElementsByClassName("mapBlocks "+ownerMap);
-    var map;
-    var mapIndex;
+    var map= mapNames.find(m=>m.name===ownerMap).mapObject;
     if(ownerMap==="clusterMap"){
-      map = singleTimeStepMap;
       popTSDonut.unhighlight(d.value,popTSDonut.id);
     }
-    else{
-        mapIndex = utciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-        if(mapIndex===-1) {
-          mapIndex = ideamciMaps.maps.findIndex(m=>m.mapname===ownerMap);
-          map = ideamciMaps.maps[mapIndex];
-        }
-        else{
-          map = utciMaps.maps[mapIndex];
-        }
+    if(ownerMap==="TYclusterMap"){
+    popAllDonut.unhighlight(d.value,popAllDonut.id);
     }
     d3.select(this).style("fill",function (d) {return  map.colorFn(d.value);} )
 

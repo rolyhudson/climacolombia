@@ -18,6 +18,7 @@ function makePage(params){
 }
 function allTimeStepAllClusterInfo(){
 	//all time all clusters only loaded once
+	readData("stats/typicalyear/clusters.json",readTypicalYear);
 	readData("stats/clusterStats/clusters.json",processAllTimeAllClusterPop);
 	readData("stats/strategyStats/clusters.json",processAllTimeAllClusterStrategies);
 }
