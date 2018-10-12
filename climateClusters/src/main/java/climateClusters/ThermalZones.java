@@ -1,21 +1,23 @@
 package climateClusters;
 
 import java.io.Serializable;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang.mutable.MutableInt;
 import org.apache.spark.api.java.JavaPairRDD;
 import org.apache.spark.api.java.JavaRDD;
-import org.apache.spark.mllib.linalg.Vector;
+
 import org.apache.spark.sql.Dataset;
 import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SaveMode;
 import org.apache.spark.sql.SparkSession;
 
 import scala.Tuple2;
-
+import climateClusters.DesignStrategy;
+import climateClusters.ClusterUtils;
+import  climateClusters.StrategySummary;
 public class ThermalZones implements Serializable{
 	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
 	public ThermalZones(SparkSession spark,String zonefile) {
@@ -72,7 +74,7 @@ public class ThermalZones implements Serializable{
 			summary.add(ss);
 		}
 		Dataset<Row> strategyDF = spark.createDataFrame(summary, StrategySummary.class);
-		strategyDF.toDF().write().json(output);
+		strategyDF.toDF().write().mode(SaveMode.Overwrite).json(output);
 	}
 	public void reportInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
 		long countR = records.count();
@@ -101,7 +103,7 @@ public class ThermalZones implements Serializable{
 			summary.add(ss);
 		}
 		Dataset<Row> strategyDF = spark.createDataFrame(summary, StrategySummary.class);
-		strategyDF.toDF().write().json(output);
+		strategyDF.toDF().write().mode(SaveMode.Overwrite).json(output);
 	}
 	
 }

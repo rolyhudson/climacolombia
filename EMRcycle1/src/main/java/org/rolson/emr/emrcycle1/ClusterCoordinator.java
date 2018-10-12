@@ -274,7 +274,7 @@ public class ClusterCoordinator {
 	}
 	public void runWorkflow(Workflow wf)
 	{
-
+		wf.generateNewOutputFolder();
 		String wfString = wf.seraliseWorkflow();
 		
 		this.dataManager.uploadStringToFile("workflowJSON/"+wf.getGuid()+".txt",wfString,"clustercolombia","plain/text");

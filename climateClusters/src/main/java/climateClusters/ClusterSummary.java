@@ -3,8 +3,13 @@ package climateClusters;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
 
 public class ClusterSummary implements Serializable{
 	private int clusterId;
@@ -49,4 +54,20 @@ public class ClusterSummary implements Serializable{
 	public List<DesignStrategy> getStrategies() {
 		return strategies;
 	}
+	public static void reportClusterSummary(JavaRDD<Record> records,String output,double[][] comfort,Vector[] clusterCenters,SparkSession spark) {
+		List<ClusterSummary> summary = new ArrayList<ClusterSummary>();
+	    Map<Integer,Long> clusterStats = records.map(f->f.getClusternum()).countByValue();
+	    
+	    for(int i=0;i<clusterCenters.length;i++) {
+	    	ClusterSummary cs = new ClusterSummary();
+	    	cs.setCentroid(clusterCenters[i]);
+	    	cs.setClusterId(i);
+	    	cs.setCount(clusterStats.get(i));
+	    	cs.setClusterUTCI(comfort[i][0]);
+	    	cs.setClusterIdeamCI(comfort[i][1]);
+	    	summary.add(cs);
+	    }
+	    Dataset<Row> clusteringDs = spark.createDataFrame(summary, ClusterSummary.class);
+	    clusteringDs.toDF().write().json(output);
+		}
 }

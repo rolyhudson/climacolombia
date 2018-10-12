@@ -1,0 +1,6 @@
+{"description":"job started","elapsed":0}
+{"description":"params read, data filtered, thermal zones read","elapsed":5}
+{"description":"perfomance processed","elapsed":9}
+{"description":"data classified","elapsed":10}
+{"description":"output written","elapsed":145}
+{"description":"job finished","elapsed":145}

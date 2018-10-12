@@ -29,14 +29,13 @@ public class AnalysisParameters {
 	}
 	public enum AnalysisMethod{
 		K_MEANS,
-		POWER_ITERATION,
-		GAUSSIAN_MIX,
-		BI_K_MEANS;
+		BISECTING_K_MEANS,
+		BISECTING_K_MEANS_AND_K_MEANS;
 	}
 	public enum Variables{
-	RADIATION_SOLAR,
-		  WIND_DIRECTION,
-		  CLOUD_COVER,
+//	RADIATION_SOLAR,
+//		  WIND_DIRECTION,
+//		  CLOUD_COVER,
 		  TEMPERATURE,
 		  VAPOUR_PRESSURE,
 		  RELATIVE_HUMIDITY,

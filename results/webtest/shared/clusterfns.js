@@ -7,6 +7,7 @@ var popClusterDonut;
 var pc1,pc2,pc3,pc4;
 var allclustersstats=[];
 var singleTimeStepMap;
+var allTimeStepMap;
 function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();

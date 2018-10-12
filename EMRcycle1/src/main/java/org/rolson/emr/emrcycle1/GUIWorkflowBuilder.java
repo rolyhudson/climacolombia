@@ -39,6 +39,7 @@ import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.layout.VBox;
 import javafx.scene.text.Font;
+import javafx.scene.web.WebEngine;
 
 
 public class GUIWorkflowBuilder {
@@ -89,14 +90,15 @@ public class GUIWorkflowBuilder {
 	List<String> months = Arrays.asList("January","February","March","April","May","June","July","August","September","October","November","December");
 
 	List<String> hours;
-	
-	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord,DataManager dm,SelectionMap sm)
+	WebEngine resultsVisualiser;
+	public GUIWorkflowBuilder(int index, String name,TabPane tabpane,ClusterCoordinator coord,DataManager dm,SelectionMap sm,WebEngine visualiser)
 	{
 		selectionMap = sm;
 		
 		this.datamanager = dm;
 		coordinator = coord;
 		setHours();
+		resultsVisualiser = visualiser;
 		Tab tab = new Tab();
 		tab.setText(name);
 		tab.setContent(setLayout());
@@ -281,7 +283,7 @@ public class GUIWorkflowBuilder {
 				{
 					Alert alert = new Alert(AlertType.CONFIRMATION);
 					alert.setTitle("Confirmation Dialog");
-					alert.setHeaderText("Active clusters exisit");
+					alert.setHeaderText("Active clusters exist");
 					alert.setContentText("Add to active cluster?");
 
 					Optional<ButtonType> result = alert.showAndWait();
@@ -319,8 +321,9 @@ public class GUIWorkflowBuilder {
 		    
 			if(forAction!=null)
 			{
-				if(forAction.getAnalysisParameters().getDashboardURL().equals("")) {
+				if(!forAction.getAnalysisParameters().getDashboardURL().equals("")) {
 					//push url to vis tab or open in new browser window
+					this.resultsVisualiser.load(forAction.getAnalysisParameters().getDashboardURL());
 				}
 				else {
 				GeoVisualisation gvis = new GeoVisualisation(forAction);

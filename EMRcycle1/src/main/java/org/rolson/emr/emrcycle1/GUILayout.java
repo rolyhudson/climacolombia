@@ -64,7 +64,7 @@ public class GUILayout {
 	private TableView<Cluster> resourcetable = new TableView<Cluster>();
 	private TableView<Workflow> workflowtable = new TableView<Workflow>();
 	private SelectionMap selectionMap = new SelectionMap();
-	
+	private WebEngine webEngine;
 	Label statuslabel = new Label();
 	Stage stage;
 	public GUILayout(ClusterCoordinator wfc,Stage stg)
@@ -177,7 +177,7 @@ public class GUILayout {
 	private void addWebView(int index,String name,TabPane tabpane)
 	{
 		WebView browser = new WebView();
-		WebEngine webEngine = browser.getEngine();
+		webEngine = browser.getEngine();
 		webEngine.load("http://lacunae.io/geovis2018_09_29_13_35_00/");
 		Tab tab = new Tab();
 		tab.setText(name);
@@ -210,7 +210,7 @@ public class GUILayout {
 			break;
 			case "Workflow builder":
 				
-				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator,this.datamanager,selectionMap);
+				GUIWorkflowBuilder gwfb = new GUIWorkflowBuilder(i,tabname,tabPane,this.coordinator,this.datamanager,selectionMap,webEngine);
 				break;
 			default:
 				addTabWithButtons(i, tabname, tabPane);

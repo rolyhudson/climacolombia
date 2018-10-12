@@ -341,8 +341,8 @@ public class ComfortIndices
         double vp = rh / 100 * 6.105 * Math.exp(17.27 * t / (237.7 + t));
         return vp;
     }
-    public static double[][] getComfortIndicesClusters(JavaRDD<Record> records,KMeansModel clusters) {
-    	int nclusters = clusters.clusterCenters().length;
+    public static double[][] getComfortIndicesClusters(JavaRDD<Record> records,int nclusters) {
+    	
     	wind = new double[nclusters];
     	alt = new double[nclusters];
     	rh= new double[nclusters];
@@ -353,6 +353,7 @@ public class ComfortIndices
     	double[] ideamCI = new double[nclusters];
     	//temp,vp,rh,tmin,tmax,trange,precip,windSpd
     	records.foreach(f->{
+    		try {
     		int cnum = f.getClusternum();
     		double[] vars = f.getVectorAllVar().toArray();
     		wind[cnum]+=vars[7];
@@ -360,6 +361,10 @@ public class ComfortIndices
     		temp[cnum]+=vars[0];
     		rh[cnum]+=vars[2];
     		pointsInside[cnum]+=1;
+    		}
+    		catch(Exception e) {
+    			
+    		}
     	});
     	double t=0;
     	double w=0;
