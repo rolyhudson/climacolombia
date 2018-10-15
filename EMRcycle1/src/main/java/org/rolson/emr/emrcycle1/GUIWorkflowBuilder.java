@@ -160,8 +160,10 @@ public class GUIWorkflowBuilder {
 	{
 		// Create a Runnable
 		Runnable task = new Runnable()
+
 		{
 			public void run()
+
 			{
 				GeoVisualisation gvis = new GeoVisualisation(forAction);
 				statusLbl.setText("COMPLETED");

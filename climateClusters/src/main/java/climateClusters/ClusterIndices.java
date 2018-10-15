@@ -213,7 +213,7 @@ public class ClusterIndices {
 		
 		return dunn;
 	}
-	// It is important to mark this class as `static`.
+	
 	  public static class MaxComparator implements Serializable, Comparator<Double> {
 		  @Override
 		  public int compare(Double a, Double b) {

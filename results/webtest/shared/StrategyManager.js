@@ -279,7 +279,8 @@ function handleMouseOverStrategy(d,i) {
 				objectsToHighlight[i].attributes["font-weight"].value= "bold";
 			}
 			else{
-				objectsToHighlight[i].attributes["fill"].value= col;
+				d3.select(this).style("fill", col);
+				objectsToHighlight[i].style.fill= col;
 				objectsToHighlight[i].attributes["opacity"].value= 0.5;
 			}
 		}
@@ -319,7 +320,7 @@ function handleMouseOverStrategy(d,i) {
 				objectsToHighlight[i].attributes["font-weight"].value= "normal";
 			}
 			else{
-				objectsToHighlight[i].attributes["fill"].value= "none";
+				objectsToHighlight[i].style.fill= "none";
 				objectsToHighlight[i].attributes["opacity"].value= 1;
 			}
 		}
