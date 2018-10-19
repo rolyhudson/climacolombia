@@ -14,6 +14,8 @@ import java.util.concurrent.TimeUnit;
 
 import org.joda.time.DateTime;
 
+import Coordination.Cluster;
+import Coordination.ClusterCoordinator;
 import javafx.application.Platform;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
@@ -40,6 +42,7 @@ import javafx.scene.control.Alert.AlertType;
 import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.ColumnConstraints;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
@@ -83,8 +86,8 @@ public class GUIWorkflowBuilder {
 	private Button saveBtn;
 	private Button runBtn;
 	private Button stopBtn;
-	private Button resultsBtn;
-	private Hyperlink dashboardlink;
+	private Button dashBoardBtn;
+	
 
 	private SelectionMap selectionMap; 
 	
@@ -167,7 +170,7 @@ public class GUIWorkflowBuilder {
 			{
 				GeoVisualisation gvis = new GeoVisualisation(forAction);
 				statusLbl.setText("COMPLETED");
-				forAction.getAnalysisParameters().setDashboardFolder(Workflow.generateUniqueOutputName("geovis",new DateTime()));
+				
 				datamanager.uploadStringToFile("workflowJSON/"+forAction.getGuid()+".txt", forAction.seraliseWorkflow(),"clustercolombia","plain/text");
 			}
 		};
@@ -190,7 +193,13 @@ public class GUIWorkflowBuilder {
 		box.setSpacing(5);
 		box.setPadding(new Insets(10, 0, 0, 10));
 		GridPane tools = new GridPane();    
-	    
+		 for (int i = 0; i < 10; i++) {
+	         ColumnConstraints column = new ColumnConstraints();
+	         if(i==0)column.setPrefWidth(50);
+	         if(i==1)column.setPrefWidth(150);
+	         if(i>1)column.setPrefWidth(100);
+	         tools.getColumnConstraints().add(column);
+	     }
 	    //name editor
 			Label nameLbl = new Label("Name: ");
 			tools.add(nameLbl,0,0);
@@ -328,9 +337,9 @@ public class GUIWorkflowBuilder {
 		});
 		tools.add(stopBtn,6,0);
 		//results 
-		this.resultsBtn = new Button("Results");
-		resultsBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
-		resultsBtn.setOnAction((event) -> {
+		this.dashBoardBtn = new Button("Dashboard");
+		dashBoardBtn.setMaxSize(Double.MAX_VALUE, Double.MAX_VALUE);
+		dashBoardBtn.setOnAction((event) -> {
 		    
 			if(forAction!=null)
 			{
@@ -352,6 +361,7 @@ public class GUIWorkflowBuilder {
 				
 				forAction.setStatus("PREPARING DASHBOARD");
 				this.statusLbl.setText("PREPARING DASHBOARD");
+				forAction.getAnalysisParameters().setDashboardFolder(Workflow.generateUniqueOutputName("geovis",new DateTime()));
 				this.coordinator.saveWorkflows();
 				//GeoVisualisation gvis = new GeoVisualisation(forAction);
 				//on background thread
@@ -359,26 +369,8 @@ public class GUIWorkflowBuilder {
 				}
 			}
 		});
-		tools.add(resultsBtn,2,1);
-		Label urlLbl = new Label("Results link: ");
-		tools.add(urlLbl,7,1);
-		dashboardlink = new Hyperlink();
+		tools.add(dashBoardBtn,2,1);
 		
-		dashboardlink.setText("");
-		dashboardlink.setOnAction((ActionEvent e) -> {
-		    System.out.println("This link is clicked");
-		    try {
-		    	String url = "http://lacunae.io/"+forAction.getAnalysisParameters().getDashboardFolder();
-				java.awt.Desktop.getDesktop().browse(new URI(url));
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (URISyntaxException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-		});
-		tools.add(dashboardlink,8,1);
 		//status label
 				Label status = new Label("STATUS: ");
 						this.statusLbl = new Label("");
@@ -714,7 +706,7 @@ public class GUIWorkflowBuilder {
 		{
 			//full editing permitted no results
 			//disabled stop 2d map 3d map stats
-			this.resultsBtn.setDisable(true);
+			this.dashBoardBtn.setDisable(true);
 			this.stopBtn.setDisable(true);
 			
 			this.copyBtn.setDisable(false);
@@ -731,7 +723,7 @@ public class GUIWorkflowBuilder {
 			this.configTools.setDisable(true);
 			this.mappingBox.setDisable(true);
 			//results enabled
-			this.resultsBtn.setDisable(false);
+			this.dashBoardBtn.setDisable(false);
 			this.stopBtn.setDisable(true);
 			
 			this.copyBtn.setDisable(false);
@@ -746,7 +738,7 @@ public class GUIWorkflowBuilder {
 			this.configTools.setDisable(true);
 			this.mappingBox.setDisable(true);
 			
-			this.resultsBtn.setDisable(true);
+			this.dashBoardBtn.setDisable(true);
 			this.stopBtn.setDisable(false);
 			
 			this.copyBtn.setDisable(false);
@@ -787,8 +779,7 @@ public class GUIWorkflowBuilder {
 		seasonStartDay.getSelectionModel().select(ap.getSeasonStartDay()-1);
 		seasonEndDay.getSelectionModel().select(ap.getSeasonEndDay()-1);
 		
-		if(!ap.getDashboardFolder().equals("")) dashboardlink.setText("lacunae.io/"+ap.getDashboardFolder());
-		else dashboardlink.setText("");
+		
 		dayStartHour.getSelectionModel().select(ap.getDayStartHour()-1);
 		dayEndHour.getSelectionModel().select(ap.getDayEndHour()-1);
 		this.masterInstanceCB.getSelectionModel().select(ap.getMasterInstance());

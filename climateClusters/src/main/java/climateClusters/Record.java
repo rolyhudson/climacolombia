@@ -104,7 +104,7 @@ public class Record implements Serializable {
 		+","+getLocation()[0]+","+getLocation()[1]+","+getReqVars()+","+getVector()
 		+",[temp,vp,rh,tmin,tmax,trange,precip,windSpd],"+getVectorAllVar();
 	}
-	public String toJSONStringSImple() {
+	public String toJSONStringSimple() {
 		List<String> allFoundStrategies = getInStrategies();
 		String strats  ="[";
 		for(int i=0;i<allFoundStrategies.size();i++) {

@@ -1,6 +1,7 @@
 package org.rolson.emr.emrcycle1;
 
 
+import Coordination.ClusterCoordinator;
 import javafx.animation.Animation;
 
 import javafx.animation.KeyFrame;

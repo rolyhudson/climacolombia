@@ -238,6 +238,7 @@ public class Workflow {
 		this.actionOnFailure = ActionOnFailure.valueOf(action);
 	}
 	public void setCommandArgs(List<String> args)
+
 	{
 		this.commandArgs =args;
 	}
@@ -255,9 +256,11 @@ public class Workflow {
 		return appType.getName();
 	}
 	public List<String> getCommandArgs(){
+
 		return commandArgs;
 	}
 	private void defaultVariables()
+
 	{
 		//setup for basic MapReduce job
 		this.name = "New workflow";
@@ -271,6 +274,7 @@ public class Workflow {
 		
 	}
 	public void setWorkflowFromAnalysisParams()
+
 	{
 		if(this.analysisParameters.getDataSet().equals("MONTHLY_GRID"))
 		{
@@ -303,6 +307,7 @@ public class Workflow {
 		setSparkStepConfig();
 	}
 	private void updateCommandArgs()
+
 	{
 		this.commandArgs = Arrays.asList("spark-submit",
 				"--deploy-mode",
@@ -318,6 +323,7 @@ public class Workflow {
 		setSparkStepConfig();
 	}
 	private void setSparkStepConfig()
+
 	{
 		this.stepConfig = new StepConfig()
 			       .withName(this.name)

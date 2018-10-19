@@ -30,18 +30,18 @@ public class Clustering {
 		List<TimeLog> timelog = new ArrayList<TimeLog>();
 		timelog.add(new TimeLog(start,"job started"));
 //		// on EMR use
-		SparkSession spark = SparkSession
-                .builder()
-                .appName("SparkJob")
-                .getOrCreate();
+//		SparkSession spark = SparkSession
+//                .builder()
+//                .appName("SparkJob")
+//                .getOrCreate();
 		
 //		local debug
 //		
-//		SparkSession spark = SparkSession.builder()
-//				  .master("local[4]")
-//				  .appName("SparkJob")
-//				  .getOrCreate();
-//		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
+		SparkSession spark = SparkSession.builder()
+				  .master("local[4]")
+				  .appName("SparkJob")
+				  .getOrCreate();
+		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
 //		//end local debug
 		
 		ClusterParams clusterParams = new ClusterParams(args[2],spark);
@@ -102,6 +102,7 @@ public class Clustering {
 		    timelog.add(new TimeLog(start,"output written"));
 			break;
 		}
+		
 		timelog.add(new TimeLog(start,"job finished"));
 		////generate the top level reports
 	    Dataset<Row> timelogfile = spark.createDataFrame(timelog, TimeLog.class);

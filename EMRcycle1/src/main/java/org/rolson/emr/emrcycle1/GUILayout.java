@@ -14,6 +14,9 @@ import java.util.Optional;
 
 import com.guigarage.flatterfx.FlatterFX;
 
+import Coordination.Cluster;
+import Coordination.ClusterActionCell;
+import Coordination.ClusterCoordinator;
 import javafx.application.Platform;
 import javafx.beans.property.SimpleBooleanProperty;
 import javafx.beans.value.ObservableValue;

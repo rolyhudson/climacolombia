@@ -53,7 +53,17 @@ public class ThermalZones implements Serializable{
 		}
 		return r;
 	}
-	
+	public static List<DesignStrategy> testZones(double[] ppoint) {
+		List<DesignStrategy> applicable = new ArrayList<DesignStrategy>();
+		for(DesignStrategy ds : strategies) {
+			if(ClusterUtils.isPointInPolygon(ppoint, ds.getPoints()))
+			{
+				applicable.add(ds);		
+			}
+			
+		}
+		return applicable;
+	}
 	public void reportMultiInclusion(JavaRDD<Record> records,SparkSession spark,String output) {
 		long countR = records.count();
 		//JavaRDD<Record> recordsStrategy = records.map(f->testZones(f));

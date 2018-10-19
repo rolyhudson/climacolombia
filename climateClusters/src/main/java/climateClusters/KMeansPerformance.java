@@ -1,11 +1,15 @@
 package climateClusters;
 
 import java.util.ArrayList;
+
 import java.util.List;
+import java.util.Optional;
 
 import org.apache.spark.api.java.JavaRDD;
 import org.apache.spark.mllib.linalg.Vector;
 import org.apache.spark.sql.SparkSession;
+
+
 import climateClusters.ClusterIndices;
 import climateClusters.ClusteringPerformance;
 public class KMeansPerformance {
@@ -46,10 +50,22 @@ public class KMeansPerformance {
 	    performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
 	    for(int i=0;i<bds.length;i++) {
-	    	cp = new ClusteringPerformance(i+minClusters,costs[i],bds[i],bddunn[i],true);
+	    	cp = new ClusteringPerformance(i+minClusters,costs[i],bds[i],bddunn[i],false);
     		performance.add(cp);
     	}
 	    nclusters = ClusteringPerformance.findElbowCluster(performance);
+	    Optional<ClusteringPerformance> cpSel = performance.stream().filter(p->p.getNClusters()==nclusters).findFirst();
+	    
+	    	if(cpSel.isPresent())
+			{
+	    		ClusteringPerformance w = cpSel.get();
+				w.setSelected(true);
+			}
+			else
+			{
+				performance.get(0).setSelected(true);
+			}
+	    
 	}
 	public int getNclusters() {
 		return this.nclusters;

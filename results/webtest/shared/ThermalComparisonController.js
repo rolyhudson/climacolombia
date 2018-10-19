@@ -18,7 +18,7 @@ function setStatsOutput(divids,props){
 	}
 	
 }
-function thermalComparison(){
+function thermalComparison (){
 	thermalData=[];
 	var clusternum;
 	var cluster;

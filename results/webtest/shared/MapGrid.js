@@ -23,7 +23,7 @@ class MapGrid{
 	}
 	makeScaleBarCluster(){
 		var barlabels=[];
-		for(var i=0;i<=maxClusterId+1;i+=1)
+		for(var i=0;i<maxClusterId;i+=1)
 		  {
 		    barlabels.push(Math.round(i));
 		  }

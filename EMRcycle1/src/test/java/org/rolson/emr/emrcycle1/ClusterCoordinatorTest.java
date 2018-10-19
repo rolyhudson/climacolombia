@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import Coordination.ClusterCoordinator;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 

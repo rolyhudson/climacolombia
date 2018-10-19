@@ -3,7 +3,7 @@ package org.rolson.emr.emrcycle1;
 import javafx.scene.control.TableCell;
 import java.util.Optional;
 
-
+import Coordination.ClusterCoordinator;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.scene.control.Alert;

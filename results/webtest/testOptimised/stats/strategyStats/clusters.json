@@ -1,10 +1,4 @@
-{"count":178,"name":"CONVENTIONAL DRY","percent":0.85}
-{"count":769,"name":"EVAPORATIVE COOLING","percent":3.68}
-{"count":1663,"name":"AIR CONDITIONED","percent":7.95}
-{"count":652,"name":"PASSIVE SOLAR HEATING","percent":3.12}
-{"count":2224,"name":"HEATING INTERNAL GAINS","percent":10.63}
-{"count":1959,"name":"COOLING HIGH THERMAL MASS WITH NIGHT COOLING","percent":9.36}
-{"count":1481,"name":"COMFORT ZONE","percent":7.08}
-{"count":18034,"name":"SOLAR PROTECTION","percent":86.21}
-{"count":1304,"name":"COOLING HIGH THERMAL MASS","percent":6.23}
-{"count":14797,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":70.73}
+{"count":339,"name":"SOLAR PROTECTION","percent":92.37}
+{"count":328,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":89.37}
+{"count":11,"name":"AIR CONDITIONED","percent":3.0}
+{"count":28,"name":"HEATING INTERNAL GAINS","percent":7.63}

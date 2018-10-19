@@ -22,7 +22,7 @@ function runExplorerMapTool(){
 	endYr =analysisParams["endDate"].year;
 	stMonth = analysisParams["seasonStartMonth"];
 	endMonth = analysisParams["seasonEndMonth"];
-	maxClusterId = analysisParams["nclusters"];
+	
   setUpControl();
   readMapData();
   
@@ -41,6 +41,7 @@ function createMap(error, context, country){
   allTimeStepMap = new MapGrid("alltimestepsmapDiv",0,0,context,country,"TYclusterMap","clusternum","c_id",getColorSpectral);
   allTimeStepMap.makeScaleBarCluster();
   allTimeStepMap.mapUpdate(typicalYearClusterData);
+  
   mapNames.push({"name":"TYclusterMap","mapObject":allTimeStepMap});
   singleTimeStepMap = new MapGrid("singletimestepmapDiv",allTimeStepMap.mapW,allTimeStepMap.mapH,context,country,"clusterMap","clusternum","c_id",getColorSpectral);
   singleTimeStepMap.makeScaleBarCluster();
@@ -73,14 +74,14 @@ function readTypicalYear(error,data){
 }
 
 function setUpControl(){
-	 addRangeSlider("alltimestepssingleclustercontrol","cluster_id","cluster_idSelector",clusterChange,0,maxClusterId,1,cluster,"slider","h3","");
+	 addRangeSlider("alltimestepssingleclustercontrol","cluster_id","cluster_idSelector",clusterChange,0,maxClusterId-1,1,cluster,"slider","h3","");
    
    document.getElementById("alltimestepssingleclustercontrol").appendChild(makeTextID("alltimestepsingleclusterPop","cluster population: ","h3"));
 
   	addRangeSlider("singletimestepallclusterscontrol","year","yearSelector",yearChange,stYr,endYr,1,stYr+1,"slider","h3","");
   	addRangeSlider("singletimestepallclusterscontrol","month","monthSelector",monthChange,stMonth,endMonth,1,month,"slider","h3","");
     
-    addRangeSlider("singletimestepsingleclustercontrol","cluster_id","cluster_idSelector",clusterChange,0,maxClusterId,1,cluster,"slider","h3","");
+    addRangeSlider("singletimestepsingleclustercontrol","cluster_id","cluster_idSelector",clusterChange,0,maxClusterId-1,1,cluster,"slider","h3","");
 
     addRangeSlider("singletimestepsingleclustercontrol","year","yearSelector",yearChange,stYr,endYr,1,stYr+1,"slider","h3","");
     addRangeSlider("singletimestepsingleclustercontrol","month","monthSelector",monthChange,stMonth,endMonth,1,month,"slider","h3","");

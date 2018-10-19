@@ -23,7 +23,7 @@ public class ClusteringOutput {
 	public ClusteringOutput(JavaRDD<Record> records,String output,SparkSession spark,List<ClusteringPerformance> performance,ThermalZones thermalzones,int numClusters,Vector[] clusterCenters ) {
 		//generate the top level reports
 	    Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusteringPerformance.class);
-    	performanceDs.toDF().write().mode(SaveMode.Overwrite).json(output+"/stats/performanceDF");
+    	performanceDs.write().mode(SaveMode.Overwrite).json(output+"/stats/performanceDF");
 	    
 	    double[][] comfortIndices = ComfortIndices.getComfortIndicesClusters(records,numClusters);
 	    ClusterSummary.reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices,clusterCenters,spark);
@@ -60,7 +60,7 @@ public class ClusteringOutput {
     			return result; 
     		});
     		//write results to typical year 
-    		typicalyear.map(f->f.toJSONStringSImple()).saveAsTextFile(output+"/stats/typicalYear");
+    		typicalyear.map(f->f.toJSONStringSimple()).saveAsTextFile(output+"/stats/typicalYear");
     		//summary of strategies typical year
     		thermalzones.reportMultiInclusion(typicalyear,spark,output+"/stats/strategyStats");
     		
@@ -90,7 +90,7 @@ public class ClusteringOutput {
         			return result; 
         		});
         		//write results to typical month 
-        		typicalmonth.map(f->f.toJSONStringSImple()).saveAsTextFile(output+"/stats/typicalYear/"+m);
+        		typicalmonth.map(f->f.toJSONStringSimple()).saveAsTextFile(output+"/stats/typicalYear/"+m);
     		}
     		
 	    //split results by year month this could be done from DB in the dashboard

@@ -4,6 +4,9 @@ import static org.junit.Assert.*;
 
 import org.junit.Ignore;
 import org.junit.Test;
+
+import Coordination.Cluster;
+import Coordination.ClusterCoordinator;
 @Ignore
 public class IntegrationTests {
 	ClusterCoordinator coord = new ClusterCoordinator();

@@ -1,4 +1,6 @@
-{"count":13,"name":"SOLAR PROTECTION","percent":81.25}
-{"count":2,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":12.5}
-{"count":11,"name":"COMFORT ZONE","percent":68.75}
-{"count":3,"name":"HEATING INTERNAL GAINS","percent":18.75}
+{"count":2,"name":"EVAPORATIVE COOLING","percent":9.09}
+{"count":2,"name":"COOLING HIGH THERMAL MASS WITH NIGHT COOLING","percent":9.09}
+{"count":6,"name":"COMFORT ZONE","percent":27.27}
+{"count":22,"name":"SOLAR PROTECTION","percent":100.0}
+{"count":2,"name":"COOLING HIGH THERMAL MASS","percent":9.09}
+{"count":16,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":72.73}

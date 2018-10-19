@@ -1,6 +1,7 @@
-{"count":2,"name":"CONVENTIONAL DRY","percent":6.67}
-{"count":3,"name":"AIR CONDITIONED","percent":10.0}
-{"count":4,"name":"COOLING HIGH THERMAL MASS WITH NIGHT COOLING","percent":13.33}
-{"count":30,"name":"SOLAR PROTECTION","percent":100.0}
-{"count":1,"name":"COOLING HIGH THERMAL MASS","percent":3.33}
-{"count":27,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":90.0}
+{"count":4,"name":"CONVENTIONAL DRY","percent":8.7}
+{"count":1,"name":"EVAPORATIVE COOLING","percent":2.17}
+{"count":3,"name":"AIR CONDITIONED","percent":6.52}
+{"count":5,"name":"COOLING HIGH THERMAL MASS WITH NIGHT COOLING","percent":10.87}
+{"count":46,"name":"SOLAR PROTECTION","percent":100.0}
+{"count":2,"name":"COOLING HIGH THERMAL MASS","percent":4.35}
+{"count":37,"name":"COOLING NATURAL AND MECHANICAL VENTILATION","percent":80.43}

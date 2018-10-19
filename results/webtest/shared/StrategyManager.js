@@ -253,6 +253,8 @@ function processPerformance(error, data){
 			}
 		}
 	}
+	var seletedPerformance = performanceData.find(p=>p.selected===true);
+	maxClusterId = seletedPerformance.NClusters;
 }
 function compare(a, b){
   	return a.NClusters - b.NClusters;
