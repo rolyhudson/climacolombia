@@ -226,6 +226,7 @@ public class GUIWorkflowBuilder {
 			wf.setName(forAction.getName()+" copy");
 			wf.setStatus("INITIALISED");
 			wf.generateNewGuid();
+			wf.getAnalysisParameters().setDashboardFolder("");
 			coordinator.addWorkflow(wf);
 			this.workflowtable.getSelectionModel().select(wf);
 			}

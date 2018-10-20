@@ -185,7 +185,7 @@ function parsePopData(tableData){
 	{
 	if(tableData[i]!="")popData.push(JSON.parse(tableData[i]))	
 	}
-	popData.sort(orderPopulation);
+	//popData.sort(orderPopulation);
 	var data=[];
 	for(var i=0;i<popData.length;i++){
 		if(popData[i].hasOwnProperty("count")){
@@ -249,7 +249,12 @@ function processPerformance(error, data){
 			if(i==0){
 				var div = document.getElementById("performanceOther");
 				div.appendChild(addTextToDiv("p","k optimised for wssse at: "+performanceData[result].NClusters+" clusters"));
-				div.appendChild(addTextToDiv("p","wssse cost = "+round(performanceData[result].costWSSSE,2)));
+				div.appendChild(addTextToDiv("p","wssse cost = "));
+				div.appendChild(addTextToDiv("h1",round(performanceData[result].costWSSSE,2)));
+				div.appendChild(addTextToDiv("p","silhouette coefficient = "));
+				div.appendChild(addTextToDiv("h1",round(performanceData[result].silhouette,2))),
+				div.appendChild(addTextToDiv("p","dunn index = "));
+				div.appendChild(addTextToDiv("h1",round(performanceData[result].dunn,2)));
 			}
 		}
 	}

@@ -68,7 +68,7 @@ getColorSpectral(t){
 
 var cScale = d3.scaleLinear()
  .domain([0,this.data.length])
- .range([0, 1]);
+ .range([1,0]);
 
   return d3.interpolateCool(cScale(t));
 }

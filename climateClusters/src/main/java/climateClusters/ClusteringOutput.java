@@ -1,6 +1,7 @@
 package climateClusters;
 
 import java.util.ArrayList;
+
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -18,6 +19,8 @@ import climateClusters.ClusterSummary;
 import climateClusters.ClusteringPerformance;
 import climateClusters.ClusterUtils;
 import climateClusters.ComfortIndices;
+import climateClusters.ThermalZones;
+import climateClusters.Record;
 public class ClusteringOutput {
 	SparkSession spk;
 	public ClusteringOutput(JavaRDD<Record> records,String output,SparkSession spark,List<ClusteringPerformance> performance,ThermalZones thermalzones,int numClusters,Vector[] clusterCenters ) {
@@ -55,7 +58,7 @@ public class ClusteringOutput {
     			result.setClusternum(av);
     			double[] ppoint = new double[] {comfortIndices[av][2],comfortIndices[av][3]};
     			result.setPsychrometricPoint(ppoint);
-    			result= ThermalZones.testZones(result);
+    			result.setInStrategies(ThermalZones.testZonesNames(ppoint));
     			//"{\"lat\":"+Double.toString(loc[0])+",\"lon\":"+Double.toString(loc[1])+",\"clusternum\":"+Integer.toString(av)+"}";
     			return result; 
     		});
@@ -86,7 +89,7 @@ public class ClusteringOutput {
         			result.setClusternum(av);
         			double[] ppoint = new double[] {comfortIndices[av][2],comfortIndices[av][3]};
         			result.setPsychrometricPoint(ppoint);
-        			result= ThermalZones.testZones(result);
+        			result.setInStrategies(ThermalZones.testZonesNames(ppoint));
         			return result; 
         		});
         		//write results to typical month 

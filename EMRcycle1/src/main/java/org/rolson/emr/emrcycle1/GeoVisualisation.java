@@ -21,6 +21,7 @@ public class GeoVisualisation {
 	private String dataBucket;
 	
 	public GeoVisualisation(Workflow wf)
+
 	{
 		this.dataBucket = "clustercolombia";
 		workflow= wf;
@@ -38,6 +39,7 @@ public class GeoVisualisation {
 	
 	
 	private void dumpResults(List<String> resultsObjects) {
+
 		PrintWriter writer;
 		try {
 			writer = new PrintWriter("C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\s3Found.txt", "UTF-8");
@@ -55,6 +57,7 @@ public class GeoVisualisation {
 		
 	}
 	private List<String> getTestList() throws IOException{
+
 		List<String> lines = new ArrayList<String>();
 		try(BufferedReader br = new BufferedReader(new FileReader("C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\testObjects.txt"))) {
 		    StringBuilder sb = new StringBuilder();
@@ -69,6 +72,7 @@ public class GeoVisualisation {
 		return lines;
 	}
 	private void transferResultObjects() {
+
 		String prefixOutput = "results"+workflow.getOutputFolder().substring(workflow.getOutputFolder().lastIndexOf('/'));
 		List<String> resultsObjects = datamanager.listBucketContentsPrefixedV2(prefixOutput);
 		//List<String> resultsObjects = new ArrayList<String>();
@@ -113,6 +117,7 @@ public class GeoVisualisation {
 		if(jsonToCombine.size()>1)combineJSON(jsonToCombine,outputfolder,prefixOutput);
 	}
 	private void combineJSON(List<String> jsonToCombine,String destinationkeypath,String keyprefix) {
+
 		StringBuilder sb = new StringBuilder();
 		String resultPath = jsonToCombine.get(0).substring(keyprefix.length(),jsonToCombine.get(0).lastIndexOf('/'));
 		for(String key : jsonToCombine) {

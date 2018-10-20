@@ -67,7 +67,7 @@ function LineGraph(divID,data,xtitle,ytitle,points){
           chart.append("circle")
           .attr("cx", function () { return xscale(data[points].x)+ margin.left; })//
           .attr("cy", function () { return yscale(data[points].y)+ margin.top; })
-          .attr("r", "2px")
+          .attr("r", "3px")
           .attr("fill", "red")
         }
       }

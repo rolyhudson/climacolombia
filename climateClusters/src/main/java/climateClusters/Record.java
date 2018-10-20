@@ -79,6 +79,9 @@ public class Record implements Serializable {
 	public List<String> getInStrategies() {
 		return this.inStrategies;
 	}
+	public void setInStrategies(List<String> s) {
+		this.inStrategies = s;
+	}
 	public void setReqVars(List<String> vars) {
 		this.reqVars = vars;
 	}
@@ -108,13 +111,13 @@ public class Record implements Serializable {
 		List<String> allFoundStrategies = getInStrategies();
 		String strats  ="[";
 		for(int i=0;i<allFoundStrategies.size();i++) {
-			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"]";
+			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"";
 			else strats  +="\""+allFoundStrategies.get(i)+"\",";
 		}
 		return "{\"clusternum\":"+getClusternum()+
 				",\"lat\":"+getLocation()[0]+
 				",\"lon\":"+getLocation()[1]+
-				",\"strategies\":"+strats+"}";
+				",\"strategies\":"+strats+"]}";
 	}
 	public String toJSONString() {
 		String[] allvarNames = {"temp","vp","rh","tmin","tmax","trange","precip","windSpd"};
@@ -134,7 +137,7 @@ public class Record implements Serializable {
 		}
 		String strats  ="[";
 		for(int i=0;i<allFoundStrategies.size();i++) {
-			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"]";
+			if(i==allFoundStrategies.size()-1)strats  +="\""+allFoundStrategies.get(i)+"\"";
 			else strats  +="\""+allFoundStrategies.get(i)+"\",";
 		}
 		return "{\"date\":\""+getDatetime()+"\""+
@@ -145,7 +148,7 @@ public class Record implements Serializable {
 				",\"vector\":"+vector+
 				",\"allParams\":" +allParams+
 				",\"strategies\":"+strats+
-				",\"utci\":"+getUtci()+
+				"],\"utci\":"+getUtci()+
 				",\"ideamci\":"+getIdeamci()+"}";
 	}
 }
