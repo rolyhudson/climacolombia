@@ -412,7 +412,7 @@ public class GUIWorkflowBuilder {
 				break;
 			case "Hardware configuration":
 				//master cb
-				this.masterInstanceCB = createCombo(new Cluster().instanceTypes,1);
+				this.masterInstanceCB = createCombo(new Cluster().instanceTypes,0);
 				masterInstanceCB.setOnAction((event) -> {
 					if(forAction!=null&&!this.newWorkflow)
 					{

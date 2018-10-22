@@ -26,11 +26,12 @@ import climateClusters.KMeansPerformance;
 import climateClusters.ClusteringOutput;
 import climateClusters.TimeLog;
 public class Clustering {
-
+	static List<climateClusters.TimeLog> timelog = new ArrayList<climateClusters.TimeLog>();
+	static DateTime start = DateTime.now();
 	public static void main(String[] args) {
-		DateTime start = DateTime.now();
-		//List<climateClusters.TimeLog> timelog = new ArrayList<climateClusters.TimeLog>();
-		//timelog.add(new climateClusters.TimeLog(start,"job started"));
+		start = DateTime.now();
+		//
+		logEvent("job started");
 //		// on EMR use
 		SparkSession spark = SparkSession
                 .builder()
@@ -50,11 +51,11 @@ public class Clustering {
 		FilterData filterData = new FilterData(clusterParams,spark,args[0]);
 		JavaRDD<Record> recorddata = filterData.getRecords();
 		ThermalZones thermalzones = new ThermalZones(spark,args[3]);
-		//timelog.add(new TimeLog(start,"params read, data filtered, thermal zones read"));
+		logEvent("params read, data filtered, thermal zones read");
 		String method = clusterParams.getClusteringMethod();
 		
 		KMeansPerformance kmPerf = new KMeansPerformance(spark,clusterParams.getNClusters(),filterData.getRecords(),method);
-		//timelog.add(new TimeLog(start,"perfomance processed"));
+		logEvent("perfomance processed");
 		SimpleKMeans simpleKM;
 		BiKMeans BiKM;
 		JavaRDD<Record> records;
@@ -72,11 +73,11 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			kmodel = simpleKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyKmeans(f,kmodel))
-		    		.map(r->ThermalZones.testZones(r))
+		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
-		    //timelog.add(new TimeLog(start,"data classified"));
+		    logEvent("data classified");
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
-		    //timelog.add(new TimeLog(start,"output written"));
+		    logEvent("output written");
 			break;
 		case "BISECTING_K_MEANS":
 			BiKM = new BiKMeans( numClusters,data);
@@ -84,11 +85,11 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			bkmodel = BiKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyBKmeans(f,bkmodel))
-		    		.map(r->ThermalZones.testZones(r))
+		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
-		    //timelog.add(new TimeLog(start,"data classified"));
+		    logEvent("data classified");
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
-		    //timelog.add(new TimeLog(start,"output written"));
+		    logEvent("output written");
 			break;
 		case "BISECTING_K_MEANS_AND_K_MEANS":
 			BiKM = new BiKMeans( numClusters,data);
@@ -97,21 +98,24 @@ public class Clustering {
 			//sorted by year and with cluster id and associated strategies
 			kmodel = simpleKM.getModel();
 		    records = recorddata.map(f->ClusterUtils.classifyKmeans(f,kmodel))
-		    		.map(r->ThermalZones.testZones(r))
+		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
-		    //timelog.add(new TimeLog(start,"data classified"));
+		    logEvent("data classified");
 		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
-		    //timelog.add(new TimeLog(start,"output written"));
+		    logEvent("output written");
 			break;
 		}
 		
-//		timelog.add(new TimeLog(start,"job finished"));
+		logEvent("job finished");
 //		////generate the top level reports
-//	    Dataset<Row> timelogfile = spark.createDataFrame(timelog, TimeLog.class);
-//	    timelogfile.toDF().write().mode(SaveMode.Overwrite).json(args[1]+"/stats/timeline");
+	    Dataset<Row> timelogfile = spark.createDataFrame(timelog, TimeLog.class);
+	    timelogfile.toDF().write().mode(SaveMode.Overwrite).json(args[1]+"/stats/timeline");
 		spark.stop();
 		
 	}
-	
+	private static void logEvent(String description) {
+	TimeLog tl = new TimeLog(start, description);
+	timelog.add(tl);
+	}
 }
 

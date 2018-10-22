@@ -309,7 +309,7 @@ public class GUILayout {
         tab.setText(name);
         List<String> cols = Arrays.asList("name", "status" , "awsID");
 		VBox resource = addTabWithTableView(this.resourcetable,cols,"Resources");
-		cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType");
+		cols = Arrays.asList("name", "status" ,"creationDate", "awsID","appType","Guid");
 		VBox workflow =addTabWithTableView(this.workflowtable,cols,"Workflows");
 		VBox monitor = new VBox();
 		monitor.getChildren().addAll(resource,workflow);

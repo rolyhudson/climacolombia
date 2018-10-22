@@ -29,7 +29,7 @@ public class ClusteringOutput {
     	performanceDs.write().mode(SaveMode.Overwrite).json(output+"/stats/performanceDF");
 	    
 	    double[][] comfortIndices = ComfortIndices.getComfortIndicesClusters(records,numClusters);
-	    ClusterSummary.reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices,clusterCenters,spark);
+	    ClusterSummary.reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones);
 	    //typical year 
 	    
     		JavaPairRDD<Vector, Iterable<Integer>> yearRecords = records
@@ -58,8 +58,8 @@ public class ClusteringOutput {
     			result.setClusternum(av);
     			double[] ppoint = new double[] {comfortIndices[av][2],comfortIndices[av][3]};
     			result.setPsychrometricPoint(ppoint);
-    			result.setInStrategies(ThermalZones.testZonesNames(ppoint));
-    			//"{\"lat\":"+Double.toString(loc[0])+",\"lon\":"+Double.toString(loc[1])+",\"clusternum\":"+Integer.toString(av)+"}";
+    			result.setInStrategies(thermalzones.testZonesNames(ppoint));
+    			
     			return result; 
     		});
     		//write results to typical year 
@@ -83,15 +83,16 @@ public class ClusteringOutput {
         			    count++;
         			}
         			int av = (int) Math.round(sum/count);
-        			//String result = "{\"lat\":"+Double.toString(loc[0])+",\"lon\":"+Double.toString(loc[1])+",\"clusternum\":"+Integer.toString(av)+"}";
+        			
         			Record result = new Record();
         			result.setLocation(loc);
         			result.setClusternum(av);
         			double[] ppoint = new double[] {comfortIndices[av][2],comfortIndices[av][3]};
         			result.setPsychrometricPoint(ppoint);
-        			result.setInStrategies(ThermalZones.testZonesNames(ppoint));
+        			result.setInStrategies(thermalzones.testZonesNames(ppoint));
         			return result; 
         		});
+        		
         		//write results to typical month 
         		typicalmonth.map(f->f.toJSONStringSimple()).saveAsTextFile(output+"/stats/typicalYear/"+m);
     		}
@@ -112,7 +113,7 @@ public class ClusteringOutput {
 	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toJSONString());
 	    		ymrecords.saveAsTextFile(path);
 	    		//could add indices per cluster per time step
-	    		ClusterSummary.reportClusterSummary(temporalRecords,path+"/stats/clusterStats",comfortIndices,clusterCenters,spark);
+	    		ClusterSummary.reportClusterSummary(temporalRecords,path+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones);
 	    		thermalzones.reportMultiInclusion(temporalRecords,spark,path+"/stats/strategyStats");
 	    		for(int c=0;c<=numClusters;c++) {
 	    			final int cnum =c;

@@ -82,7 +82,9 @@ class ScaleBar{
     if(owner==="TYclusterMap"){
     popAllDonut.highlight(d.value,popAllDonut.id);
     }
-    
+    if(owner==="clusterMonthlyMap"){
+    popMonthlyDonut.highlight(d.value,popMonthlyDonut.id);
+    }
     for(var b=0;b<mapBlocks.length;b++){
       var bnum = map.scalebar.findBlockInScale(mapBlocks[b].id)
       if(Number(bnum)===d.sblock){
@@ -100,6 +102,9 @@ class ScaleBar{
     }
     if(ownerMap==="TYclusterMap"){
     popAllDonut.unhighlight(d.value,popAllDonut.id);
+    }
+    if(ownerMap==="clusterMonthlyMap"){
+    popMonthlyDonut.unhighlight(d.value,popMonthlyDonut.id);
     }
     d3.select(this).style("fill",function (d) {return  map.colorFn(d.value);} )
 
@@ -120,8 +125,8 @@ class ScaleBar{
   }
   findBlockInScale(v){
     var blockNum=0;
-    for(var i=0;i<this.scaleLbl.length-1;i++){
-      if(v>=this.scaleLbl[i]&&v<this.scaleLbl[i+1]){
+    for(var i=0;i<this.scaleLbl.length;i++){
+      if(v>=this.scaleLbl[i]){
         blockNum=i;
       }
     }

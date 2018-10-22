@@ -29,12 +29,12 @@ public class GeoVisualisation {
 		
 		datamanager = new DataManager();
 		outputfolder = wf.getAnalysisParameters().getDashboardFolder();
-
-		transferResultObjects();
 		//move the index file
 		datamanager.copyMove(this.dataBucket, "lacunae.io", "data/geovistemplates/index.html", outputfolder+"/index.html");
 		//move and rename the workflowfile
 		this.datamanager.uploadStringToFile(outputfolder+"/parameters.txt", workflow.seraliseWorkflow(),"lacunae.io","plain/text");
+		transferResultObjects();
+		
 	}
 	
 	

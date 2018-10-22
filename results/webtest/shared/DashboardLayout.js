@@ -4,10 +4,12 @@ var performanceChart;
 var popAllDonut;
 var popTSDonut;
 var popClusterDonut;
-var pc1,pc2,pc3,pc4;
+var popMonthlyDonut;
+var pc1,pc2,pc3,pc4,pc5,pc6;
 var allclustersstats=[];
 var singleTimeStepMap;
 var allTimeStepMap;
+var monthlyTypicalMap;
 function makePage(params){
 	mainimgHeight = window.innerHeight/4;
 	setuplayout();
@@ -21,6 +23,7 @@ function allTimeStepAllClusterInfo(){
 	readData("stats/typicalYear/clusters.json",readTypicalYear);
 	readData("stats/clusterStats/clusters.json",processAllTimeAllClusterPop);
 	readData("stats/strategyStats/clusters.json",processAllTimeAllClusterStrategies);
+	readData("../shared/ColombianCities.csv",readCities);
 }
 function addPCharts(){
 	
@@ -28,6 +31,8 @@ function addPCharts(){
 	pc2 = new Pchart("alltimestepssingleclusterpchart",strategiesDisplay,"pc2",pc1.w,pc1.h);
 	pc3 = new Pchart("singletimestepallclusterspchart",strategiesDisplay,"pc3",pc1.w,pc1.h);
 	pc4 = new Pchart("singletimestepsingleclusterpchart",strategiesDisplay,"pc4",pc1.w,pc1.h);
+	pc5 = new Pchart("monthlytypicalallclusterspchart",strategiesDisplay,"pc5",pc1.w,pc1.h);
+	pc6 = new Pchart("monthlytypicalsingleclusterpchart",strategiesDisplay,"pc6",pc1.w,pc1.h);
 	//getFoundStrategies();
 	allTimeStepAllClusterInfo();
 	
@@ -184,15 +189,16 @@ function onelineLink(name, href)
 function setupClusterBrowser(){
 	var clusterbrowser = document.getElementById("clusterbrowser");
 	clusterbrowser.append(addTextToDiv("h1","cluster explorer"));
+	var timeTabs = ["alltimesteps","singletimestep","monthlytypical"];
 	var rowexplorer1 = makeSection();
 	//addtab panel
-	var tabb = tabButtonsDiv(["all time steps","single time step"],clickTimeStepTab,["alltimesteps","singletimestep"],"timeTabContent");
+	var tabb = tabButtonsDiv(["all time steps","single time step","monthly typical"],clickTimeStepTab,timeTabs,"timeTabContent");
 	rowexplorer1.appendChild(tabb);
-	addContentTab(["alltimesteps","singletimestep"],rowexplorer1 ,"timeTabContent");
+	addContentTab(timeTabs,rowexplorer1 ,"timeTabContent");
 	
 	clusterbrowser.appendChild(rowexplorer1);
 	//add contents to tabs
-	insertTimeTabContents(["alltimesteps","singletimestep"],0.5);
+	insertTimeTabContents(timeTabs,0.5);
 	//select start tabs
 	//set selected time tab
 	var selected = document.getElementsByClassName("timeTabContent tablinks");

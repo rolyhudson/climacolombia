@@ -32,12 +32,16 @@ public class Cluster {
 	private Collection<Application> applications;
 	private List<Workflow> workflows;
 	private DateTime creationDate;
-	public List<String>instanceTypes=Arrays.asList("m1.small","m1.medium","m1.large","m1.xlarge","m3.xlarge","m3.2xlarge",
-			"c1.medium","c1.xlarge","c3.xlarge","c3.2xlarge","c3.4xlarge","c3.8xlarge","cc1.4xlarge","cc2.8xlarge","c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge",
-			"m2.xlarge","m2.2xlarge","m2.4xlarge","r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge","cr1.8xlarge","m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge",
-			"m4.16large","r4.large","r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge",
-			"h1.4xlarge","hs1.2xlarge","hs1.4xlarge","hs1.8xlarge","i2.xlarge","i2.2xlarge","i2.4large","i2.8xlarge","d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge",
-			"g2.2xlarge","cg1.4xlarge");
+	public List<String>instanceTypes=Arrays.asList("m4.large","m4.xlarge","m4.2xlarge","m4.4xlarge","m4.10xlarge","m4.16xlarge",
+			"m5.xlarge","m5.2xlarge","m5.4xlarge","m5.12xlarge","m5.24xlarge","m5d.xlarge","m5d.2xlarge","m5d.4xlarge","m5d.12xlarge","m5d.24xlarge",
+			"c4.large","c4.xlarge","c4.2xlarge","c4.4xlarge","c4.8xlarge",
+			"c5.xlarge","c5.2xlarge","c5.4xlarge","c5.9xlarge","c5.18xlarge","c5d.xlarge","c5d.2xlarge","c5d.4xlarge","c5d.9xlarge","c5d.18xlarge",
+			"r3.xlarge","r3.2xlarge","r3.4xlarge","r3.8xlarge",
+			"r4.xlarge","r4.2xlarge","r4.4xlarge","r4.8xlarge","r4.16xlarge",
+			"r5.xlarge","r5.2xlarge","r5.4xlarge","r5.12xlarge","r5d.xlarge","r5d.2xlarge","r5d.4xlarge","r5d.12xlarge","r5d.24xlarge",
+			"i3.xlarge","i3.2xlarge","i3.4xlarge","i3.8xlarge","i3.16xlarge",
+			"d2.xlarge","d2.2xlarge","d2.4xlarge","d2.8xlarge",
+			"p2.xlarge","p2.8xlarge","p2.16xlarge","p3.2xlarge","p3.8xlarge","p3.16xlarge");
 	public Cluster() {
 		workflows = new ArrayList<Workflow>();
 		applications = new ArrayList<Application>();

@@ -193,7 +193,8 @@ public class ClusterUtils implements Serializable {
 		Vector allVar = Vectors.dense(v.stream().mapToDouble(Double::doubleValue).toArray());
 		r.setVectorAllVar(allVar);
 		r.setPsychrometricPoint(psychrometricPoint);
-		
+//		List<String> sTest = Arrays.asList("HEATING INTERNAL GAINS", "CONVENTIONAL HEATING", "SOLAR PROTECTION");
+//		r.setInStrategies(sTest);
 		return r;
 	}
 	public static boolean inDateRange(String line,DateTime startdate,DateTime enddate)

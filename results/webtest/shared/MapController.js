@@ -10,11 +10,13 @@ var month =7;
 var cluster =0
 var clusterData=[];
 var typicalYearClusterData=[];
+var clusterMonthlyData=[];
 var minClusterId=0;
 var maxClusterId;
 var contextMapData;
 var countryMap;
 var mapNames=[];
+var cityData=[];
 function runExplorerMapTool(){
 
 	stYr =analysisParams["startDate"].year;
@@ -41,16 +43,23 @@ function createMap(error, context, country){
   allTimeStepMap = new MapGrid("alltimestepsmapDiv",0,0,context,country,"TYclusterMap","clusternum","c_id",getColorSpectral);
   allTimeStepMap.makeScaleBarCluster();
   allTimeStepMap.mapUpdate(typicalYearClusterData);
-  
+  allTimeStepMap.showCities(cityData);
   mapNames.push({"name":"TYclusterMap","mapObject":allTimeStepMap});
+
   singleTimeStepMap = new MapGrid("singletimestepmapDiv",allTimeStepMap.mapW,allTimeStepMap.mapH,context,country,"clusterMap","clusternum","c_id",getColorSpectral);
   singleTimeStepMap.makeScaleBarCluster();
-  mapNames.push({"name":"clusterMap","mapObject":allTimeStepMap});
+  mapNames.push({"name":"clusterMap","mapObject":singleTimeStepMap});
+
+  monthlyTypicalMap = new MapGrid("monthlytypicalmapDiv",allTimeStepMap.mapW,allTimeStepMap.mapH,context,country,"clusterMonthlyMap","clusternum","c_id",getColorSpectral);
+  monthlyTypicalMap.makeScaleBarCluster();
+
+  mapNames.push({"name":"clusterMonthlyMap","mapObject":monthlyTypicalMap });
   runThermalComparison();
   explorerUpdate();
 }
 function explorerUpdate(){
-	getData(year+"/"+month+"/clusters.json"); 
+	getData(year+"/"+month+"/clusters.json",processCluster); 
+  getData("stats/typicalYear/"+month+"/clusters.json",processClusterMonthly);
   readData(year+"/"+month+"/stats/clusterStats/clusters.json",processSingleTimeStepAllClusterPop);
   readData(year+"/"+month+"/stats/strategyStats/clusters.json",processTimeStepAllClusterStrategies);
   withinClusterUpdate();
@@ -85,6 +94,8 @@ function setUpControl(){
 
     addRangeSlider("singletimestepsingleclustercontrol","year","yearSelector",yearChange,stYr,endYr,1,stYr+1,"slider","h3","");
     addRangeSlider("singletimestepsingleclustercontrol","month","monthSelector",monthChange,stMonth,endMonth,1,month,"slider","h3","");
+
+    addRangeSlider("monthlytypicalallclusterscontrol","month","monthSelector",monthChange,stMonth,endMonth,1,month,"slider","h3","");
     document.getElementById("singletimestepsingleclustercontrol").appendChild(makeTextID("singletimestepsingleclusterPop","cluster population: ","h3"));
  	
 }
@@ -123,31 +134,30 @@ function monthChange(){
 	explorerUpdate();
   
 }
-function getData(file)
+function readCities(error,data){
+  cityData = d3.csvParseRows(data);
+  }
+function getData(file,func)
 {
 	loading();
 	d3.queue()
     .defer(d3.text, file)
-    .await(process);
+    .await(func);
 }
-function process(error, data)
+function processCluster(error, data)
 {
 	if (error) throw error;
 	loaded();
   	//console.log(data);
   	tableData = data.split(/\r?\n/);
   	clusterData=[];
-  	var lat=0;
-  	var lon=0;
-  	var clusterid=0;
-  	var vector =[];
-  	var alt=0;
     
   	for(var i=0;i<tableData.length;i++){
   		if(tableData[i]!="")clusterData.push(JSON.parse(tableData[i]));
 
   	}
   	singleTimeStepMap.mapUpdate(clusterData);
+    singleTimeStepMap.showCities(cityData)
     withinClusterUpdate();
     //get the thermal data
     thermalComparison();
@@ -155,6 +165,58 @@ function process(error, data)
     utciMaps.updateMaps(thermalData);
     ideamciMaps.updateMaps(thermalData);
 }
+function processClusterMonthly(error, data)
+{
+  if (error) throw error;
+
+    //console.log(data);
+    tableData = data.split(/\r?\n/);
+    clusterMonthlyData=[];
+    var foundstrat = [];
+    var strategyData=[];
+    var clusterSummary=[];
+    var points=0;
+      for(var i=0;i<tableData.length;i++){
+        if(tableData[i]!=""){
+          points++;
+          
+          clusterMonthlyData.push(JSON.parse(tableData[i]));
+          c = clusterSummary.find(cs=>cs.x===clusterMonthlyData[i].clusternum);
+            if(c=== undefined){
+              clusterSummary.push({"x":clusterMonthlyData[i].clusternum,"y":1,"percent":0});
+            }
+            else{
+             c.y++;
+            }
+
+          for(var j=0;j<clusterMonthlyData[i].strategies.length;j++){
+            foundstrat.push(clusterMonthlyData[i].strategies[j]);
+          }
+        }
+      
+      }
+      monthlyTypicalMap.mapUpdate(clusterMonthlyData);
+      monthlyTypicalMap.showCities(cityData);
+    var s;
+    //summarise occurances
+    for(var i=0;i<foundstrat.length;i++){
+      s = strategyData.find(sd=>sd.name===foundstrat[i]);
+      if(s=== undefined){
+        strategyData.push({"name":foundstrat[i],"count":1,"percent":0});
+      }
+      else{
+        s.count++;
+      }
+        
+    }
+    //calc percentages
+    for(var i=0;i<strategyData.length;i++){
+      strategyData[i].percent = Math.round(strategyData[i].count/points*1000)/10;
+    }
+    pc5.addFoundStrategies(strategyData,"pc5");
+    popMonthlyDonut = new Donutchart("monthlytypicalallclusterscontrol",clusterSummary,"populationMonthlydonut",["all clusters"],popAllDonut.w,popAllDonut.h);
+}
+
 function loading(){
 	document.getElementById("loading").innerHTML="loading data...";
 }

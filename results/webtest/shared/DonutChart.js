@@ -108,6 +108,7 @@ handleMouseOver(d,i){
     var id = d.data.id;
     var map = allTimeStepMap;
     if(id.includes("TS")) map =singleTimeStepMap;
+    if(id.includes("Monthly")) map =monthlyTypicalMap;
     var arcs = document.getElementsByClassName("arc"+id);
     var textA = document.getElementsByClassName("graphLabelA donut"+id);
     var textB = document.getElementsByClassName("graphLabelB donut"+id);
@@ -140,6 +141,7 @@ handleMouseOut(d,i){
     var id = d.data.id;
     var map = allTimeStepMap;
     if(id.includes("TS")) map =singleTimeStepMap;
+    if(id.includes("Monthly")) map =monthlyTypicalMap;
     var arcs = document.getElementsByClassName("arc"+id);
     var textA = document.getElementsByClassName("graphLabelA donut"+id);
     var textB = document.getElementsByClassName("graphLabelB donut"+id);

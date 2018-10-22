@@ -44,13 +44,21 @@ class MapGrid{
 	setUpMap(divid){
 
 		d3.selectAll(".mapspace ."+this.mapname).remove();
+		var map = this.svgMap;
 		this.svgMap = d3.select("#"+divid)
 		.append("svg")
 		.attr("class","mapspace "+this.mapname)
 		.attr("width", this.mapW)
 		.attr("height", this.mapH)
-		.call(d3.zoom().on("zoom", function () {
-		svgMap.attr("transform", d3.event.transform)
+		.call(d3.zoom().on("zoom", function (d) {
+			//var ownerMap = d3.event.sourceEvent.currentTarget.classList[1];
+		//var map= mapNames.find(m=>m.name===ownerMap).mapObject;
+		//zoom and pan all maps
+		for(var i=0;i<mapNames.length;i++){
+			var map= mapNames[i].mapObject;
+			map.svgMap.attr("transform", d3.event.transform)
+		}
+		
 		}))
 		.append("g");
 	}
@@ -128,7 +136,6 @@ class MapGrid{
 	handleMouseOverMap(d, i) {  // Add interactivity
 		// Use D3 to select element, change color and size
 		var ownerMap = this.classList[1];
-		var mapIndex;
 		var map= mapNames.find(m=>m.name===ownerMap).mapObject;
 		d3.select(this).style("fill", "red");
 		if(ownerMap==="clusterMap"){
@@ -142,7 +149,6 @@ class MapGrid{
 	handleMouseOutMap(d, i) {
 		// Use D3 to select element, change color back to normal
 		var ownerMap = this.classList[1];
-		var mapIndex;
 		var map= mapNames.find(m=>m.name===ownerMap).mapObject;
 		d3.selectAll(".mOver").remove();
 		if(ownerMap==="clusterMap"){
@@ -156,4 +162,52 @@ class MapGrid{
 		d3.select(this).style("fill",function (d) {return  map.colorFn(d[prop]);} )
 		map.scalebar.resethighlightBlock(d[prop]);
 		}
+	showCities(cityData){
+		var cityLocations =[];
+		for(var i=0;i<cityData.length;i++)
+		{
+			cityLocations.push({"city":cityData[i][0],"lat":cityData[i][1],"lon":cityData[i][2]});
+		}
+		var proj = this.projection;
+		
+		// remove previous
+
+		var t =document.getElementsByClassName("citys "+this.mapname);
+		if(t.length>0){
+			var parent = t[0].parentNode;
+			while(t.length>0){
+				parent.removeChild(t[0]);
+				
+			}
+		}
+		var c =document.getElementsByClassName("cityPt "+this.mapname);
+		if(c.length>0){
+			var parent = c[0].parentNode;
+			while(c.length>0){
+				parent.removeChild(c[0]);
+				
+			}
+		}
+			this.svgMap.selectAll(".citys")
+			.data(cityLocations,function(d){return d;})
+			.enter()
+			.append("text")
+			.attr("class", "citys "+this.mapname)
+			.attr("x", function (d) { return proj([d.lon,d.lat])[0];})
+			.attr("y", function (d) { return proj([d.lon,d.lat])[1];})
+			.attr("font-size", 9+"px")  
+			.text(function (d) { return d.city;});
+		
+			this.svgMap.selectAll("circle")
+			.data(cityLocations,function(d){return d;})
+			.enter()
+			.append("circle")
+			.attr("class", "cityPt "+this.mapname)
+			.attr("cx", function (d) { return proj([d.lon,d.lat])[0]; })
+			.attr("cy", function (d) { return proj([d.lon,d.lat])[1]; })
+			.attr("r", "3px")
+			.attr("fill", "red");
+	}
+
+
 }

@@ -19,7 +19,7 @@ import climateClusters.DesignStrategy;
 import climateClusters.ClusterUtils;
 import  climateClusters.StrategySummary;
 public class ThermalZones implements Serializable{
-	private static List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
+	private List<DesignStrategy> strategies = new ArrayList<DesignStrategy>();
 	public ThermalZones(SparkSession spark,String zonefile) {
 		List<String> strategiesString = spark.read().textFile(zonefile).collectAsList();
 		for(String s : strategiesString){
@@ -43,7 +43,7 @@ public class ThermalZones implements Serializable{
 			strategies.add(ds);
 		}
 	}
-	public static Record testZones(Record r) {
+	public Record testZones(Record r) {
 		for(DesignStrategy ds : strategies) {
 			if(ClusterUtils.isPointInPolygon(r.getPsychrometricPoint(), ds.getPoints()))
 			{
@@ -53,7 +53,7 @@ public class ThermalZones implements Serializable{
 		}
 		return r;
 	}
-	public static List<DesignStrategy> testZones(double[] ppoint) {
+	public List<DesignStrategy> testZones(double[] ppoint) {
 		List<DesignStrategy> applicable = new ArrayList<DesignStrategy>();
 		for(DesignStrategy ds : strategies) {
 			if(ClusterUtils.isPointInPolygon(ppoint, ds.getPoints()))
@@ -64,7 +64,7 @@ public class ThermalZones implements Serializable{
 		}
 		return applicable;
 	}
-	public static List<String> testZonesNames(double[] ppoint) {
+	public List<String> testZonesNames(double[] ppoint) {
 		List<String> applicable = new ArrayList<String>();
 		for(DesignStrategy ds : strategies) {
 			if(ClusterUtils.isPointInPolygon(ppoint, ds.getPoints()))

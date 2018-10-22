@@ -97,7 +97,7 @@ function processAllTimeSingleClusterStrategies(cnum){
 	}
 	//calc percentages
 	for(var i=0;i<strategyData.length;i++){
-		strategyData[i].percent = strategyData[i].count/points*100;
+		strategyData[i].percent = Math.round(strategyData[i].count/points*1000)/10;
 	}
 	pc2.addFoundStrategies(strategyData,"pc2");
 }
@@ -299,6 +299,10 @@ function handleMouseOverStrategy(d,i) {
 			map = allTimeStepMap;
 			cData = typicalYearClusterData; 
 		}
+		if(pc==="pc5"||pc==="pc6") {
+			map = monthlyTypicalMap;
+			cData = clusterMonthlyData; 
+		}
 		var pNodeId = event.target.parentNode.id;
 		if(pNodeId.includes("singlecluster")){
 			blocks = highlightPointsByCluster(name.replace(/_/g,' '),cluster,cData);
@@ -337,6 +341,10 @@ function handleMouseOverStrategy(d,i) {
 		if(pc==="pc1"||pc==="pc2") {
 			map = allTimeStepMap;
 			cData = typicalYearClusterData; 
+		}
+		if(pc==="pc5"||pc==="pc6") {
+			map = monthlyTypicalMap;
+			cData = clusterMonthlyData; 
 		}
 		var blocks = highlightPoints(name.replace(/_/g,' '),cData);
 		var mapBlocks = document.getElementsByClassName("mapBlocks "+map.mapname);

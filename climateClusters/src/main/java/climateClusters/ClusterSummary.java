@@ -71,7 +71,7 @@ public class ClusterSummary implements Serializable{
 	public List<String> getStrategies() {
 		return strategies;
 	}
-	public static void reportClusterSummary(JavaRDD<Record> records,String output,double[][] comfort,Vector[] clusterCenters,SparkSession spark) {
+	public static void reportClusterSummary(JavaRDD<Record> records,String output,double[][] comfort,Vector[] clusterCenters,SparkSession spark,ThermalZones tzs) {
 		List<ClusterSummary> summary = new ArrayList<ClusterSummary>();
 	    Map<Integer,Long> clusterStats = records.map(f->f.getClusternum()).countByValue();
 	    
@@ -84,7 +84,7 @@ public class ClusterSummary implements Serializable{
 	    	cs.setClusterIdeamCI(comfort[i][1]);
 	    	cs.setClusterTemp(comfort[i][2]);
 	    	cs.setClusterRh(comfort[i][3]);
-	    	cs.setStrategies(ThermalZones.testZones(new double[] {comfort[i][2],comfort[i][3]}));
+	    	cs.setStrategies(tzs.testZones(new double[] {comfort[i][2],comfort[i][3]}));
 	    	summary.add(cs);
 	    }
 	    Dataset<Row> clusteringDs = spark.createDataFrame(summary, ClusterSummary.class);
