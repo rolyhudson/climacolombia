@@ -33,18 +33,18 @@ public class Clustering {
 		//
 		logEvent("job started");
 //		// on EMR use
-		SparkSession spark = SparkSession
-                .builder()
-                .appName("SparkJob")
-                .getOrCreate();
-		
+//		SparkSession spark = SparkSession
+//                .builder()
+//                .appName("SparkJob")
+//                .getOrCreate();
+//		
 //		local debug
 //		
-//		SparkSession spark = SparkSession.builder()
-//				  .master("local[4]")
-//				  .appName("SparkJob")
-//				  .getOrCreate();
-//		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
+		SparkSession spark = SparkSession.builder()
+				  .master("local[4]")
+				  .appName("SparkJob")
+				  .getOrCreate();
+		args[1] = args[1]+"/" +DateTime.now().getMillisOfDay();
 //		//end local debug
 		
 		ClusterParams clusterParams = new ClusterParams(args[2],spark);

@@ -30,9 +30,9 @@ public class KMeansPerformance {
 	this.nclusters = numClusters;	
 	dataPoints = recorddata.map(f->f.getVectorNorm());
 	dataPoints.cache();
-	if(method.equals("BISECTING_K_MEANS_AND_K_MEANS"))this.method = "BISECTING_K_MEANS";
-	else this.method=method;
-	
+//	if(method.equals("BISECTING_K_MEANS_AND_K_MEANS"))this.method = "BISECTING_K_MEANS";
+//	else this.method=method;
+	this.method=method;
 	runPerformance();
 	storePerformance();
 	}

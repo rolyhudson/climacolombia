@@ -141,6 +141,14 @@ public class ClusterIndices {
 				bKclusters = bkm.run(records.rdd());
 				costs[i-minClusters]=bKclusters.computeCost(records.rdd());
 			}
+		case "BISECTING_K_MEANS_AND_K_MEANS":
+			for(int i =minClusters;i<maxClusters;i++) {
+				BisectingKMeans bkm = new BisectingKMeans().setK(i);
+				bKclusters = bkm.run(records.rdd());
+				//use bkm centroids for km model
+				clusters = new KMeansModel(bKclusters.clusterCenters());
+				costs[i-minClusters]=clusters.computeCost(records.rdd());
+			}
 			break;
 		default:
 			costs= new double [1];
