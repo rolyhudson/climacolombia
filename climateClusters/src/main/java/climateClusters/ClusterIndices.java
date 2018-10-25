@@ -59,6 +59,9 @@ public class ClusterIndices {
 			case "BISECTING_K_MEANS":
 				silhouette = BDSilhouetteBKM(jsc,records,minClusters,maxClusters);
 				break;
+			case "BISECTING_K_MEANS_AND_K_MEANS":
+				silhouette = BDSilhouetteBKMKM(jsc,records,minClusters,maxClusters);
+				break;
 			default:
 				silhouette = new double [1];
 					
@@ -121,6 +124,36 @@ public class ClusterIndices {
 		}
 		return silhouette;
 	}
+	private static double[] BDSilhouetteBKMKM(JavaSparkContext jsc,JavaRDD<Vector> records,int minClusters,int maxClusters) {
+		long totalData = records.count();
+		BisectingKMeansModel clusters;
+		BisectingKMeansModel clusterCentroids;
+		KMeansModel kmclusters;
+		double intraMean=0;
+		double interMean=0;
+		double max=0;
+		double[] silhouette=new double[maxClusters-minClusters];
+		JavaRDD<Vector> centroides;
+		for(int i =minClusters;i<maxClusters;i++) {
+			BisectingKMeans bkm = new BisectingKMeans().setK(i);
+			clusters = bkm.run(records.rdd());	
+			//use bkm centroids for km model
+			kmclusters = new KMeansModel(clusters.clusterCenters());
+			intraMean = kmclusters.computeCost(records.rdd())/totalData;
+			centroides = jsc.parallelize(Arrays.asList(kmclusters.clusterCenters()));
+			bkm = new BisectingKMeans().setK(1);
+			clusterCentroids = bkm.run(centroides.rdd());	
+			interMean = clusterCentroids.computeCost(centroides.rdd())/i;
+			if(interMean>=intraMean) {
+				max = interMean;
+			}
+			else {
+				max = intraMean;
+			}
+			silhouette[i-minClusters] = (interMean - intraMean)/max;
+		}
+		return silhouette;
+	}
 	public static double[] costs(JavaRDD<Vector> records,int minClusters,int maxClusters,int numIterations,SparkSession spark,String method) {
 		JavaSparkContext jsc = new JavaSparkContext(spark.sparkContext());
 		long totalData = records.count();
@@ -167,6 +200,9 @@ public class ClusterIndices {
 			case "BISECTING_K_MEANS":
 				dunn = BDdunnBKM(jsc,records,minClusters,maxClusters);
 				break;
+			case "BISECTING_K_MEANS_AND_K_MEANS":
+				dunn = BDdunnBKMKM(jsc,records,minClusters,maxClusters);
+				break;
 			default:
 				dunn = new double [1];
 			break;
@@ -177,8 +213,7 @@ public class ClusterIndices {
 	private static double[] BDdunnKM(JavaSparkContext jsc,JavaRDD<Vector> records,int minClusters,int maxClusters,int numIterations) {
 		KMeansModel clusters;
 		KMeansModel clusterCentroids;
-		double intraMean=0;
-		double interMean=0;
+
 		double max;
 		double min;
 		double[] dunn=new double[maxClusters-minClusters];
@@ -200,8 +235,7 @@ public class ClusterIndices {
 	private static double[] BDdunnBKM(JavaSparkContext jsc,JavaRDD<Vector> records,int minClusters,int maxClusters) {
 		BisectingKMeansModel clusters;
 		BisectingKMeansModel clusterCentroids;
-		double intraMean=0;
-		double interMean=0;
+
 		double max;
 		double min;
 		double[] dunn=new double[maxClusters-minClusters];
@@ -221,7 +255,31 @@ public class ClusterIndices {
 		
 		return dunn;
 	}
-	
+	private static double[] BDdunnBKMKM(JavaSparkContext jsc,JavaRDD<Vector> records,int minClusters,int maxClusters) {
+		BisectingKMeansModel clusters;
+		BisectingKMeansModel clusterCentroids;
+		 
+		double max;
+		double min;
+		double[] dunn=new double[maxClusters-minClusters];
+		JavaRDD<Vector> centroides;
+		for(int i =minClusters;i<maxClusters;i++) {
+			BisectingKMeans bkm = new BisectingKMeans().setK(i);
+			clusters = bkm.run(records.rdd());
+			//use bkm centroids for km model
+			final KMeansModel kmclusters = new KMeansModel(clusters.clusterCenters());
+			
+			max = records.map(f->Vectors.sqdist(f, kmclusters.clusterCenters()[kmclusters.predict(f)])).max(new MaxComparator());
+			centroides = jsc.parallelize(Arrays.asList(kmclusters.clusterCenters()));
+			bkm = new BisectingKMeans().setK(1);
+			clusterCentroids = bkm.run(centroides.rdd());//
+			final BisectingKMeansModel cent = clusterCentroids;
+			min = records.map(f->Vectors.sqdist(f, cent.clusterCenters()[0])).min(new MinComparator());
+			dunn[i-minClusters] = min/max;
+		}
+		
+		return dunn;
+	}
 	  public static class MaxComparator implements Serializable, Comparator<Double> {
 		  @Override
 		  public int compare(Double a, Double b) {

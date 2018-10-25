@@ -57,7 +57,7 @@ fill: none;
 .label{
 font-size: smaller;
 }
-#overview, #clusterbrowser,#comfortcomparison{
+#overview, #clusterbrowser,#comfortcomparison,#clustersummary{
 	border: 1px solid grey;
 	margin: 10;
 }

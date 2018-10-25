@@ -26,11 +26,13 @@ public class ClusterParams {
 	private String clusteringMethod;
 	private String dataset;
 	private int nclusters;
+	private String name;
 	public ClusterParams(String path,SparkSession spark) {
 		
 		Dataset<Row> jsondata = spark.read().format("json").load(path);
 		
 		this.jsontext = jsondata.selectExpr("analysisParameters");
+		this.name = getValue2(jsondata.selectExpr("name").toJSON().collectAsList());
 		getParamsFromJSON();
 	}
 	private String getValue(String key)
@@ -115,6 +117,9 @@ public class ClusterParams {
 	}
 	public String getDataset() {
 		return this.dataset;
+	}
+	public String getName() {
+		return this.name;
 	}
 	public String getClusteringMethod() {
 		return this.clusteringMethod;

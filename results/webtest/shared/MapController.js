@@ -213,10 +213,13 @@ function processClusterMonthly(error, data)
     for(var i=0;i<strategyData.length;i++){
       strategyData[i].percent = Math.round(strategyData[i].count/points*1000)/10;
     }
+    clusterSummary.sort(orderPopulationByClusterID);
     pc5.addFoundStrategies(strategyData,"pc5");
     popMonthlyDonut = new Donutchart("monthlytypicalallclusterscontrol",clusterSummary,"populationMonthlydonut",["all clusters"],popAllDonut.w,popAllDonut.h);
 }
-
+function orderPopulationByClusterID(a, b){
+  return a.x-b.x;
+}
 function loading(){
 	document.getElementById("loading").innerHTML="loading data...";
 }

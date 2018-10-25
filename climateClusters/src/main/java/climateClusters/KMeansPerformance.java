@@ -25,7 +25,7 @@ public class KMeansPerformance {
     private SparkSession spark;
     String method;
     
-	public KMeansPerformance(SparkSession spk,int numClusters,JavaRDD<Record> recorddata,String method) {
+	public KMeansPerformance(SparkSession spk,int numClusters,JavaRDD<Record> recorddata,String method,String name) {
 	this.spark =spk;
 	this.nclusters = numClusters;	
 	dataPoints = recorddata.map(f->f.getVectorNorm());
@@ -34,7 +34,7 @@ public class KMeansPerformance {
 //	else this.method=method;
 	this.method=method;
 	runPerformance();
-	storePerformance();
+	storePerformance(name);
 	}
 	private void runPerformance() {
 	 if(nclusters!=0) {
@@ -45,12 +45,12 @@ public class KMeansPerformance {
 	    bddunn =ClusterIndices.BDDunn(dataPoints,minClusters, maxclusters, numIterations, spark,this.method);
 	    costs = ClusterIndices.costs(dataPoints, minClusters, maxclusters, numIterations, spark,this.method);
 	}
-	private void storePerformance() {
+	private void storePerformance(String name) {
 		 //store the performance stats
 	    performance = new ArrayList<ClusteringPerformance>();
 	    ClusteringPerformance cp;
 	    for(int i=0;i<bds.length;i++) {
-	    	cp = new ClusteringPerformance(i+minClusters,costs[i],bds[i],bddunn[i],false);
+	    	cp = new ClusteringPerformance(i+minClusters,costs[i],bds[i],bddunn[i],false,name);
     		performance.add(cp);
     	}
 	    nclusters = ClusteringPerformance.findElbowCluster(performance);

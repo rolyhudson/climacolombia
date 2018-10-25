@@ -159,6 +159,12 @@ function setupThermalComparision(){
 	comfortComp.appendChild(row1);
 	comfortComp.appendChild(row2);
 }
+function setupClusterSummary(){
+	var summary = document.getElementById("clustersummary");
+	summary.append(addTextToDiv("h1","cluster summary"));
+	var rowsummary1 = makeSection();
+	var tablespace = makeContentElement("",1,"tablesummary","h2","5/5");
+}
 function setupOverview(){
 	var overview = document.getElementById("overview");
 	overview.append(addTextToDiv("h1","overview @"+window.location.href));
@@ -297,6 +303,7 @@ function clickTimeStepTab(event){
 
 function setuplayout(){
 	setupOverview();
+	setupClusterSummary();
 	setupClusterBrowser();
 	
     setupThermalComparision();

@@ -23,13 +23,13 @@ import climateClusters.ThermalZones;
 import climateClusters.Record;
 public class ClusteringOutput {
 	SparkSession spk;
-	public ClusteringOutput(JavaRDD<Record> records,String output,SparkSession spark,List<ClusteringPerformance> performance,ThermalZones thermalzones,int numClusters,Vector[] clusterCenters ) {
+	public ClusteringOutput(JavaRDD<Record> records,String output,SparkSession spark,List<ClusteringPerformance> performance,ThermalZones thermalzones,int numClusters,Vector[] clusterCenters,String name ) {
 		//generate the top level reports
 	    Dataset<Row> performanceDs = spark.createDataFrame(performance, ClusteringPerformance.class);
     	performanceDs.write().mode(SaveMode.Overwrite).json(output+"/stats/performanceDF");
 	    
 	    double[][] comfortIndices = ComfortIndices.getComfortIndicesClusters(records,numClusters);
-	    ClusterSummary.reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones);
+	    ClusterSummary.reportClusterSummary(records,output+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones,name);
 	    //typical year 
 	    
     		JavaPairRDD<Vector, Iterable<Integer>> yearRecords = records
@@ -113,7 +113,7 @@ public class ClusteringOutput {
 	    		JavaRDD<String> ymrecords = temporalRecords.map(f->f.toJSONString());
 	    		ymrecords.saveAsTextFile(path);
 	    		//could add indices per cluster per time step
-	    		ClusterSummary.reportClusterSummary(temporalRecords,path+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones);
+	    		ClusterSummary.reportClusterSummary(temporalRecords,path+"/stats/clusterStats",comfortIndices,clusterCenters,spark,thermalzones,name);
 	    		thermalzones.reportMultiInclusion(temporalRecords,spark,path+"/stats/strategyStats");
 	    		for(int c=0;c<=numClusters;c++) {
 	    			final int cnum =c;

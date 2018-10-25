@@ -370,13 +370,21 @@ public class ComfortIndices
     	
     	JavaPairRDD<Integer , Iterable<Vector>> comfortRecords = records
 				.mapToPair(f->ClusterUtils.getComfortIndices(f)).groupByKey();
-    	//comfort index vector is utci, ideamci,temp, rh
+    	//comfort index vector is utci, ideamci,temp, rh,trange,windspd
     	JavaPairRDD<Integer,Vector> clusterComfort = comfortRecords.mapToPair(d->{
 			Iterable<Vector> it = d._2;
 			double sumideamci = 0;
 			double sumutci = 0;
 			double sumtemp = 0;
 			double sumrh = 0;
+			double maxtemp=-30;
+			double mintemp=50;
+			double maxtemprange=0;
+			double mintemprange=100;
+			double maxrh=-30;
+			double minrh=100;
+			double maxws=-30;
+			double minws=100;
 			int count=0;
 			for (Vector cPair : it) {
 				double[] vals = cPair.toArray();
@@ -384,10 +392,22 @@ public class ComfortIndices
 			    sumideamci +=vals[1];
 			    sumtemp+=vals[2];
 			    sumrh+=vals[3];
+			    //set max mins temp is index 2
+			    if(vals[2]>maxtemp)maxtemp=vals[2];
+			    if(vals[2]<mintemp)mintemp=vals[2];
+			  //set max mins rh is index 3
+			    if(vals[3]>maxrh)maxrh=vals[3];
+			    if(vals[3]<minrh)minrh=vals[3];
+			  //set max mins temprange is index 4
+			    if(vals[4]>maxtemprange)maxtemprange=vals[4];
+			    if(vals[4]<mintemprange)mintemprange=vals[4];
+			  //set max mins windrange is index 5
+			    if(vals[5]>maxws)maxws=vals[5];
+			    if(vals[5]<minws)minws=vals[5];
 			    count++;
 			}
 			
-			Vector avIndices = Vectors.dense(sumutci /count,sumideamci/count,sumtemp/count,sumrh/count);
+			Vector avIndices = Vectors.dense(sumutci /count,sumideamci/count,sumtemp/count,sumrh/count,maxtemp,mintemp,maxtemprange,mintemprange,maxrh,minrh,maxws,minws);
 			Tuple2<Integer,Vector> result = new Tuple2<Integer,Vector>(d._1,avIndices);
 			return result; 
 		});

@@ -3,6 +3,7 @@ package climateClusters;
 
 import java.io.IOException;
 
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +40,6 @@ public class Clustering {
 //                .getOrCreate();
 //		
 //		local debug
-//		
 		SparkSession spark = SparkSession.builder()
 				  .master("local[4]")
 				  .appName("SparkJob")
@@ -48,13 +48,14 @@ public class Clustering {
 //		//end local debug
 		
 		ClusterParams clusterParams = new ClusterParams(args[2],spark);
+		String name = clusterParams.getName();
 		FilterData filterData = new FilterData(clusterParams,spark,args[0]);
 		JavaRDD<Record> recorddata = filterData.getRecords();
 		ThermalZones thermalzones = new ThermalZones(spark,args[3]);
 		logEvent("params read, data filtered, thermal zones read");
 		String method = clusterParams.getClusteringMethod();
 		
-		KMeansPerformance kmPerf = new KMeansPerformance(spark,clusterParams.getNClusters(),filterData.getRecords(),method);
+		KMeansPerformance kmPerf = new KMeansPerformance(spark,clusterParams.getNClusters(),filterData.getRecords(),method,name);
 		logEvent("perfomance processed");
 		SimpleKMeans simpleKM;
 		BiKMeans BiKM;
@@ -76,7 +77,7 @@ public class Clustering {
 		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    logEvent("data classified");
-		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
+		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres,name);
 		    logEvent("output written");
 			break;
 		case "BISECTING_K_MEANS":
@@ -88,7 +89,7 @@ public class Clustering {
 		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    logEvent("data classified");
-		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
+		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres,name);
 		    logEvent("output written");
 			break;
 		case "BISECTING_K_MEANS_AND_K_MEANS":
@@ -101,7 +102,7 @@ public class Clustering {
 		    		.map(f->thermalzones.testZones(f))
 		    		.sortBy(f-> f.getDatetime().getYear(), true, 20);
 		    logEvent("data classified");
-		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres);
+		    clusterOut = new ClusteringOutput(records,args[1],spark,kmPerf.getPerformance(),thermalzones, numClusters,clusterCentres,name);
 		    logEvent("output written");
 			break;
 		}
@@ -114,7 +115,7 @@ public class Clustering {
 		
 	}
 	private static void logEvent(String description) {
-	TimeLog tl = new TimeLog(start, description);
+	climateClusters.TimeLog tl = new climateClusters.TimeLog(start, description);
 	timelog.add(tl);
 	}
 }

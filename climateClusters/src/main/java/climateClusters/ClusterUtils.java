@@ -129,7 +129,10 @@ public class ClusterUtils implements Serializable {
 		
 	}
 	public static Tuple2<Integer,Vector>getComfortIndices(Record r){
-		double [] indices = new double[] {r.getUtci(),r.getIdeamci(),r.getPsychrometricPoint()[0],r.getPsychrometricPoint()[1]};
+		Vector allV = r.getVectorAllVar();
+		double[] variables = allV.toArray();
+		//temp,vp,rh,tmin,tmax,trange,precip,windSpd
+		double [] indices = new double[] {r.getUtci(),r.getIdeamci(),r.getPsychrometricPoint()[0],r.getPsychrometricPoint()[1],variables[5],variables[7]};
 		return new Tuple2<Integer,Vector>(r.getClusternum(),new DenseVector(indices));
 	}
 	public static Tuple2<Vector,Integer> getLocationCluster(Record r){
@@ -184,6 +187,7 @@ public class ClusterUtils implements Serializable {
 		double[] psychrometricPoint = new double[2];
 		for(int i=4;i<sarray.length;i++)
 		{
+			//temp,vp,rh,tmin,tmax,trange,precip,windSpd
 			if(i==4) psychrometricPoint[0] = Double.parseDouble(sarray[i]);
 			if(i==6) psychrometricPoint[1] = Double.parseDouble(sarray[i]);
 			v.add(Double.parseDouble(sarray[i]));

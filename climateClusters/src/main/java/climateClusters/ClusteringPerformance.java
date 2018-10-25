@@ -15,12 +15,14 @@ public class ClusteringPerformance implements Serializable {
 	private double silhouette;
 	private double dunn;
 	private boolean selected;
-	public ClusteringPerformance(int nclusters,double wsssecost,double BDsil,double BDdunn,boolean isselected) {
+	private String jobname;
+	public ClusteringPerformance(int nclusters,double wsssecost,double BDsil,double BDdunn,boolean isselected,String name) {
 		nClusters = nclusters;
 		costWSSSE =  wsssecost;
 		silhouette = BDsil;
 		dunn = BDdunn;
 		selected = isselected;
+		jobname =name;
 	}
 	public int getNClusters() {
 		return nClusters;
@@ -56,6 +58,12 @@ public class ClusteringPerformance implements Serializable {
 	}
 	public void setSelected(boolean select) {
 		selected = select;
+	}
+	public String getJobname() {
+		return jobname;
+	}
+	public void setJobName(String name) {
+		jobname = name;
 	}
 	public static int findElbowCluster(List<ClusteringPerformance> points) {
 		if(points.size()==1) return points.get(0).getNClusters();
