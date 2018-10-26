@@ -40,7 +40,24 @@ a:hover {
     border: 1px solid #ccc;
     border-top: none;
 }
+table{
+	
+	border-collapse: collapse;
+}
+table, th, td {
+    border: 1px solid black;
+}
 
+tr:nth-child(even){background-color: #f2f2f2;}
+
+tr:hover {background-color: #ddd;}
+
+thead {
+	font-weight: bold;
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+}
 #loading{
     height:25px;}
  #container{

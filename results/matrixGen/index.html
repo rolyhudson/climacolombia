@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<!-- HTML5 Boilerplate -->
+<!--[if lt IE 7]>      <html class="no-js lt-ie9 lt-ie8 lt-ie7"> <![endif]-->
+<!--[if IE 7]>         <html class="no-js lt-ie9 lt-ie8"> <![endif]-->
+<!--[if IE 8]>         <html class="no-js lt-ie9"> <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js"> <!--<![endif]-->
+
+<head>
+
+	<meta charset="utf-8">
+	<!-- Always force latest IE rendering engine & Chrome Frame -->
+	<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+
+	<title>cluster-colombia</title>
+	<meta name="description" content="">
+	<meta name="keywords" content="">
+
+	<meta name="author" content="">
+
+	<meta http-equiv="cleartype" content="on">
+
+	<link rel="shortcut icon" href="/favicon.ico">
+
+	<!-- Responsive and mobile friendly stuff -->
+	<meta name="HandheldFriendly" content="True">
+	<meta name="MobileOptimized" content="320">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	<!-- Stylesheets -->
+	<link rel="stylesheet" type="text/css" href="http://fonts.googleapis.com/css?family=Droid Sans Mono">
+	<link href="https://fonts.googleapis.com/css?family=EB+Garamond" rel="stylesheet">
+	
+
+	<script src="BarScale.js"></script>
+	<script src="matrixGen.js"></script>
+	<script src="Matrix.js"></script>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
+<style>
+body { font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;font-size: small;}
+#sil, #dunn, #wssse {
+    width: 1200px;
+    
+    overflow: hidden; /* will contain if #first is longer than #second */
+}
+#silMatrix, #dunnMatrix, #wssseMatrix {
+    float:left; /* add this */
+}
+#silScale, #dunnScale, #wssseScale{
+    float:left; /* add this */
+}
+</style>
+</head>
+
+<body>
+
+	<div id = "sil">
+		<div id = "silMatrix"></div>
+		<div id = "silMatrixScale"></div>
+		
+	</div>
+	<div id = "dunn">
+		<div id = "dunnMatrix"></div>
+		<div id = "dunnMatrixScale"></div>
+	
+	</div>
+	<div id = "wssse">
+		<div id = "wssseMatrix"></div>
+		<div id = "wssseMatrixScale"></div>
+	</div>
+
+				
+</body>
+
+<script type="text/javascript">
+	
+makeMatrix();
+</script>
+</html>

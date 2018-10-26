@@ -177,7 +177,7 @@ function processAllTimeAllClusterPop(error, data){
 	tableData = data.split(/\r?\n/);
 	allclustersstats=parsePopData(tableData);
 	popAllDonut = new Donutchart("alltimestepsallclusterscontrol",allclustersstats,"populationoverviewdonut",["all clusters"],0,0);
-	
+	addSummaryTable(tableData)
 }
 function parsePopData(tableData){
 	var popData=[];

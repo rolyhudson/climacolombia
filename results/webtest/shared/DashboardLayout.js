@@ -159,11 +159,62 @@ function setupThermalComparision(){
 	comfortComp.appendChild(row1);
 	comfortComp.appendChild(row2);
 }
+function addSummaryTable(tblData){
+	var tbl = document.createElement("TABLE");
+	var tbdy = document.createElement('tbody');
+
+	var props = ["clusterId","count","strategies","clusterMinTemp","clusterMaxTemp","clusterMinRh","clusterMaxRh"
+	,"clusterMinWS","clusterMaxWS","clusterMinTempRange","clusterMaxTempRange","clusterUTCI","clusterIdeamCI"];
+	var titles = ["c_id","count","strategies","min temp","max temp","min rh","max rh"
+	,"min wind spd","max wind spd","min tRange","max tRange","UTCI","IdeamCI"];
+
+	
+	for(var i=0;i<tblData.length;i++){
+		
+		//for each required prop add to row
+		var obj;
+		if(tblData[i]!=""){
+			var tr = document.createElement('tr');
+			obj=JSON.parse(tblData[i]);
+				for(var p=0;p<props.length;p++){
+					if (obj.hasOwnProperty(props[p])) {
+						
+			        var td = document.createElement('td');
+			        var val = obj[props[p]];
+			        if(isNaN(val))td.appendChild(document.createTextNode(val));
+					else td.appendChild(document.createTextNode(Math.round(val*100)/100));
+					tr.appendChild(td);
+					
+		    		}
+		    		else{
+		    			var td = document.createElement('td');
+		    			td.appendChild(document.createTextNode("na"));
+		    			tr.appendChild(td);
+		    		}
+				}
+		tbdy.appendChild(tr);
+		}
+	}
+	tbl.appendChild(tbdy);
+	var header = tbl.createTHead();
+	var row = header.insertRow(0); 
+	//one row per prop
+	
+	for(var p=0;p<titles.length;p++){
+		var cell = row.insertCell(p);
+	    cell.innerHTML =titles[p];  
+	   
+	}
+	
+	document.getElementById("tablesummary").appendChild(tbl);
+}
 function setupClusterSummary(){
 	var summary = document.getElementById("clustersummary");
 	summary.append(addTextToDiv("h1","cluster summary"));
 	var rowsummary1 = makeSection();
 	var tablespace = makeContentElement("",1,"tablesummary","h2","5/5");
+	rowsummary1.appendChild(tablespace);
+	summary.appendChild(rowsummary1);
 }
 function setupOverview(){
 	var overview = document.getElementById("overview");
