@@ -39,16 +39,23 @@
 <script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <style>
 body { font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;font-size: small;}
-#sil, #dunn, #wssse {
+#sil, #dunn, #wssse, #ideam,#utci {
     width: 1200px;
     
     overflow: hidden; /* will contain if #first is longer than #second */
 }
-#silMatrix, #dunnMatrix, #wssseMatrix {
+#silMatrix, #dunnMatrix, #wssseMatrix, #ideamMatrix,#utciMatrix {
     float:left; /* add this */
 }
-#silScale, #dunnScale, #wssseScale{
+#silMatrixScale, #dunnMatrixScale, #wssseMatrixScale, #ideamMatrixScale,#utciMatrixScale{
     float:left; /* add this */
+}
+.axis{
+	font-size: small;
+	font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;
+}
+.scaletitle{
+	font-size: medium;
 }
 </style>
 </head>
@@ -69,7 +76,15 @@ body { font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;font-size: sma
 		<div id = "wssseMatrix"></div>
 		<div id = "wssseMatrixScale"></div>
 	</div>
-
+<div id = "utci">
+		<div id = "utciMatrix"></div>
+		<div id = "utciMatrixScale"></div>
+	
+	</div>
+	<div id = "ideam">
+		<div id = "ideamMatrix"></div>
+		<div id = "ideamMatrixScale"></div>
+	</div>
 				
 </body>
 

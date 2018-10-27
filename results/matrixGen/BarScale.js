@@ -18,10 +18,11 @@ class ScaleBar{
     this.svgScaleBar = d3.select("#"+this.divid)
     .append("svg")
 
-    .attr("width", 300)
+    .attr("width", 500)
     .attr("height",this.height)
     .attr("class","svgScaleBar "+this.owner);
   }
+  
   drawScaleBarText(){
     
     var labelData=[];
@@ -29,11 +30,12 @@ class ScaleBar{
     for(var i=0;i<this.scaleLbl.length;i++){
       labelData.push({"value":this.scaleLbl[i],"sblock":this.findBlockInScale(this.scaleLbl[i])});
     }
+
     // remove previous
     d3.selectAll(".blocks ."+this.owner).remove();
     //add the new blocks
     var color = this.colorFn;
-    
+    var max = labelData[labelData.length-1].value;
     var  label = this.svgScaleBar.selectAll("rect")
     .data(labelData)
     .enter()
@@ -44,7 +46,7 @@ class ScaleBar{
     .attr("y", function(d,i){return i*block+block;})
     .attr("width", block)
     .attr("height",block)
-    .style("fill", function(d) {return color(d.value);});
+    .style("fill", function(d) {return color(d.value,max);});
    
     this.scaleblocks = document.getElementsByClassName("blocks "+this.owner);
     var labelX=block*1.5;
