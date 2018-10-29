@@ -1,0 +1,16 @@
+{"NClusters":6,"costWSSSE":7.60455454076362,"dunn":3.531047481992084,"jobname":"KM6TRh","selected":true,"silhouette":0.969326445209009,"utcirmse":3.35,"ideamcirmse":1.36}
+{"NClusters":6,"costWSSSE":1.9836401010864964,"dunn":3.995347728398275,"jobname":"KM6TrRh","selected":true,"silhouette":0.9692176355188641,"utcirmse":5.61,"ideamcirmse":3.23}
+{"NClusters":6,"costWSSSE":34.45243553132569,"dunn":2.9178848264672785,"jobname":"KM6TRhWs","selected":true,"silhouette":0.8737785605677718,"utcirmse":3,"ideamcirmse":1.47}
+{"NClusters":6,"costWSSSE":51.20694287823631,"dunn":2.854213513370864,"jobname":"KM6TTrRhWs","selected":true,"silhouette":0.7732352824721259,"utcirmse":2.99,"ideamcirmse":1.46}
+{"NClusters":6,"costWSSSE":7.626661432616755,"dunn":3.79955213126209,"jobname":"BKM6TRh","selected":true,"silhouette":0.9727006924782678,"utcirmse":3.35,"ideamcirmse":1.36}
+{"NClusters":6,"costWSSSE":2.3943045357836943,"dunn":2.653763367593671,"jobname":"BKM6TrRh","selected":true,"silhouette":0.9342408932274897,"utcirmse":5.63,"ideamcirmse":3.25}
+{"NClusters":6,"costWSSSE":36.04229455648445,"dunn":2.7841628450864233,"jobname":"BKM6TRhWs","selected":true,"silhouette":0.8426603825795149,"utcirmse":2.88,"ideamcirmse":1.37}
+{"NClusters":6,"costWSSSE":54.24784846445041,"dunn":2.5623859532948194,"jobname":"BKM6TTrRhWs","selected":true,"silhouette":0.7700892021031965,"utcirmse":3.35,"ideamcirmse":1.74}
+{"NClusters":11,"costWSSSE":2.510935844585573,"dunn":5.835155884317805,"jobname":"KM11TRh","selected":true,"silhouette":0.9915909996510577,"utcirmse":3.18,"ideamcirmse":1.27}
+{"NClusters":11,"costWSSSE":0.6772337099021641,"dunn":8.463805951017092,"jobname":"KM11TrRh","selected":true,"silhouette":0.9919256866763211,"utcirmse":5.62,"ideamcirmse":3.23}
+{"NClusters":11,"costWSSSE":19.01303677465676,"dunn":4.398623611019749,"jobname":"KM11TRhWs","selected":true,"silhouette":0.9329040143871475,"utcirmse":2.4,"ideamcirmse":1.29}
+{"NClusters":11,"costWSSSE":34.83009234674687,"dunn":4.127434346008431,"jobname":"KM11TTrRhWs","selected":true,"silhouette":0.8759950434679407,"utcirmse":2.77,"ideamcirmse":1.39}
+{"NClusters":11,"costWSSSE":2.8034845021089887,"dunn":4.142817283105866,"jobname":"BKM11TRh","selected":true,"silhouette":0.9885343076480444,"utcirmse":3.17,"ideamcirmse":1.3}
+{"NClusters":11,"costWSSSE":0.8325037155210215,"dunn":5.041380077126766,"jobname":"BKM11TrRh","selected":true,"silhouette":0.9832359383601357,"utcirmse":5.61,"ideamcirmse":3.24}
+{"NClusters":11,"costWSSSE":21.426928589708464,"dunn":2.9252321947494604,"jobname":"BKM11TRhWs","selected":true,"silhouette":0.8998136320655217,"utcirmse":2.17,"ideamcirmse":1.27}
+{"NClusters":11,"costWSSSE":38.06678277240479,"dunn":2.91864399825021,"jobname":"BKM11TTrRhWs","selected":true,"silhouette":0.8164025661562019,"utcirmse":2.85,"ideamcirmse":1.6}

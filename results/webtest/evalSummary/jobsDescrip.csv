@@ -1,0 +1,17 @@
+Number,Clustering method,K clusters,Features (normalised with MLlib L2),Results link,Short name
+1,K-means,6,Temperature + relative humidity,http://lacunae.io/geovis2018_10_26_14_53_14/,KM6TRh
+2,K-means,6,Temperature range + relative humidity,http://lacunae.io/geovis2018_10_26_14_14_21/,KM6TrRh
+3,K-means,6,Temperature + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_11_20_24/,KM6TRhWs
+4,K-means,6,Temperature + temperature range + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_11_21_05/,KM6TTrRhWs
+5,Bisecting K-means,6,Temperature + relative humidity,http://lacunae.io/geovis2018_10_27_11_53_39/,BKM6TRh
+6,Bisecting K-means,6,Temperature range + relative humidity,http://lacunae.io/geovis2018_10_27_11_46_08/,BKM6TrRh
+7,Bisecting K-means,6,Temperature + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_11_53_30/,BKM6TRhWs
+8,Bisecting K-means,6,Temperature + temperature range + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_12_58_07/,BKM6TTrRhWs
+9,K-means,11,Temperature + relative humidity,http://lacunae.io/geovis2018_10_27_14_18_36/,KM11TRh
+10,K-means,11,Temperature range + relative humidity,http://lacunae.io/geovis2018_10_27_14_06_53/,KM11TrRh
+11,K-means,11,Temperature + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_15_05_38/,KM11TRhWs
+12,K-means,11,Temperature + temperature range + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_14_06_45/,KM11TTrRhWs
+13,Bisecting K-means,11,Temperature + relative humidity,http://lacunae.io/geovis2018_10_27_14_20_00/,BKM11TRh
+14,Bisecting K-means,11,Temperature range + relative humidity,http://lacunae.io/geovis2018_10_27_14_20_42/,BKM11TrRh
+15,Bisecting K-means,11,Temperature + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_14_21_03/,BKM11TRhWs
+16,Bisecting K-means,11,Temperature + temperature range + relative humidity + wind speed,http://lacunae.io/geovis2018_10_27_14_20_56/,BKM11TTrRhWs

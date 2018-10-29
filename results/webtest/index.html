@@ -25,27 +25,53 @@
 	<meta name="HandheldFriendly" content="True">
 	<meta name="MobileOptimized" content="320">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="evalSummary/BarScale.js"></script>
+  <script src="evalSummary/matrixGen.js"></script>
+  <script src="evalSummary/Matrix.js"></script>
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
+<script src="https://d3js.org/d3-scale-chromatic.v1.min.js"></script>
 <style>
-body { font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;}
-	table{
-	
-	border-collapse: collapse;
+  body { font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;}
+  table{
+ border-collapse: collapse;
+  
+  }
+  table, th, td {
+  border: 1px solid #ddd;
+  padding: 5px;
+  }
+th {
+   border: none;
 }
-table, th, td {
-    border: 1px solid black;
+  
+
+  tr:hover {background-color: #ddd;}
+
+  thead {
+  font-weight: bold;
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  }
+#sil, #dunn, #wssse, #ideam,#utci {
+    width: 1200px;
+    
+    overflow: hidden; /* will contain if #first is longer than #second */
 }
-
-tr:nth-child(even){background-color: #f2f2f2;}
-
-tr:hover {background-color: #ddd;}
-
-thead {
-	font-weight: bold;
-    padding-top: 12px;
-    padding-bottom: 12px;
-    text-align: left;
+#silMatrix, #dunnMatrix, #wssseMatrix, #ideamMatrix,#utciMatrix {
+    float:left; /* add this */
 }
-
+#silMatrixScale, #dunnMatrixScale, #wssseMatrixScale, #ideamMatrixScale,#utciMatrixScale{
+    float:left; /* add this */
+}
+.axis{
+  font-size: small;
+  font-family:"Droid Sans Mono",Helvetica, Arial, sans-serif;
+}
+.scaletitle{
+  font-size: medium;
+}
 </style>
 	
 </head>
@@ -53,145 +79,44 @@ thead {
 <body>
 <div id = "container">
 	<h1>Evaluation Summary</h1>
-	<p> <a href="https://docs.google.com/presentation/d/1QAY6ZUAJ5zlwWwdgNoAhxZlYenV0TnsVtp8n6fcSLdM/edit?usp=sharing">Click here to read more about this project</a></p>
+	<p> <a href="https://docs.google.com/presentation/d/1QAY6ZUAJ5zlwWwdgNoAhxZlYenV0TnsVtp8n6fcSLdM/edit?usp=sharing">Click here to read a software walkthough for the project</a></p>
 	<h2>Results from optimised studies</h2>
 	<p> <a href="http://lacunae.io/geovis2018_10_21_16_54_54/">K_MEANS</a></p>
 	<p> <a href="http://lacunae.io/geovis2018_10_21_19_08_24/">BISECTING_K_MEANS</a></p>
 	<p> <a href="http://lacunae.io/geovis2018_10_22_09_40_56/">BISECTING_K_MEANS_AND_K_MEANS</a></p>
 	<h2>Individual experiments</h2>
+<div id = "workflowDescriptions"></div>
 
-<table>
-  <tr>
-  	<th>Number</th>
-    <th>Clustering method</th>
-    <th>K clusters</th>
-    <th>Features (normalised with MLlib L<sup>2</sup>)</th>
-    <th>Short name + results link</th>
-  </tr>
-  <tr>
-    <td>1</td>
-    <td>K-means</td>
-    <td>6</td>
-    <td>Temperature, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_26_14_53_14">KM6TRh</a></td>
-  </tr>
-  <tr>
-    <td>2</td>
-    <td>K-means</td>
-    <td>6</td>
-    <td>Temperature range, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_26_14_14_21">KM6TrRh</a></td>
-  </tr>
-  <tr>
-    <td>3</td>
-    <td>K-means</td>
-    <td>6</td>
-    <td>Temperature, relative humdity,wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_11_20_24">KM6TRhWs</a></td>
-  </tr>
-  <tr>
-    <td>4</td>
-    <td>K-means</td>
-    <td>6</td>
-    <td>Temperature, temperature range, relative humdity, wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_11_21_05">KM6TTrRhWs</a></td>
-  </tr>
-  <tr>
-    <td>5</td>
-    <td>Bisecting K-means</td>
-    <td>6</td>
-    <td>Temperature, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_11_53_39/">BKM6TRh</a></td>
-  </tr>
-  <tr>
-    <td>6</td>
-    <td>Bisecting K-means</td>
-    <td>6</td>
-    <td>Temperature range, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_11_46_08/">BKM6TrRh</a></td>
-  </tr>
-  <tr>
-    <td>7</td>
-    <td>Bisecting K-means</td>
-    <td>6</td>
-    <td>Temperature, relative humdity,wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_11_53_30/">BKM6TRhWs</a></td>
-  </tr>
-  <tr>
-    <td>8</td>
-    <td>Bisecting K-means</td>
-    <td>6</td>
-    <td>Temperature, temperature range, relative humdity, wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_12_58_07/">BKM6TTrRhWs</a></td>
-  </tr>
-  <tr>
-  	<th>Number</th>
-    <th>Clustering method</th>
-    <th>K clusters</th>
-    <th>Features</th>
-    <th>Short name and results link</th>
-  </tr>
-  <tr>
-    <td>9</td>
-    <td>K-means</td>
-    <td>11</td>
-    <td>Temperature, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_18_36/">KM11TRh</a></td>
-  </tr>
-  <tr>
-    <td>10</td>
-    <td>K-means</td>
-    <td>11</td>
-    <td>Temperature range, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_06_53/">KM11TrRh</a></td>
-  </tr>
-  <tr>
-    <td>11</td>
-    <td>K-means</td>
-    <td>11</td>
-    <td>Temperature, relative humdity,wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_15_05_38/">KM11TRhWs</a></td>
-  </tr>
-  <tr>
-    <td>12</td>
-    <td>K-means</td>
-    <td>11</td>
-    <td>Temperature, temperature range, relative humdity, wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_06_45/">KM11TTrRhWs</a></td>
-  </tr>
-  <tr>
-    <td>13</td>
-    <td>Bisecting K-means</td>
-    <td>11</td>
-    <td>Temperature, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_20_00/">BKM11TRh</a></td>
-  </tr>
-  <tr>
-    <td>14</td>
-    <td>Bisecting K-means</td>
-    <td>11</td>
-    <td>Temperature range, relative humdity</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_20_42/">BKM11TrRh</a></td>
-  </tr>
-  <tr>
-    <td>15</td>
-    <td>Bisecting K-means</td>
-    <td>11</td>
-    <td>Temperature, relative humdity,wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_21_03/">BKM11TRhWs</a></td>
-  </tr>
-  <tr>
-    <td>16</td>
-    <td>Bisecting K-means</td>
-    <td>11</td>
-    <td>Temperature, temperature range, relative humdity, wind speed</td>
-    <td><a href="http://lacunae.io/geovis2018_10_27_14_20_56/">BKM11TTrRhWs</a></td>
-  </tr>
-</table>
-
-	
+<h2>Ranked results from individual experiments</h2>
+<div id = "rankedResults"></div>
+<h2>Dissimilarity matrices from individual experiments</h2>	
 </div>
-				
+<div id = "sil">
+    <div id = "silMatrix"></div>
+    <div id = "silMatrixScale"></div>
+    
+  </div>
+  <div id = "dunn">
+    <div id = "dunnMatrix"></div>
+    <div id = "dunnMatrixScale"></div>
+  
+  </div>
+  <div id = "wssse">
+    <div id = "wssseMatrix"></div>
+    <div id = "wssseMatrixScale"></div>
+  </div>
+<div id = "utci">
+    <div id = "utciMatrix"></div>
+    <div id = "utciMatrixScale"></div>
+  
+  </div>
+  <div id = "ideam">
+    <div id = "ideamMatrix"></div>
+    <div id = "ideamMatrixScale"></div>
+  </div>				
 </body>
-
+<script type="text/javascript">
+  
+makeMatrix();
+</script>
 </html>
