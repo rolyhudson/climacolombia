@@ -7,7 +7,7 @@ A summary presentation of the project can be seen [here](https://docs.google.com
 
 Results from the evaluation of the project that also demonstrate the online dashboard can be see [here](http://lacunae.io/)
 
-For more detail read the abstract below, for even more detail review the dissertation word document and the astah diagrams in the [documentation folder](../blob/master/documentation).
+For more detail read the abstract below, for even more detail review the dissertation word document and the astah diagrams in the [documentation folder](../master/documentation).
 
 # Abstract
 The aim of this dissertation is to develop a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.  These strategies can help provide more comfortable living and working conditions for people using the buildings and reduce the need for heating and cooling, lowering emissions and energy consumption. Implementing these strategies requires understanding the local and regional climate conditions over different periods. In Colombia, a lack of seasons, extreme topographical vari-ations and subtle tropical patterns make identifying localized, low-energy construction strategies complex.
