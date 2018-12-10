@@ -1,19 +1,24 @@
-# BIG CLIMATE DATA ANALYTICS: EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
+# BIG CLIMATE DATA ANALYTICS: 
+## EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
+![alt text](https://github.com/rolyhudson/climacolombia/blob/master/documentation/dissertationDocs/figures/yearSoloutionA.png "Annual cluster mapping") Diagram showing annual cluster mapping results.
+
 This is the code and documention repository for Roland Hudson's dissertation project for a Master of Science in Software Engineering at the University of Liverpool.
 
 The code defines a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.
 
 A summary presentation of the project can be seen [here](https://docs.google.com/presentation/d/1QAY6ZUAJ5zlwWwdgNoAhxZlYenV0TnsVtp8n6fcSLdM/edit?usp=sharing).
 
-Results from the evaluation of the project that also demonstrate the online dashboard can be see [here](http://lacunae.io/).
+Results from the evaluation of the project that also demonstrate the online dashboard can be seen [here](http://lacunae.io/).
 
-For more detail read the abstract below, for even more detail review the dissertation word document and the astah diagrams in the [documentation folder](../master/documentation).
+For more detail read the abstract below, for even more detail review the dissertation and the astah diagrams in the [documentation folder](../master/documentation).
 
 The [Application folder](../master/Application) contains the Java code for the graphical user interface.
 
 The [Dashboard folder](../master/Dashboard) contains the JavaScript files for the visualisiton of analysis results.
 
-The [ClimateClustersSpark folder](../master/Dashboard) contains the Java code for the Apache Spark ananlysis of the climate data set.
+The [SparkClimateClustering folder](../master/SparkClimateClustering) contains the Java code for the Apache Spark ananlysis of the climate data set.
+
+![alt text](https://github.com/rolyhudson/climacolombia/blob/master/documentation/dissertationDocs/figures/guiWorkflowbuilder.png "Interface for building analysis workflows") Diagram showing the interface for building analysis workflows.
 
 # Abstract
 The aim of this dissertation is to develop a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.  These strategies can help provide more comfortable living and working conditions for people using the buildings and reduce the need for heating and cooling, lowering emissions and energy consumption. Implementing these strategies requires understanding the local and regional climate conditions over different periods. In Colombia, a lack of seasons, extreme topographical vari-ations and subtle tropical patterns make identifying localized, low-energy construction strategies complex.
