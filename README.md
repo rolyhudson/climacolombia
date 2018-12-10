@@ -1,5 +1,5 @@
 # BIG CLIMATE DATA ANALYTICS: 
-##EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
+## EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
 ![alt text](https://github.com/rolyhudson/climacolombia/blob/master/documentation/dissertationDocs/figures/yearSoloutionA.png "Annual cluster mapping") Diagram showing annual cluster mapping results.
 
 This is the code and documention repository for Roland Hudson's dissertation project for a Master of Science in Software Engineering at the University of Liverpool.
