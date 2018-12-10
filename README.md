@@ -1,8 +1,16 @@
 # BIG CLIMATE DATA ANALYTICS: EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
 This is the code and documention repository for Roland Hudson's dissertation project for a Master of Science in Software Engineering at the University of Liverpool.
-Application for data analysis, machine learning and visualisation with Colombian climate data
+
+The code defines a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.
+
+A summary presentation of the project can be seen [here](https://docs.google.com/presentation/d/1QAY6ZUAJ5zlwWwdgNoAhxZlYenV0TnsVtp8n6fcSLdM/edit?usp=sharing)
+
+Results from the evaluation of the project that also demonstrate the online dashboard can be see [here](http://lacunae.io/)
+
+For more detail read the abstract below, for even more detail review the dissertation word document and the astah diagrams in the documentation folder[documentation folder](../tree/master/documentation).
+
 # Abstract
-The aim of this dissertation is to develop a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seek-ing to understand the spatial and temporal use of low-energy design strategies.  These strategies can help provide more comfortable living and working conditions for people using the buildings and reduce the need for heating and cooling, lowering emissions and energy consumption. Implementing these strategies requires understanding the local and regional climate conditions over different periods. In Colombia, a lack of seasons, extreme topographical vari-ations and subtle tropical patterns make identifying localized, low-energy construction strategies complex.
+The aim of this dissertation is to develop a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.  These strategies can help provide more comfortable living and working conditions for people using the buildings and reduce the need for heating and cooling, lowering emissions and energy consumption. Implementing these strategies requires understanding the local and regional climate conditions over different periods. In Colombia, a lack of seasons, extreme topographical vari-ations and subtle tropical patterns make identifying localized, low-energy construction strategies complex.
 
 The dissertation provides an overview of literature covering previous relevant research publications and theory, this includes examination of low-energy design strategies and spatiotemporal nature of climate data. The literature review summarises big data tools and systems, relevant to climate data and identifies recent applications of machine learning to classify climates. The analysis and design chapter describes use cases, identifies system requirements and proposes a general system design. The implementation chapter documents how Agile Model Driven Development is used to model, implement and document a software artefact, which integrates a local application with analysis and visualisation in a distributed, cloud-based environment.
 
