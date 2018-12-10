@@ -8,9 +8,9 @@ The code defines a distributed, machine-learning application that classifies Col
 
 A summary presentation of the project can be seen [here](https://docs.google.com/presentation/d/1QAY6ZUAJ5zlwWwdgNoAhxZlYenV0TnsVtp8n6fcSLdM/edit?usp=sharing).
 
-Results from the evaluation of the project that also demonstrate the online dashboard can be see [here](http://lacunae.io/).
+Results from the evaluation of the project that also demonstrate the online dashboard can be seen [here](http://lacunae.io/).
 
-For more detail read the abstract below, for even more detail review the dissertation word document and the astah diagrams in the [documentation folder](../master/documentation).
+For more detail read the abstract below, for even more detail review the dissertation and the astah diagrams in the [documentation folder](../master/documentation).
 
 The [Application folder](../master/Application) contains the Java code for the graphical user interface.
 
