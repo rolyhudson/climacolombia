@@ -1,4 +1,5 @@
 # BIG CLIMATE DATA ANALYTICS: EFFECTIVE KNOWLEDGE-DISCOVERY FROM COLOMBIA’S WEATHER DATA
+![alt text](https://github.com/rolyhudson/climacolombia/blob/master/documentation/dissertationDocs/figures/yearSoloutionA.png "12 typical months")
 This is the code and documention repository for Roland Hudson's dissertation project for a Master of Science in Software Engineering at the University of Liverpool.
 
 The code defines a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.
