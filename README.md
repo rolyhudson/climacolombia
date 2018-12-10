@@ -13,7 +13,7 @@ The [Application folder](../master/Application) contains the Java code for the g
 
 The [Dashboard folder](../master/Dashboard) contains the JavaScript files for the visualisiton of analysis results.
 
-The [ClimateClustersSpark folder](../master/Dashboard) contains the Java code for the Apache Spark ananlysis of the climate data set.
+The [SparkClimateClustering folder](../master/SparkClimateClustering) contains the Java code for the Apache Spark ananlysis of the climate data set.
 
 # Abstract
 The aim of this dissertation is to develop a distributed, machine-learning application that classifies Colombian climate data and provides decision support to environmental designers seeking to understand the spatial and temporal use of low-energy design strategies.  These strategies can help provide more comfortable living and working conditions for people using the buildings and reduce the need for heating and cooling, lowering emissions and energy consumption. Implementing these strategies requires understanding the local and regional climate conditions over different periods. In Colombia, a lack of seasons, extreme topographical vari-ations and subtle tropical patterns make identifying localized, low-energy construction strategies complex.
