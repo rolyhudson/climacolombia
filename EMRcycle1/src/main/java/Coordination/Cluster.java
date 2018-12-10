@@ -8,9 +8,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.joda.time.DateTime;
-import org.rolson.emr.emrcycle1.Workflow;
 
 import com.amazonaws.services.elasticmapreduce.model.*;
+
+import Workflowbuilder.Workflow;
 
 
 public class Cluster {

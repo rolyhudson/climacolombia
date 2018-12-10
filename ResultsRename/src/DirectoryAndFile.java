@@ -37,7 +37,7 @@ public class DirectoryAndFile {
 		
 	}
 	private static void transferResultObjects() {
-		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\65956273\\";
+		String prefixOutput = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\58653821\\";
 		String outputfolder = "C:\\Users\\Admin\\Documents\\projects\\clusterColombia\\climacolombia\\results\\webtest\\test3\\";
 		getPaths(new File(prefixOutput));
 		

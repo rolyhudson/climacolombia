@@ -7,6 +7,8 @@ import java.io.File;
 
 import org.junit.Test;
 
+import Coordination.Utils;
+
 public class UtilsTest {
 
 	@Test

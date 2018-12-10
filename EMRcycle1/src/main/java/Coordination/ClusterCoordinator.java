@@ -14,8 +14,6 @@ import java.util.concurrent.TimeUnit;
 import org.joda.time.DateTime;
 import org.joda.time.format.DateTimeFormat;
 import org.joda.time.format.DateTimeFormatter;
-import org.rolson.emr.emrcycle1.DataManager;
-import org.rolson.emr.emrcycle1.Workflow;
 
 import com.amazonaws.auth.DefaultAWSCredentialsProviderChain;
 import com.amazonaws.services.elasticmapreduce.AmazonElasticMapReduce;
@@ -35,6 +33,7 @@ import com.amazonaws.services.elasticmapreduce.model.StepConfig;
 import com.amazonaws.services.elasticmapreduce.model.StepSummary;
 import com.amazonaws.services.elasticmapreduce.model.TerminateJobFlowsRequest;
 
+import Workflowbuilder.Workflow;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 

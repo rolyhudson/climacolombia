@@ -7,6 +7,8 @@ import java.io.File;
 
 import org.junit.Test;
 
+import Coordination.DataManager;
+
 public class DataManagerTest {
 	DataManager dm = mock(DataManager.class);
 	@Test

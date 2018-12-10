@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import Coordination.DataManager;
+
 public class GeoVisualisationTest {
 DataManager datamanager = new DataManager();
 
